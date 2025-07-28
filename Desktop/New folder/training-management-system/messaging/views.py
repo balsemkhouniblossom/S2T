@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.db.models import Q
 from django.utils import timezone
 from .models import Message, GroupeChat, MessageGroupe, FilDiscussion, ReponseDiscussion
-from users.models import Utilisateur
+from users.models import Utilisateur, Formateur, Apprenant
 
 
 @login_required
@@ -184,25 +184,19 @@ def group_detail(request, group_id):
         messages.error(request, 'Vous n\'êtes pas membre de ce groupe.')
         return redirect('messaging:groups')
     
-    # Get group messages
-    group_messages = group.messages.all().order_by('date_envoi')
-    
-    # Handle new message
-    if request.method == 'POST':
-        contenu = request.POST.get('contenu')
+    # Handle message sending
+    if request.method == "POST":
+        contenu = request.POST.get("contenu")
         if contenu:
-            message = MessageGroupe.objects.create(
-                groupe=group,
+            MessageGroupe.objects.create(
                 auteur=request.user,
+                groupe=group,
                 contenu=contenu,
             )
-            
-            if 'fichier_joint' in request.FILES:
-                message.fichier_joint = request.FILES['fichier_joint']
-                message.save()
-            
-            messages.success(request, 'Message envoyé!')
-            return redirect('messaging:group_detail', group_id=group_id)
+            return redirect('messaging:group_detail', group_id=group.id)
+    
+    # Get group messages
+    group_messages = group.messages.all().order_by('date_envoi')
     
     context = {
         'group': group,
@@ -268,3 +262,22 @@ def discussion_detail(request, discussion_id):
         'reponses': reponses,
     }
     return render(request, 'messaging/discussion_detail.html', context)
+
+
+@login_required
+def create_group(request):
+    """Create a new group chat"""
+    if request.method == "POST":
+        nom = request.POST.get("nom")
+        membres_ids = request.POST.getlist("membres")
+        membres = Utilisateur.objects.filter(id__in=membres_ids)
+        group = GroupeChat.objects.create(nom=nom, createur=request.user)
+        group.membres.set(membres)
+        group.save()
+        return redirect("messaging:groups")
+    # Get users who are Formateur or Apprenant
+    formateurs = Formateur.objects.values_list('utilisateur_id', flat=True)
+    apprenants = Apprenant.objects.values_list('utilisateur_id', flat=True)
+    user_ids = list(formateurs) + list(apprenants)
+    users = Utilisateur.objects.filter(id__in=user_ids)
+    return render(request, "messaging/create_group.html", {"users": users})

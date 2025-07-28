@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Discussions{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2><i class="fas fa-comments"></i> Discussions</h2>
+    <hr>
+    {% if discussions %}
+        <div class="list-group">
+            {% for discussion in discussions %}
+                <a href="{% url 'messaging:discussion_detail' discussion.id %}" class="list-group-item list-group-item-action">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-comment-dots"></i> {{ discussion.titre }}</span>
+                        <span class="badge bg-primary">{{ discussion.messages.count }} messages</span>
+                    </div>
+                    <small class="text-muted">Créé le {{ discussion.date_creation|date:"d/m/Y H:i" }}</small>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info mt-3">Aucune discussion trouvée.</div>
+    {% endif %}
+    <a href="{% url 'messaging:inbox' %}" class="btn btn-secondary mt-4"><i class="fas fa-arrow-left"></i> Retour à la messagerie</a>
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Créer un groupe{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2><i class="fas fa-users"></i> Créer un groupe</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="nom" class="form-label">Nom du groupe</label>
+            <input type="text" name="nom" id="nom" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="membres" class="form-label">Membres</label>
+            <select name="membres" id="membres" class="form-control" multiple required>
+                <optgroup label="Formateurs">
+                {% for user in users %}
+                    {% if user.formateur %}
+                        <option value="{{ user.id }}">{{ user.prenom }} {{ user.nom }} ({{ user.email }})</option>
+                    {% endif %}
+                {% endfor %}
+                </optgroup>
+                <optgroup label="Apprenants">
+                {% for user in users %}
+                    {% if user.apprenant %}
+                        <option value="{{ user.id }}">{{ user.prenom }} {{ user.nom }} ({{ user.email }})</option>
+                    {% endif %}
+                {% endfor %}
+                </optgroup>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-success"><i class="fas fa-plus"></i> Créer le groupe</button>
+        <a href="{% url 'messaging:groups' %}" class="btn btn-secondary ms-2"><i class="fas fa-arrow-left"></i> Retour</a>
+    </form>
+</div>
+{% endblock %}

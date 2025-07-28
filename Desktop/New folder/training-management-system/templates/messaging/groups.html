@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Groupes de discussion{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2><i class="fas fa-users"></i> Groupes de discussion</h2>
+    <a href="{% url 'messaging:create_group' %}" class="btn btn-primary mb-3">
+        <i class="fas fa-plus"></i> Créer un groupe
+    </a>
+    <hr>
+    {% if groups %}
+        <div class="list-group">
+            {% for group in groups %}
+                <a href="{% url 'messaging:group_detail' group.id %}" class="list-group-item list-group-item-action">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-comments"></i> {{ group.nom }}</span>
+                        <span class="badge bg-primary">{{ group.membres.count }} membres</span>
+                    </div>
+                    <small class="text-muted">Créé le {{ group.date_creation|date:"d/m/Y H:i" }}</small>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info mt-3">Aucun groupe trouvé.</div>
+    {% endif %}
+    <a href="{% url 'messaging:inbox' %}" class="btn btn-secondary mt-4"><i class="fas fa-arrow-left"></i> Retour à la messagerie</a>
+</div>
+{% endblock %}
