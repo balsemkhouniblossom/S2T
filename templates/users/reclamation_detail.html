@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Détail Réclamation{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3><i class="fas fa-exclamation-circle text-danger"></i> {{ reclamation.sujet }}</h3>
+                    {% if reclamation.statut == 'ouverte' %}
+                        <span class="badge bg-warning text-dark"><i class="fas fa-hourglass-half"></i> Ouverte</span>
+                    {% elif reclamation.statut == 'en_cours' %}
+                        <span class="badge bg-info text-dark"><i class="fas fa-spinner"></i> En cours</span>
+                    {% elif reclamation.statut == 'resolue' %}
+                        <span class="badge bg-success"><i class="fas fa-check"></i> Résolue</span>
+                    {% elif reclamation.statut == 'fermee' %}
+                        <span class="badge bg-secondary"><i class="fas fa-times"></i> Fermée</span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <p><strong><i class="fas fa-align-left"></i> Description :</strong><br>{{ reclamation.description|linebreaks }}</p>
+                    <p><strong><i class="fas fa-bolt"></i> Priorité :</strong> {{ reclamation.get_priorite_display }}</p>
+                    <p><strong><i class="fas fa-calendar"></i> Date de création :</strong> {{ reclamation.date_creation|date:"d/m/Y H:i" }}</p>
+                    {% if reclamation.date_resolution %}
+                    <p><strong><i class="fas fa-calendar-check"></i> Date de résolution :</strong> {{ reclamation.date_resolution|date:"d/m/Y H:i" }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% if is_admin and reclamation.statut != 'resolue' %}
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-reply"></i> Réponse de l'administrateur
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="response" class="form-label">Message</label>
+                            <textarea name="response" id="response" class="form-control" rows="4" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success"><i class="fas fa-paper-plane"></i> Envoyer la réponse</button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+            <a href="{% url 'users:reclamation_list' %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left"></i> Retour à la liste</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

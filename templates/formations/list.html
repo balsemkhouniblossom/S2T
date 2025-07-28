@@ -1,0 +1,542 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Formations disponibles{% endblock %}
+
+{% block extra_css %}
+<style>
+    .formation-card {
+        border: none;
+        box-shadow: var(--shadow-light);
+        transition: var(--transition-medium);
+        height: 100%;
+        border-radius: 16px;
+        overflow: hidden;
+        position: relative;
+        background: #fff;
+    }
+    
+    .formation-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        transform: scaleX(0);
+        transition: var(--transition-medium);
+    }
+    
+    .formation-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .formation-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .formation-image {
+        height: 200px;
+        object-fit: cover;
+        width: 100%;
+        transition: var(--transition-medium);
+    }
+    
+    .formation-card:hover .formation-image {
+        transform: scale(1.05);
+    }
+    
+    .niveau-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        z-index: 2;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        backdrop-filter: blur(10px);
+        box-shadow: var(--shadow-light);
+        transition: var(--transition-medium);
+    }
+    
+    .niveau-badge:hover {
+        transform: scale(1.1);
+    }
+    
+    .price-tag {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--success-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .price-tag::before {
+        content: 'TND';
+        font-size: 1rem;
+        opacity: 0.8;
+    }
+    
+    .search-section {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        padding: 4rem 0;
+        margin-bottom: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .search-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        content: 'TND';
+        font-size: 1rem;
+        opacity: 0.8;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+    
+    .search-section .container {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .search-form {
+        background: rgba(255,255,255,0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 2rem;
+        border: 1px solid rgba(255,255,255,0.2);
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .search-form .form-control {
+        background: rgba(255,255,255,0.9);
+        border: none;
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        font-size: 1rem;
+        transition: var(--transition-medium);
+    }
+    
+    .search-form .form-control:focus {
+        background: white;
+        box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+    }
+    
+    .search-btn {
+        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+        color: var(--primary-color);
+        border: none;
+        border-radius: 8px;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        transition: var(--transition-medium);
+        box-shadow: var(--shadow-light);
+    }
+    
+    .search-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+        background: white;
+    }
+    
+    .stats-section {
+        background: linear-gradient(135deg, var(--light-color) 0%, #e9ecef 100%);
+        padding: 3rem 0;
+        margin-bottom: 3rem;
+        border-radius: 16px;
+        box-shadow: var(--shadow-light);
+    }
+    
+    .stat-item {
+        text-align: center;
+        padding: 1.5rem;
+        border-radius: 12px;
+        background: white;
+        box-shadow: var(--shadow-light);
+        transition: var(--transition-medium);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        transform: scaleX(0);
+        transition: var(--transition-medium);
+    }
+    
+    .stat-item:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .stat-item:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .stat-label {
+        color: var(--text-secondary);
+        font-weight: 500;
+        font-size: 1rem;
+    }
+    
+    .formation-info {
+        padding: 1.5rem;
+    }
+    
+    .formation-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+        line-height: 1.4;
+        transition: var(--transition-medium);
+    }
+    
+    .formation-card:hover .formation-title {
+        color: var(--primary-color);
+    }
+    
+    .formation-description {
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+        line-height: 1.6;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .formation-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .meta-item i {
+        color: var(--primary-color);
+        font-size: 0.85rem;
+    }
+    
+    .formation-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+    
+    .btn-details {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: var(--transition-medium);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: var(--shadow-light);
+    }
+    
+    .btn-details:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-apply {
+        background: var(--success-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: var(--transition-medium);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: var(--shadow-light);
+    }
+    
+    .btn-apply:hover {
+        background: #218838;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow-light);
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .empty-state h3 {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+    
+    .empty-state p {
+        color: var(--text-secondary);
+        margin-bottom: 2rem;
+    }
+    
+    /* Enhanced responsive design */
+    @media (max-width: 768px) {
+        .search-section {
+            padding: 2rem 0;
+        }
+        
+        .search-form {
+            padding: 1.5rem;
+        }
+        
+        .formation-actions {
+            flex-direction: column;
+        }
+        
+        .btn-details,
+        .btn-apply {
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Search Section -->
+<div class="search-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="mb-4 display-4 fw-bold">Découvrez nos Formations</h1>
+                <p class="lead mb-4">Développez vos compétences avec nos formations de qualité</p>
+                
+                <!-- Search Form -->
+                <form method="GET" class="search-form">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <input type="text" name="q" class="form-control" 
+                                   placeholder="Rechercher une formation..." value="{{ request.GET.q }}">
+                        </div>
+                        <div class="col-md-3">
+                            <select name="niveau" class="form-control">
+                                <option value="">Tous les niveaux</option>
+                                <option value="debutant" {% if request.GET.niveau == 'debutant' %}selected{% endif %}>Débutant</option>
+                                <option value="intermediaire" {% if request.GET.niveau == 'intermediaire' %}selected{% endif %}>Intermédiaire</option>
+                                <option value="avance" {% if request.GET.niveau == 'avance' %}selected{% endif %}>Avancé</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <input type="number" name="prix_max" class="form-control" 
+                                   placeholder="Prix max" value="{{ request.GET.prix_max }}">
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn search-btn w-100">
+                                <i class="fas fa-search"></i> Rechercher
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Section -->
+<div class="stats-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <span class="stat-number">{{ total_formations }}</span>
+                    <div class="stat-label">Formations disponibles</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <span class="stat-number">{{ formations_gratuites }}</span>
+                    <div class="stat-label">Formations gratuites</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <span class="stat-number">{{ total_formateurs }}</span>
+                    <div class="stat-label">Formateurs experts</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <span class="stat-number">{{ total_apprenants }}</span>
+                    <div class="stat-label">Apprenants satisfaits</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Formations List -->
+<div class="container">
+    {% if formations %}
+        <div class="row">
+            {% for formation in formations %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="formation-card">
+                        {% if formation.image %}
+                            <img src="{{ formation.image.url }}" alt="{{ formation.titre }}" class="formation-image">
+                        {% else %}
+                            <div class="formation-image d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);">
+                                <i class="fas fa-graduation-cap text-white" style="font-size: 3rem;"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <span class="niveau-badge badge bg-light text-dark">
+                            <i class="fas fa-signal"></i> {{ formation.get_niveau_display }}
+                        </span>
+                        
+                        <div class="formation-info">
+                            <h5 class="formation-title">{{ formation.titre }}</h5>
+                            <p class="formation-description">{{ formation.description|truncatewords:20 }}</p>
+                            
+                            <div class="formation-meta">
+                                <div class="meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>{{ formation.duree_heures }}h</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-users"></i>
+                                    <span>{{ formation.apprenants.count }}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>{{ formation.date_debut|date:"d M" }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="price-tag">{{ formation.prix }}</div>
+                                {% if formation.moyenne_evaluations %}
+                                    <div class="rating">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= formation.moyenne_evaluations|floatformat:0 %}
+                                                <i class="fas fa-star text-warning"></i>
+                                            {% else %}
+                                                <i class="far fa-star text-warning"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <span class="ms-1 text-muted">({{ formation.evaluations.count }})</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="formation-actions">
+                                <a href="{% url 'formations:detail' formation.id %}" class="btn-details">
+                                    <i class="fas fa-eye"></i> Voir détails
+                                </a>
+                                {% if formation.applications_ouvertes %}
+                                    <a href="{% url 'formations:apply_formation' formation.id %}" class="btn-apply">
+                                        <i class="fas fa-paper-plane"></i> Candidater
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if formations.has_other_pages %}
+            <nav aria-label="Formations pagination" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    {% if formations.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ formations.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.niveau %}&niveau={{ request.GET.niveau }}{% endif %}{% if request.GET.prix_max %}&prix_max={{ request.GET.prix_max }}{% endif %}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in formations.paginator.page_range %}
+                        {% if formations.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > formations.number|add:'-3' and num < formations.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.niveau %}&niveau={{ request.GET.niveau }}{% endif %}{% if request.GET.prix_max %}&prix_max={{ request.GET.prix_max }}{% endif %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if formations.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ formations.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.niveau %}&niveau={{ request.GET.niveau }}{% endif %}{% if request.GET.prix_max %}&prix_max={{ request.GET.prix_max }}{% endif %}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+        
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-search"></i>
+            <h3>Aucune formation trouvée</h3>
+            <p>Essayez de modifier vos critères de recherche ou explorez toutes nos formations disponibles.</p>
+            <a href="{% url 'formations:list' %}" class="btn btn-primary">
+                <i class="fas fa-list"></i> Voir toutes les formations
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

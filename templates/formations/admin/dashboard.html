@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestion des Formations - Administration{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="alert alert-info mb-4">
+        <h4 class="mb-3"><i class="fas fa-user-shield"></i> Administrator Access</h4>
+        <ul class="mb-0">
+            <li><strong>Validate accounts</strong> – <a href="{% url 'users:admin_user_list' %}">Review & activate user accounts</a></li>
+            <li><strong>Manage formations/sessions</strong> – <a href="{% url 'formations:admin_list' %}">Formations</a> |
+                <a href="{% url 'formations:admin_sessions_list' %}">Sessions</a></li>
+            <li><strong>Handle payments & complaints</strong> –
+                <a href="{% url 'payments:admin_list' %}">Payments</a> |
+                <a href="{% url 'moderation:admin_complaints_list' %}">Complaints</a></li>
+            <li><strong>Assign trainers</strong> – <a href="{% url 'formations:admin_assign_trainer' %}">Assign trainers to formations</a></li>
+            <li><strong>Monitor evaluations & attendance</strong> –
+                <a href="{% url 'formations:admin_evaluations_list' %}">Evaluations</a> |
+                <a href="{% url 'formations:admin_attendance_list' %}">Attendance</a></li>
+        </ul>
+    </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-5">📚 Gestion des Formations</h1>
+        <div>
+            <a href="{% url 'formations:admin_formation_create' %}" class="btn btn-success me-2">
+                <i class="fas fa-plus"></i> Nouvelle Formation
+            </a>
+            <a href="{% url 'formations:admin_list' %}" class="btn btn-primary">
+                <i class="fas fa-list"></i> Toutes les Formations
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-primary">
+                <div class="card-body text-center">
+                    <i class="fas fa-graduation-cap fa-2x text-primary mb-2"></i>
+                    <h3 class="text-primary">{{ stats.total_formations }}</h3>
+                    <p class="card-text">Formations Total</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                    <h3 class="text-success">{{ stats.formations_publiees }}</h3>
+                    <p class="card-text">Publiées</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body text-center">
+                    <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                    <h3 class="text-warning">{{ stats.formations_en_cours }}</h3>
+                    <p class="card-text">En Cours</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-info">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-2x text-info mb-2"></i>
+                    <h3 class="text-info">{{ stats.total_participants }}</h3>
+                    <p class="card-text">Participants</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Breakdown -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">📊 Répartition par Statut</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between">
+                                <span>Brouillon:</span>
+                                <strong class="text-secondary">{{ stats.formations_brouillon }}</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between">
+                                <span>Publiées:</span>
+                                <strong class="text-success">{{ stats.formations_publiees }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between">
+                                <span>En cours:</span>
+                                <strong class="text-warning">{{ stats.formations_en_cours }}</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between">
+                                <span>Terminées:</span>
+                                <strong class="text-info">{{ stats.formations_terminees }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">👥 Ressources</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>Formateurs disponibles:</span>
+                        <strong class="text-primary">{{ stats.total_formateurs }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Total des participants:</span>
+                        <strong class="text-info">{{ stats.total_participants }}</strong>
+                    </div>
+                    <hr>
+                    <a href="{% url 'formations:admin_assign_trainer' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-user-plus"></i> Assigner Formateurs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Formations -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">🕒 Formations Récentes</h5>
+            <a href="{% url 'formations:admin_list' %}" class="btn btn-outline-primary btn-sm">Voir toutes</a>
+        </div>
+        <div class="card-body">
+            {% if recent_formations %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Titre</th>
+                                <th>Formateur</th>
+                                <th>Statut</th>
+                                <th>Participants</th>
+                                <th>Date Début</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for formation in recent_formations %}
+                            <tr>
+                                <td>
+                                    <strong>{{ formation.titre }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ formation.niveau|capfirst }}</small>
+                                </td>
+                                <td>
+                                    <i class="fas fa-user"></i>
+                                    {{ formation.formateur.utilisateur.get_full_name }}
+                                </td>
+                                <td>
+                                    {% if formation.statut == 'publiee' %}
+                                        <span class="badge bg-success">{{ formation.get_statut_display }}</span>
+                                    {% elif formation.statut == 'en_cours' %}
+                                        <span class="badge bg-warning">{{ formation.get_statut_display }}</span>
+                                    {% elif formation.statut == 'terminee' %}
+                                        <span class="badge bg-info">{{ formation.get_statut_display }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ formation.get_statut_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <i class="fas fa-users"></i>
+                                    {{ formation.participants_inscrits }}/{{ formation.participants_max }}
+                                </td>
+                                <td>{{ formation.date_debut|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'formations:admin_formation_detail' formation.id %}" 
+                                           class="btn btn-outline-primary" title="Voir détails">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'formations:admin_formation_edit' formation.id %}" 
+                                           class="btn btn-outline-warning" title="Modifier">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-plus-circle fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Aucune formation créée.</p>
+                    <a href="{% url 'formations:admin_formation_create' %}" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Créer votre première formation
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">⚡ Actions Rapides</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <a href="{% url 'formations:admin_formation_create' %}" class="btn btn-success w-100 mb-2">
+                                <i class="fas fa-plus"></i><br>
+                                Nouvelle Formation
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'formations:admin_assign_trainer' %}" class="btn btn-primary w-100 mb-2">
+                                <i class="fas fa-user-plus"></i><br>
+                                Assigner Formateur
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'formations:admin_list' %}" class="btn btn-info w-100 mb-2">
+                                <i class="fas fa-list"></i><br>
+                                Gérer Formations
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="/admin/formations/formation/" class="btn btn-secondary w-100 mb-2">
+                                <i class="fas fa-cog"></i><br>
+                                Admin Django
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

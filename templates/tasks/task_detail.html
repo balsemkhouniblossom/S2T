@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ task.titre }} - Training Management System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'formations:task_list' %}">Mes Tâches</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    {{ task.titre }}
+                </li>
+            </ol>
+        </nav>
+        <div>
+            <span class="badge {{ task.get_priority_badge_class }} fs-6 me-2">{{ task.get_priorite_display }}</span>
+            <span class="badge {{ task.get_status_badge_class }} fs-6">{{ task.get_statut_display }}</span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3><i class="fas fa-tasks"></i> {{ task.titre }}</h3>
+                </div>
+                <div class="card-body">
+                    {% if task.description %}
+                        <div class="mb-4">
+                            <h5>Description</h5>
+                            <p>{{ task.description|linebreaks }}</p>
+                        </div>
+                    {% endif %}
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="info-item mb-3">
+                                <strong><i class="fas fa-calendar"></i> Date de création:</strong>
+                                <span>{{ task.date_creation|date:"d/m/Y H:i" }}</span>
+                            </div>
+                            <div class="info-item mb-3">
+                                <strong><i class="fas fa-tag"></i> Catégorie:</strong>
+                                <span class="badge badge-info">{{ task.get_categorie_display }}</span>
+                            </div>
+                            {% if task.formation_liee %}
+                                <div class="info-item mb-3">
+                                    <strong><i class="fas fa-link"></i> Formation liée:</strong>
+                                    <a href="{% url 'formations:detail' task.formation_liee.id %}">
+                                        {{ task.formation_liee.titre }}
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if task.date_echeance %}
+                                <div class="info-item mb-3">
+                                    <strong><i class="fas fa-clock"></i> Date d'échéance:</strong>
+                                    <span class="{% if task.is_overdue %}text-danger{% endif %}">
+                                        {{ task.date_echeance|date:"d/m/Y H:i" }}
+                                        {% if task.is_overdue %}
+                                            <span class="badge badge-danger">En retard</span>
+                                        {% elif task.days_until_due and task.days_until_due <= 3 %}
+                                            <span class="badge badge-warning">Urgent</span>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            {% endif %}
+                            {% if task.date_completion %}
+                                <div class="info-item mb-3">
+                                    <strong><i class="fas fa-check-circle"></i> Date de completion:</strong>
+                                    <span class="text-success">{{ task.date_completion|date:"d/m/Y H:i" }}</span>
+                                </div>
+                            {% endif %}
+                            <div class="info-item mb-3">
+                                <strong><i class="fas fa-edit"></i> Dernière modification:</strong>
+                                <span>{{ task.date_modification|date:"d/m/Y H:i" }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if task.notes %}
+                        <div class="mb-4">
+                            <h5>Notes</h5>
+                            <div class="border p-3 bg-light">
+                                {{ task.notes|linebreaks }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if task.fichiers_attaches %}
+                        <div class="mb-4">
+                            <h5>Fichiers attachés</h5>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-file me-2"></i>
+                                <a href="{{ task.fichiers_attaches.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-download"></i> Télécharger
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="fas fa-cogs"></i> Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'formations:task_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour à la liste
+                        </a>
+                        
+                        <a href="{% url 'formations:task_edit' task.id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-edit"></i> Modifier
+                        </a>
+
+                        {% if task.statut != 'completed' %}
+                            <button onclick="toggleTaskStatus({{ task.id }}, 'completed')" 
+                                    class="btn btn-success">
+                                <i class="fas fa-check"></i> Marquer comme terminée
+                            </button>
+                        {% else %}
+                            <button onclick="toggleTaskStatus({{ task.id }}, 'todo')" 
+                                    class="btn btn-warning">
+                                <i class="fas fa-redo"></i> Rouvrir
+                            </button>
+                        {% endif %}
+
+                        {% if task.statut == 'todo' %}
+                            <button onclick="toggleTaskStatus({{ task.id }}, 'in_progress')" 
+                                    class="btn btn-info">
+                                <i class="fas fa-play"></i> Commencer
+                            </button>
+                        {% elif task.statut == 'in_progress' %}
+                            <button onclick="toggleTaskStatus({{ task.id }}, 'todo')" 
+                                    class="btn btn-secondary">
+                                <i class="fas fa-pause"></i> Mettre en pause
+                            </button>
+                        {% endif %}
+
+                        <a href="{% url 'formations:task_delete' task.id %}" 
+                           class="btn btn-outline-danger"
+                           onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?')">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {% if task.days_until_due %}
+                <div class="card">
+                    <div class="card-header">
+                        <h6><i class="fas fa-hourglass-half"></i> Temps restant</h6>
+                    </div>
+                    <div class="card-body text-center">
+                        {% if task.is_overdue %}
+                            <h3 class="text-danger">En retard</h3>
+                            <p class="text-muted">de {{ task.days_until_due|add:"-1" }} jour{{ task.days_until_due|add:"-1"|pluralize }}</p>
+                        {% elif task.days_until_due == 0 %}
+                            <h3 class="text-warning">Aujourd'hui</h3>
+                            <p class="text-muted">Échéance aujourd'hui</p>
+                        {% elif task.days_until_due == 1 %}
+                            <h3 class="text-warning">Demain</h3>
+                            <p class="text-muted">Échéance demain</p>
+                        {% else %}
+                            <h3 class="text-{% if task.days_until_due <= 3 %}warning{% else %}info{% endif %}">
+                                {{ task.days_until_due }} jour{{ task.days_until_due|pluralize }}
+                            </h3>
+                            <p class="text-muted">jusqu'à l'échéance</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleTaskStatus(taskId, newStatus) {
+    fetch(`/formations/tasks/${taskId}/toggle-status/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({status: newStatus})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+</script>
+
+<style>
+.info-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.badge-info {
+    background-color: #17a2b8;
+}
+</style>
+
+{% csrf_token %}
+{% endblock %}

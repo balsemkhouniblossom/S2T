@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Créer une Formation - Training Management System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="display-6">Créer une Formation</h1>
+                <a href="{% url 'formations:admin_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour à la liste
+                </a>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-plus"></i> Nouvelle Formation
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="id_titre" class="form-label"><i class="fas fa-heading"></i> Titre de la formation <span class="text-danger">*</span></label>
+                                {{ form.titre|add_class:'form-control' }}
+                                {% if form.titre.errors %}<div class="text-danger small">{{ form.titre.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label for="id_description" class="form-label"><i class="fas fa-align-left"></i> Description</label>
+                                {{ form.description|add_class:'form-control' }}
+                                {% if form.description.errors %}<div class="text-danger small">{{ form.description.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_date_debut" class="form-label"><i class="fas fa-calendar-plus"></i> Date de début</label>
+                                {{ form.date_debut|add_class:'form-control' }}
+                                {% if form.date_debut.errors %}<div class="text-danger small">{{ form.date_debut.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="id_date_fin" class="form-label"><i class="fas fa-calendar-minus"></i> Date de fin</label>
+                                {{ form.date_fin|add_class:'form-control' }}
+                                {% if form.date_fin.errors %}<div class="text-danger small">{{ form.date_fin.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="id_duree_heures" class="form-label"><i class="fas fa-clock"></i> Durée (heures)</label>
+                                {{ form.duree_heures|add_class:'form-control' }}
+                                {% if form.duree_heures.errors %}<div class="text-danger small">{{ form.duree_heures.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="id_niveau" class="form-label"><i class="fas fa-signal"></i> Niveau</label>
+                                {{ form.niveau|add_class:'form-control' }}
+                                {% if form.niveau.errors %}<div class="text-danger small">{{ form.niveau.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="id_prix" class="form-label"><i class="fas fa-money-bill-wave"></i> Prix (TND)</label>
+                                {{ form.prix|add_class:'form-control' }}
+                                {% if form.prix.errors %}<div class="text-danger small">{{ form.prix.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_participants_max" class="form-label"><i class="fas fa-users"></i> Participants maximum</label>
+                                {{ form.participants_max|add_class:'form-control' }}
+                                {% if form.participants_max.errors %}<div class="text-danger small">{{ form.participants_max.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="id_prerequisites" class="form-label"><i class="fas fa-list"></i> Prérequis</label>
+                                {{ form.prerequisites|add_class:'form-control' }}
+                                {% if form.prerequisites.errors %}<div class="text-danger small">{{ form.prerequisites.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-lg w-100 mt-3"><i class="fas fa-check"></i> Créer la formation</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

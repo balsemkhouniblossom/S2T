@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Training Management System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'formations:task_list' %}">Mes Tâches</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    {{ title }}
+                </li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-plus"></i> {{ title }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="{{ form.titre.id_for_label }}" class="form-label">
+                                        Titre <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.titre }}
+                                    {% if form.titre.errors %}
+                                        <div class="text-danger">{{ form.titre.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.categorie.id_for_label }}" class="form-label">Catégorie</label>
+                                    {{ form.categorie }}
+                                    {% if form.categorie.errors %}
+                                        <div class="text-danger">{{ form.categorie.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger">{{ form.description.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.priorite.id_for_label }}" class="form-label">Priorité</label>
+                                    {{ form.priorite }}
+                                    {% if form.priorite.errors %}
+                                        <div class="text-danger">{{ form.priorite.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.statut.id_for_label }}" class="form-label">Statut</label>
+                                    {{ form.statut }}
+                                    {% if form.statut.errors %}
+                                        <div class="text-danger">{{ form.statut.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.date_echeance.id_for_label }}" class="form-label">Date d'échéance</label>
+                                    {{ form.date_echeance }}
+                                    {% if form.date_echeance.errors %}
+                                        <div class="text-danger">{{ form.date_echeance.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.formation_liee.id_for_label }}" class="form-label">Formation liée (optionnel)</label>
+                            {{ form.formation_liee }}
+                            <small class="form-text text-muted">
+                                Sélectionnez une formation si cette tâche y est liée
+                            </small>
+                            {% if form.formation_liee.errors %}
+                                <div class="text-danger">{{ form.formation_liee.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                                <div class="text-danger">{{ form.notes.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.fichiers_attaches.id_for_label }}" class="form-label">Fichiers attachés</label>
+                            {{ form.fichiers_attaches }}
+                            <small class="form-text text-muted">
+                                Joignez des fichiers liés à cette tâche (optionnel)
+                            </small>
+                            {% if form.fichiers_attaches.errors %}
+                                <div class="text-danger">{{ form.fichiers_attaches.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'formations:task_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Retour
+                            </a>
+                            <div>
+                                {% if task %}
+                                    <a href="{% url 'formations:task_delete' task.id %}" 
+                                       class="btn btn-outline-danger me-2"
+                                       onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?')">
+                                        <i class="fas fa-trash"></i> Supprimer
+                                    </a>
+                                {% endif %}
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Enregistrer
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

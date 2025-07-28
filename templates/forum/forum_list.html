@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Forum Communautaire{% endblock %}
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Forum Communautaire</h1>
+    <a href="{% url 'forum:post_question' %}" class="btn btn-primary mb-3">Poser une question</a>
+    <ul class="list-group">
+        {% for question in questions %}
+        <li class="list-group-item">
+            <a href="{% url 'forum:detail' question.id %}"><strong>{{ question.titre }}</strong></a>
+            <br>
+            <small>par {{ question.auteur.nom }} le {{ question.date_creation|date:'Y-m-d H:i' }}</small>
+        </li>
+        {% empty %}
+        <li class="list-group-item">Aucune question pour le moment.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

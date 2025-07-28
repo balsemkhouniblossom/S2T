@@ -1,0 +1,313 @@
+{% extends 'base.html' %}
+
+{% block title %}Assigner des Formateurs - Administration{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-6">👨‍🏫 Assigner des Formateurs</h1>
+        <a href="{% url 'formations:admin_dashboard' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Retour Dashboard
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Assignment Form -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">🎯 Nouvelle assignation</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="assignmentForm">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="formation_id" class="form-label">
+                                    Formation <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="formation_id" name="formation_id" required>
+                                    <option value="">Sélectionnez une formation</option>
+                                    {% for formation in formations %}
+                                        <option value="{{ formation.id }}" 
+                                                data-current-trainer="{{ formation.formateur.utilisateur.get_full_name }}"
+                                                data-status="{{ formation.statut }}"
+                                                data-participants="{{ formation.participants_inscrits }}"
+                                                data-date="{{ formation.date_debut|date:'d/m/Y' }}">
+                                            {{ formation.titre }} ({{ formation.get_statut_display }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="formateur_id" class="form-label">
+                                    Nouveau Formateur <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="formateur_id" name="formateur_id" required style="color: black;">
+                                    <option value="">Sélectionnez un formateur</option>
+                                    {% for formateur in formateurs %}
+                                        <option value="{{ formateur.id }}"
+                                                data-specialite="{{ formateur.specialite|default:'Non spécifiée' }}"
+                                                data-experience="{{ formateur.experience|default:'Non spécifiée' }}"
+                                                data-email="{{ formateur.utilisateur.email }}">
+                                            {{ formateur.utilisateur.get_full_name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Formation Details (populated via JavaScript) -->
+                        <div id="formationDetails" class="alert alert-info d-none" style="color: black;">
+                            <h6><i class="fas fa-info-circle"></i> Détails de la formation sélectionnée</h6>
+                            <div class="row" style="color: black;">
+                                <div class="col-md-6">
+                                    <strong>Formateur actuel:</strong> <span id="currentTrainer" style="color: black;"></span><br>
+                                    <strong>Statut:</strong> <span id="formationStatus" style="color: black;"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Participants:</strong> <span id="participantsCount" style="color: black;"></span><br>
+                                    <strong>Date de début:</strong> <span id="formationDate" style="color: black;"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Trainer Details (populated via JavaScript) -->
+                        <div id="trainerDetails" class="alert alert-success d-none">
+                            <h6><i class="fas fa-user-check"></i> Détails du formateur sélectionné</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Email:</strong> <span id="trainerEmail"></span><br>
+                                    <strong>Spécialité:</strong> <span id="trainerSpecialite"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Expérience:</strong> <span id="trainerExperience"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-user-plus"></i> Assigner le formateur
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Info -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">📊 Statistiques</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Formations disponibles:</span>
+                        <strong class="text-primary">{{ formations.count }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Formateurs actifs:</span>
+                        <strong class="text-success">{{ formateurs.count }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Assignations possibles:</span>
+                        <strong class="text-info">{{ formations.count }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">💡 Conseils</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success"></i>
+                            Vérifiez la spécialité du formateur
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success"></i>
+                            Contactez le formateur avant l'assignation
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success"></i>
+                            Informez les participants du changement
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle text-success"></i>
+                            Vérifiez la disponibilité aux dates prévues
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">⚡ Actions rapides</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'formations:admin_formation_create' %}" class="btn btn-outline-success btn-sm">
+                            <i class="fas fa-plus"></i> Nouvelle formation
+                        </a>
+                        <a href="{% url 'formations:admin_list' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-list"></i> Toutes les formations
+                        </a>
+                        <a href="/admin/users/formateur/" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-users"></i> Gérer formateurs
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Assignments -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">📋 Assignations actuelles</h5>
+        </div>
+        <div class="card-body">
+            {% if formations %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Formation</th>
+                                <th>Formateur Assigné</th>
+                                <th>Statut</th>
+                                <th>Participants</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for formation in formations %}
+                            <tr>
+                                <td>
+                                    <strong>{{ formation.titre }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ formation.get_niveau_display }}</small>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-user-tie me-2"></i>
+                                        <div>
+                                            <strong>{{ formation.formateur.utilisateur.get_full_name }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ formation.formateur.utilisateur.email }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if formation.statut == 'publiee' %}
+                                        <span class="badge bg-success">{{ formation.get_statut_display }}</span>
+                                    {% elif formation.statut == 'en_cours' %}
+                                        <span class="badge bg-warning text-dark">{{ formation.get_statut_display }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ formation.get_statut_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {{ formation.participants_inscrits }}/{{ formation.participants_max }}
+                                </td>
+                                <td>{{ formation.date_debut|date:"d/m/Y" }}</td>
+                                <td>
+                                    <button class="btn btn-outline-primary btn-sm"
+                                            onclick="quickAssign({{ formation.id }}, '{{ formation.titre|escapejs }}')">
+                                        <i class="fas fa-exchange-alt"></i> Réassigner
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Aucune formation à assigner</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const formationSelect = document.getElementById('formation_id');
+    const trainerSelect = document.getElementById('formateur_id');
+    const formationDetails = document.getElementById('formationDetails');
+    const trainerDetails = document.getElementById('trainerDetails');
+
+    // Show formation details when selected
+    formationSelect.addEventListener('change', function() {
+        if (this.value) {
+            const option = this.options[this.selectedIndex];
+            document.getElementById('currentTrainer').textContent = option.dataset.currentTrainer;
+            document.getElementById('formationStatus').textContent = option.dataset.status;
+            document.getElementById('participantsCount').textContent = option.dataset.participants;
+            document.getElementById('formationDate').textContent = option.dataset.date;
+            
+            formationDetails.classList.remove('d-none');
+        } else {
+            formationDetails.classList.add('d-none');
+        }
+    });
+
+    // Show trainer details when selected
+    trainerSelect.addEventListener('change', function() {
+        if (this.value) {
+            const option = this.options[this.selectedIndex];
+            document.getElementById('trainerEmail').textContent = option.dataset.email;
+            document.getElementById('trainerSpecialite').textContent = option.dataset.specialite;
+            document.getElementById('trainerExperience').textContent = option.dataset.experience;
+            
+            trainerDetails.classList.remove('d-none');
+        } else {
+            trainerDetails.classList.add('d-none');
+        }
+    });
+
+    // Form submission
+    document.getElementById('assignmentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        fetch('{% url "formations:admin_assign_trainer" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Formateur assigné avec succès!');
+                location.reload();
+            } else {
+                alert('Erreur: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Une erreur est survenue lors de l\'assignation.');
+        });
+    });
+});
+
+function quickAssign(formationId, formationTitle) {
+    if (confirm(`Voulez-vous réassigner un nouveau formateur à la formation "${formationTitle}"?`)) {
+        document.getElementById('formation_id').value = formationId;
+        document.getElementById('formation_id').dispatchEvent(new Event('change'));
+        document.getElementById('formation_id').scrollIntoView({ behavior: 'smooth' });
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Administration{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="display-6">{{ title }}</h1>
+                <a href="{% url 'formations:admin_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour à la liste
+                </a>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        {% if formation %}
+                            <i class="fas fa-edit"></i> Modification de la formation
+                        {% else %}
+                            <i class="fas fa-plus"></i> Nouvelle formation
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Basic Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-info-circle"></i> Informations de base
+                                </h6>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.titre.id_for_label }}" class="form-label">
+                                    Titre de la formation <span class="text-danger">*</span>
+                                </label>
+                                {{ form.titre }}
+                                {% if form.titre.errors %}
+                                    <div class="text-danger small">{{ form.titre.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.description.id_for_label }}" class="form-label">
+                                    Description <span class="text-danger">*</span>
+                                </label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                    <div class="text-danger small">{{ form.description.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.objectifs.id_for_label }}" class="form-label">
+                                    Objectifs pédagogiques <span class="text-danger">*</span>
+                                </label>
+                                {{ form.objectifs }}
+                                {% if form.objectifs.errors %}
+                                    <div class="text-danger small">{{ form.objectifs.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Formation Details -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-cogs"></i> Détails de la formation
+                                </h6>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.duree_heures.id_for_label }}" class="form-label">
+                                    Durée (heures) <span class="text-danger">*</span>
+                                </label>
+                                {{ form.duree_heures }}
+                                {% if form.duree_heures.errors %}
+                                    <div class="text-danger small">{{ form.duree_heures.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.niveau.id_for_label }}" class="form-label">
+                                    Niveau <span class="text-danger">*</span>
+                                </label>
+                                {{ form.niveau }}
+                                {% if form.niveau.errors %}
+                                    <div class="text-danger small">{{ form.niveau.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.prix.id_for_label }}" class="form-label">
+                                    Prix (TND) <span class="text-danger">*</span>
+                                </label>
+                                {{ form.prix }}
+                                {% if form.prix.errors %}
+                                    <div class="text-danger small">{{ form.prix.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.formateur.id_for_label }}" class="form-label">
+                                    Formateur <span class="text-danger">*</span>
+                                </label>
+                                {{ form.formateur }}
+                                {% if form.formateur.errors %}
+                                    <div class="text-danger small">{{ form.formateur.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.participants_max.id_for_label }}" class="form-label">
+                                    Participants maximum <span class="text-danger">*</span>
+                                </label>
+                                {{ form.participants_max }}
+                                {% if form.participants_max.errors %}
+                                    <div class="text-danger small">{{ form.participants_max.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.prerequisites.id_for_label }}" class="form-label">
+                                    Prérequis
+                                </label>
+                                {{ form.prerequisites }}
+                                {% if form.prerequisites.errors %}
+                                    <div class="text-danger small">{{ form.prerequisites.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Scheduling -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-calendar"></i> Planification
+                                </h6>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.date_debut.id_for_label }}" class="form-label">
+                                    Date et heure de début <span class="text-danger">*</span>
+                                </label>
+                                {{ form.date_debut }}
+                                {% if form.date_debut.errors %}
+                                    <div class="text-danger small">{{ form.date_debut.errors }}</div>
+                                {% endif %}
+                                {% if form.date_debut.help_text %}
+                                    <div class="form-text">{{ form.date_debut.help_text }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.date_fin.id_for_label }}" class="form-label">
+                                    Date et heure de fin <span class="text-danger">*</span>
+                                </label>
+                                {{ form.date_fin }}
+                                {% if form.date_fin.errors %}
+                                    <div class="text-danger small">{{ form.date_fin.errors }}</div>
+                                {% endif %}
+                                {% if form.date_fin.help_text %}
+                                    <div class="form-text">{{ form.date_fin.help_text }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-toggle-on"></i> Statut
+                                </h6>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.statut.id_for_label }}" class="form-label">
+                                    Statut de la formation <span class="text-danger">*</span>
+                                </label>
+                                {{ form.statut }}
+                                {% if form.statut.errors %}
+                                    <div class="text-danger small">{{ form.statut.errors }}</div>
+                                {% endif %}
+                                {% if form.statut.help_text %}
+                                    <div class="form-text">{{ form.statut.help_text }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="row">
+                            <div class="col-12">
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% url 'formations:admin_list' %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times"></i> Annuler
+                                    </a>
+                                    <div>
+                                        {% if formation %}
+                                            <a href="{% url 'formations:admin_formation_detail' formation.id %}" class="btn btn-outline-info me-2">
+                                                <i class="fas fa-eye"></i> Voir détails
+                                            </a>
+                                        {% endif %}
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-save"></i>
+                                            {% if formation %}
+                                                Mettre à jour
+                                            {% else %}
+                                                Créer la formation
+                                            {% endif %}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Additional Information -->
+            {% if formation %}
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">📊 Informations additionnelles</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Date de création:</strong> {{ formation.date_creation|date:"d/m/Y H:i" }}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Participants actuels:</strong> {{ formation.participants_inscrits }}/{{ formation.participants_max }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation and UX improvements
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-calculate end date based on start date and duration
+    const dateDebutInput = document.getElementById('{{ form.date_debut.id_for_label }}');
+    const dateFinInput = document.getElementById('{{ form.date_fin.id_for_label }}');
+    const dureeInput = document.getElementById('{{ form.duree_heures.id_for_label }}');
+    
+    function updateEndDate() {
+        if (dateDebutInput.value && dureeInput.value) {
+            const startDate = new Date(dateDebutInput.value);
+            const duration = parseInt(dureeInput.value);
+            const endDate = new Date(startDate.getTime() + (duration * 60 * 60 * 1000));
+            
+            // Format to datetime-local
+            const year = endDate.getFullYear();
+            const month = String(endDate.getMonth() + 1).padStart(2, '0');
+            const day = String(endDate.getDate()).padStart(2, '0');
+            const hours = String(endDate.getHours()).padStart(2, '0');
+            const minutes = String(endDate.getMinutes()).padStart(2, '0');
+            
+            dateFinInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+    }
+    
+    dateDebutInput.addEventListener('change', updateEndDate);
+    dureeInput.addEventListener('input', updateEndDate);
+});
+</script>
+{% endblock %}

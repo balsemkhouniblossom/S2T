@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block title %}Modifier Utilisateur{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Modifier Utilisateur</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="nom" class="form-label">Nom</label>
+                    <input type="text" class="form-control" id="nom" name="nom" value="{{ user.nom }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="prenom" class="form-label">Prénom</label>
+                    <input type="text" class="form-control" id="prenom" name="prenom" value="{{ user.prenom }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="telephone" class="form-label">Téléphone</label>
+                    <input type="text" class="form-control" id="telephone" name="telephone" value="{{ user.telephone }}">
+                </div>
+                <div class="mb-3">
+                    <label for="adresse" class="form-label">Adresse</label>
+                    <textarea class="form-control" id="adresse" name="adresse">{{ user.adresse }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="date_naissance" class="form-label">Date de naissance</label>
+                    <input type="date" class="form-control" id="date_naissance" name="date_naissance" value="{{ user.date_naissance|date:'Y-m-d' }}">
+                </div>
+                <div class="mb-3">
+                    <label for="is_active" class="form-label">Statut</label>
+                    <select class="form-select" id="is_active" name="is_active">
+                        <option value="True" {% if user.is_active %}selected{% endif %}>Actif</option>
+                        <option value="False" {% if not user.is_active %}selected{% endif %}>Inactif</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="photo_profil" class="form-label">Photo de profil</label><br>
+                    {% if user.photo_profil %}
+                        <img src="{{ user.photo_profil.url }}" alt="Photo de profil" class="img-thumbnail mb-2" style="max-width:120px;">
+                    {% endif %}
+                    <input type="file" class="form-control" id="photo_profil" name="photo_profil">
+                </div>
+                {% if formateur %}
+                <h5 class="mt-4">Détails Formateur</h5>
+                <div class="mb-3">
+                    <label for="competences" class="form-label">Compétences</label>
+                    <input type="text" class="form-control" id="competences" name="competences" value="{{ formateur.competences }}">
+                </div>
+                <div class="mb-3">
+                    <label for="experience" class="form-label">Expérience (années)</label>
+                    <input type="number" class="form-control" id="experience" name="experience" value="{{ formateur.experience }}">
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description">{{ formateur.description }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="tarif_horaire" class="form-label">Tarif horaire</label>
+                    <input type="number" step="0.01" class="form-control" id="tarif_horaire" name="tarif_horaire" value="{{ formateur.tarif_horaire }}">
+                </div>
+                {% endif %}
+                {% if apprenant %}
+                <h5 class="mt-4">Détails Apprenant</h5>
+                <div class="mb-3">
+                    <label for="entreprise" class="form-label">Entreprise</label>
+                    <input type="text" class="form-control" id="entreprise" name="entreprise" value="{{ apprenant.entreprise }}">
+                </div>
+                <div class="mb-3">
+                    <label for="poste" class="form-label">Poste</label>
+                    <input type="text" class="form-control" id="poste" name="poste" value="{{ apprenant.poste }}">
+                </div>
+                <div class="mb-3">
+                    <label for="niveau_etude" class="form-label">Niveau d'étude</label>
+                    <input type="text" class="form-control" id="niveau_etude" name="niveau_etude" value="{{ apprenant.niveau_etude }}">
+                </div>
+                <div class="mb-3">
+                    <label for="objectifs" class="form-label">Objectifs</label>
+                    <textarea class="form-control" id="objectifs" name="objectifs">{{ apprenant.objectifs }}</textarea>
+                </div>
+                {% endif %}
+                {% if admin_obj %}
+                <h5 class="mt-4">Détails Administrateur</h5>
+                <div class="mb-3">
+                    <label for="departement" class="form-label">Département</label>
+                    <input type="text" class="form-control" id="departement" name="departement" value="{{ admin_obj.departement }}">
+                </div>
+                <div class="mb-3">
+                    <label for="niveau_acces" class="form-label">Niveau d'accès</label>
+                    <select class="form-select" id="niveau_acces" name="niveau_acces">
+                        <option value="super" {% if admin_obj.niveau_acces == 'super' %}selected{% endif %}>Super Administrateur</option>
+                        <option value="admin" {% if admin_obj.niveau_acces == 'admin' %}selected{% endif %}>Administrateur</option>
+                        <option value="moderateur" {% if admin_obj.niveau_acces == 'moderateur' %}selected{% endif %}>Modérateur</option>
+                    </select>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Enregistrer</button>
+        <a href="{% url 'users:admin_user_list' %}" class="btn btn-secondary ms-2 mt-3">Annuler</a>
+    </form>
+</div>
+{% endblock %}

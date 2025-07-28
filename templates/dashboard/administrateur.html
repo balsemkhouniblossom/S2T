@@ -1,0 +1,582 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Administrateur - Training Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+    
+    .dashboard-header .container {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 16px;
+        text-align: center;
+        box-shadow: var(--shadow-light);
+        transition: var(--transition-medium);
+        position: relative;
+        overflow: hidden;
+        border: none;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        transform: scaleX(0);
+        transition: var(--transition-medium);
+    }
+    
+    .stat-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        margin: 0 auto 1rem;
+        transition: var(--transition-medium);
+    }
+    
+    .stat-card:hover .stat-icon {
+        transform: scale(1.1);
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .stat-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+    
+    .stat-label {
+        color: var(--text-secondary);
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+    }
+    
+    .content-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 2rem;
+        margin: 2rem 0;
+    }
+    
+    .content-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: var(--shadow-light);
+        transition: var(--transition-medium);
+        position: relative;
+        overflow: hidden;
+        border: none;
+    }
+    
+    .content-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        transform: scaleX(0);
+        transition: var(--transition-medium);
+    }
+    
+    .content-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .content-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border-color);
+    }
+    
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .stats-list {
+        display: grid;
+        gap: 1rem;
+    }
+    
+    .stat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: var(--light-color);
+        border-radius: 8px;
+        transition: var(--transition-medium);
+    }
+    
+    .stat-item:hover {
+        background: white;
+        box-shadow: var(--shadow-light);
+        transform: translateX(4px);
+    }
+    
+    .stat-item-label {
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+    
+    .stat-item-value {
+        font-weight: 700;
+        color: var(--primary-color);
+        font-size: 1.1rem;
+    }
+    
+    .actions-grid {
+        display: grid;
+        gap: 1rem;
+    }
+    
+    .action-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition-medium);
+        border: none;
+        cursor: pointer;
+        box-shadow: var(--shadow-light);
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+        text-decoration: none;
+    }
+    
+    .action-btn-primary {
+        background: var(--primary-color);
+        color: white;
+    }
+    
+    .action-btn-primary:hover {
+        background: var(--secondary-color);
+        color: white;
+    }
+    
+    .action-btn-success {
+        background: var(--success-color);
+        color: white;
+    }
+    
+    .action-btn-success:hover {
+        background: #218838;
+        color: white;
+    }
+    
+    .action-btn-warning {
+        background: var(--warning-color);
+        color: white;
+    }
+    
+    .action-btn-warning:hover {
+        background: #e0a800;
+        color: white;
+    }
+    
+    .action-btn-info {
+        background: var(--info-color);
+        color: white;
+    }
+    
+    .action-btn-info:hover {
+        background: #138496;
+        color: white;
+    }
+    
+    .action-btn-secondary {
+        background: var(--text-secondary);
+        color: white;
+    }
+    
+    .action-btn-secondary:hover {
+        background: #5a6268;
+        color: white;
+    }
+    
+    .status-section {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        margin: 2rem 0;
+        box-shadow: var(--shadow-light);
+        transition: var(--transition-medium);
+        position: relative;
+        overflow: hidden;
+        border: none;
+        text-align: center;
+    }
+    
+    .status-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--success-color), var(--primary-color));
+        transform: scaleX(0);
+        transition: var(--transition-medium);
+    }
+    
+    .status-section:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .status-section:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .status-icon {
+        font-size: 3rem;
+        color: var(--success-color);
+        margin-bottom: 1rem;
+    }
+    
+    .status-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+    
+    .status-description {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+    
+    .status-link {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition-medium);
+    }
+    
+    .status-link:hover {
+        color: var(--secondary-color);
+        text-decoration: underline;
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-header {
+            padding: 2rem 0;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .content-card {
+            padding: 1.5rem;
+        }
+        
+        .actions-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="display-4 fw-bold mb-3">Dashboard Administrateur</h1>
+                <p class="lead mb-4">Gérez votre plateforme de formation</p>
+                <div class="d-flex gap-2 justify-content-center flex-wrap">
+                    <a href="{% url 'comprehensive_admin_dashboard' %}" class="btn btn-light btn-lg">
+                        <i class="fas fa-chart-line"></i> Dashboard Complet
+                    </a>
+                    <a href="/admin/" class="btn btn-light btn-lg">
+                        <i class="fas fa-cogs"></i> Interface Admin
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-number" style="color: var(--primary-color);">{{ stats.users_count }}</div>
+            <div class="stat-title">Utilisateurs</div>
+            <div class="stat-label">{{ stats.formateurs_count }} Formateurs | {{ stats.apprenants_count }} Apprenants</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <div class="stat-number" style="color: var(--success-color);">{{ stats.formations_count }}</div>
+            <div class="stat-title">Formations</div>
+            <div class="stat-label">Formations disponibles</div>
+            <a href="{% url 'formations:list' %}" class="btn btn-outline">
+                <i class="fas fa-eye"></i> Voir tout
+            </a>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="stat-number" style="color: var(--warning-color);">{{ stats.courses_count }}</div>
+            <div class="stat-title">Cours</div>
+            <div class="stat-label">Cours publiés</div>
+            <a href="{% url 'courses:list' %}" class="btn btn-outline">
+                <i class="fas fa-eye"></i> Voir tout
+            </a>
+        </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="content-grid">
+        <div class="content-card">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <i class="fas fa-user-check"></i> Suivi de présence
+                </h3>
+            </div>
+            <p>Confirmation automatique ou manuelle de présence par session (pour formateurs et apprenants).</p>
+            <!-- Example table, replace with dynamic data as needed -->
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Session</th>
+                        <th>Formateur</th>
+                        <th>Apprenant</th>
+                        <th>Présence</th>
+                        <th>Confirmation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in user_sessions %}
+                    <tr>
+                        <td>{{ session.derniere_connexion|date:"Y-m-d H:i" }}</td>
+                        <td>{{ session.nom }} {{ session.prenom }}</td>
+                        <td>{{ session.email }}</td>
+                        <td>
+                            {% if session.confirmation == 'Automatique' %}
+                                Oui
+                            {% elif session.derniere_connexion and session.derniere_connexion|date:'Y-m-d' == today %}
+                                Oui
+                            {% else %}
+                                Non
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form method="post" action="/users/update_confirmation/{{ session.user_id }}/">
+                                {% csrf_token %}
+                                <select name="confirmation" class="form-select">
+                                    <option value="En cours" {% if session.confirmation == 'En cours' %}selected{% endif %}>En cours</option>
+                                    <option value="Automatique" {% if session.confirmation == 'Automatique' %}selected{% endif %}>Automatique</option>
+                                    <option value="Manuelle" {% if session.confirmation == 'Manuelle' %}selected{% endif %}>Manuelle</option>
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-primary">Valider</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="content-card">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <i class="fas fa-history"></i> Historique de participation
+                </h3>
+            </div>
+            <p>Consultez l'historique de participation des utilisateurs aux sessions et formations.</p>
+            <!-- Example table, replace with dynamic data as needed -->
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Utilisateur</th>
+                        <th>Session</th>
+                        <th>Formation</th>
+                        <th>Date</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in user_sessions %}
+                    <tr>
+                        <td>{{ session.nom }} {{ session.prenom }}</td>
+                        <td>{{ session.derniere_connexion|date:"Y-m-d H:i" }}</td>
+                        <td>{% if session.formation %}{{ session.formation }}{% else %}-{% endif %}</td>
+                        <td>{{ session.derniere_connexion|date:"Y-m-d" }}</td>
+                        <td>{% if session.derniere_deconnexion %}Présent{% else %}Absent{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="content-card">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <i class="fas fa-chart-bar"></i> Statistiques Système
+                </h3>
+            </div>
+            
+            <div class="stats-list">
+                <div class="stat-item">
+                    <span class="stat-item-label">Total Utilisateurs</span>
+                    <strong class="stat-item-value">{{ stats.users_count }}</strong>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-item-label">Formateurs Actifs</span>
+                    <strong class="stat-item-value">{{ stats.formateurs_count }}</strong>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-item-label">Apprenants Inscrits</span>
+                    <strong class="stat-item-value">{{ stats.apprenants_count }}</strong>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-item-label">Formations Disponibles</span>
+                    <strong class="stat-item-value">{{ stats.formations_count }}</strong>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-item-label">Cours Publiés</span>
+                    <strong class="stat-item-value">{{ stats.courses_count }}</strong>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-card">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <i class="fas fa-tools"></i> Actions Rapides
+                </h3>
+            </div>
+            
+            <div class="actions-grid">
+                <a href="/admin/users/utilisateur/" class="action-btn action-btn-primary">
+                    <i class="fas fa-users"></i> Gérer les Utilisateurs
+                </a>
+                <a href="{% url 'formations:admin_dashboard' %}" class="action-btn action-btn-success">
+                    <i class="fas fa-graduation-cap"></i> Interface Formations
+                </a>
+                <a href="/admin/formations/formation/" class="action-btn action-btn-success">
+                    <i class="fas fa-cogs"></i> Admin Formations
+                </a>
+                <a href="/admin/courses/cours/" class="action-btn action-btn-warning">
+                    <i class="fas fa-book"></i> Gérer les Cours
+                </a>
+                <a href="/admin/messaging/message/" class="action-btn action-btn-info">
+                    <i class="fas fa-comments"></i> Gérer les Messages
+                </a>
+                <a href="/admin/payments/paiement/" class="action-btn action-btn-secondary">
+                    <i class="fas fa-credit-card"></i> Gérer les Paiements
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Section -->
+    <div class="status-section">
+        <div class="status-icon">
+            <i class="fas fa-rocket"></i>
+        </div>
+        <h3 class="status-title">Système Opérationnel</h3>
+        <p class="status-description">
+            🚀 Système opérationnel et prêt à l'utilisation !<br>
+            Base de données configurée avec {{ stats.users_count }} utilisateurs, {{ stats.formations_count }} formations et {{ stats.courses_count }} cours.
+        </p>
+        <p>
+            Accédez à l'<a href="/admin/" class="status-link">interface d'administration</a> pour une gestion complète.<br>
+            <a href="/forum/" class="status-link"><i class="fas fa-comments"></i> Forum Global (Q&A)</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

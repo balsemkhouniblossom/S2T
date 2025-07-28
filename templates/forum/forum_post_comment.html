@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Ajouter un commentaire{% endblock %}
+{% block content %}
+<div class="container">
+    <h2>Ajouter un commentaire à : {{ question.titre }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="contenu" class="form-label">Commentaire</label>
+            <textarea class="form-control" id="contenu" name="contenu" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-success">Publier</button>
+        <a href="{% url 'forum:detail' question.id %}" class="btn btn-secondary">Annuler</a>
+    </form>
+</div>
+{% endblock %}

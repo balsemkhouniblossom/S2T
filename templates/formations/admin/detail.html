@@ -1,0 +1,294 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ formation.titre }} - Détails{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-6">{{ formation.titre }}</h1>
+        <div>
+            <a href="{% url 'formations:admin_list' %}" class="btn btn-outline-secondary me-2">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+            <a href="{% url 'formations:admin_formation_edit' formation.id %}" class="btn btn-warning me-2">
+                <i class="fas fa-edit"></i> Modifier
+            </a>
+            <a href="{% url 'formations:admin_formation_delete' formation.id %}" 
+               class="btn btn-danger"
+               onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette formation?')">
+                <i class="fas fa-trash"></i> Supprimer
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Formation Info -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">📋 Informations de la formation</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Statut:</strong>
+                            {% if formation.statut == 'publiee' %}
+                                <span class="badge bg-success">{{ formation.get_statut_display }}</span>
+                            {% elif formation.statut == 'en_cours' %}
+                                <span class="badge bg-warning text-dark">{{ formation.get_statut_display }}</span>
+                            {% elif formation.statut == 'terminee' %}
+                                <span class="badge bg-info">{{ formation.get_statut_display }}</span>
+                            {% elif formation.statut == 'annulee' %}
+                                <span class="badge bg-danger">{{ formation.get_statut_display }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ formation.get_statut_display }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Niveau:</strong> {{ formation.get_niveau_display }}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Durée:</strong> {{ formation.duree_heures }} heures
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Prix:</strong> {{ formation.prix }} TND
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Date de début:</strong> {{ formation.date_debut|date:"d/m/Y H:i" }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Date de fin:</strong> {{ formation.date_fin|date:"d/m/Y H:i" }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <strong>Description:</strong>
+                        <p class="mt-2">{{ formation.description|linebreaks }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <strong>Objectifs pédagogiques:</strong>
+                        <p class="mt-2">{{ formation.objectifs|linebreaks }}</p>
+                    </div>
+
+                    {% if formation.prerequisites %}
+                        <div class="mb-3">
+                            <strong>Prérequis:</strong>
+                            <p class="mt-2">{{ formation.prerequisites|linebreaks }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Sessions/Planning -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">📅 Sessions programmées</h5>
+                    <button class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-plus"></i> Ajouter session
+                    </button>
+                </div>
+                <div class="card-body">
+                    {% if sessions %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Durée</th>
+                                        <th>Salle</th>
+                                        <th>Sujet</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for session in sessions %}
+                                    <tr>
+                                        <td>{{ session.date_session|date:"d/m/Y H:i" }}</td>
+                                        <td>{{ session.duree_session }} min</td>
+                                        <td>{{ session.salle.nom }}</td>
+                                        <td>{{ session.sujet }}</td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-warning" title="Modifier">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger" title="Supprimer">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3 text-muted">
+                            <i class="fas fa-calendar-plus fa-2x mb-2"></i>
+                            <p>Aucune session programmée</p>
+                            <button class="btn btn-sm btn-primary">
+                                <i class="fas fa-plus"></i> Créer la première session
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Evaluations -->
+            {% if evaluations_count > 0 %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">⭐ Évaluations ({{ evaluations_count }})</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 text-center">
+                            <h4 class="text-primary">{{ avg_ratings.contenu|floatformat:1|default:"N/A" }}/5</h4>
+                            <small>Contenu</small>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <h4 class="text-success">{{ avg_ratings.formateur|floatformat:1|default:"N/A" }}/5</h4>
+                            <small>Formateur</small>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <h4 class="text-info">{{ avg_ratings.organisation|floatformat:1|default:"N/A" }}/5</h4>
+                            <small>Organisation</small>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <h4 class="text-warning">{{ avg_ratings.globale|floatformat:1|default:"N/A" }}/5</h4>
+                            <small>Global</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Formateur Info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">👨‍🏫 Formateur</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" 
+                             style="width: 50px; height: 50px;">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div>
+                            <strong>{{ formation.formateur.utilisateur.get_full_name }}</strong>
+                            <br>
+                            <small class="text-muted">{{ formation.formateur.utilisateur.email }}</small>
+                        </div>
+                    </div>
+                    {% if formation.formateur.specialite %}
+                        <p><strong>Spécialité:</strong> {{ formation.formateur.specialite }}</p>
+                    {% endif %}
+                    {% if formation.formateur.experience %}
+                        <p><strong>Expérience:</strong> {{ formation.formateur.experience }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Participants -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="card-title mb-0">👥 Participants</h6>
+                    <span class="badge bg-primary">{{ participants_count }}/{{ formation.participants_max }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>Inscrits:</span>
+                        <strong class="text-primary">{{ participants_count }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>Places restantes:</span>
+                        <strong class="{% if places_restantes > 0 %}text-success{% else %}text-danger{% endif %}">
+                            {{ places_restantes }}
+                        </strong>
+                    </div>
+                    
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: {% widthratio participants_count formation.participants_max 100 %}%"
+                             aria-valuenow="{{ participants_count }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="{{ formation.participants_max }}">
+                        </div>
+                    </div>
+                    
+                    <a href="#" class="btn btn-outline-primary btn-sm w-100">
+                        <i class="fas fa-users"></i> Gérer les participants
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">⚡ Actions rapides</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        {% if formation.statut == 'brouillon' %}
+                            <button class="btn btn-success btn-sm">
+                                <i class="fas fa-check"></i> Publier la formation
+                            </button>
+                        {% elif formation.statut == 'publiee' %}
+                            <button class="btn btn-warning btn-sm">
+                                <i class="fas fa-play"></i> Démarrer la formation
+                            </button>
+                        {% elif formation.statut == 'en_cours' %}
+                            <button class="btn btn-info btn-sm">
+                                <i class="fas fa-stop"></i> Terminer la formation
+                            </button>
+                        {% endif %}
+                        
+                        <button class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-envelope"></i> Contacter participants
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-file-export"></i> Exporter les données
+                        </button>
+                        <a href="{% url 'formations:detail' formation.id %}" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-eye"></i> Vue publique
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formation Stats -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">📊 Statistiques</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Date de création:</span>
+                        <small>{{ formation.date_creation|date:"d/m/Y" }}</small>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Taux de remplissage:</span>
+                        <small>{% widthratio participants_count formation.participants_max 100 %}%</small>
+                    </div>
+                    {% if evaluations_count > 0 %}
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Note moyenne:</span>
+                            <small>{{ avg_ratings.globale|floatformat:1 }}/5</small>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

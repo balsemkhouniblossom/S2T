@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #f093fb;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --text-primary: #2c3e50;
+            --text-secondary: #6c757d;
+            --border-color: #e9ecef;
+            --shadow-light: 0 2px 8px rgba(102,126,234,0.08);
+            --shadow-medium: 0 4px 16px rgba(102,126,234,0.12);
+            --shadow-heavy: 0 8px 32px rgba(102,126,234,0.16);
+            --transition-fast: 0.2s ease;
+            --transition-medium: 0.3s ease;
+            --transition-slow: 0.5s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            line-height: 1.7;
+            color: var(--text-primary);
+            font-weight: 400;
+        }
+        
+        /* Enhanced Navbar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow-medium);
+            transition: var(--transition-medium);
+        }
+        
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: var(--shadow-heavy);
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        
+        .nav-logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition-medium);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-logo::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102,126,234,0.1), transparent);
+            transition: var(--transition-slow);
+        }
+        
+        .nav-logo:hover::before {
+            left: 100%;
+        }
+        
+        .nav-logo:hover {
+            color: var(--secondary-color);
+            transform: scale(1.05);
+        }
+        
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .nav-menu a {
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            transition: var(--transition-medium);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-menu a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(102,126,234,0.1);
+            transform: translateX(-100%);
+            transition: var(--transition-medium);
+        }
+        
+        .nav-menu a:hover::before {
+            transform: translateX(0);
+        }
+        
+        .nav-menu a:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .nav-auth {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition-medium);
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: var(--shadow-light);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+            text-decoration: none;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 8rem 0 6rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+        
+        .hero .container {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.25rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .hero-btn {
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition-medium);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: var(--shadow-light);
+        }
+        
+        .hero-btn-primary {
+            background: white;
+            color: var(--primary-color);
+        }
+        
+        .hero-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .hero-btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        
+        .hero-btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+            color: white;
+            text-decoration: none;
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 6rem 0;
+            background: white;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 4rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2.5rem;
+            text-align: center;
+            box-shadow: var(--shadow-light);
+            transition: var(--transition-medium);
+            position: relative;
+            overflow: hidden;
+            border: none;
+            height: 100%;
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            transform: scaleX(0);
+            transition: var(--transition-medium);
+        }
+        
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-medium);
+        }
+        
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            margin: 0 auto 1.5rem;
+            transition: var(--transition-medium);
+        }
+        
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1);
+        }
+        
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            transition: var(--transition-medium);
+        }
+        
+        .feature-card:hover .feature-title {
+            color: var(--primary-color);
+        }
+        
+        .feature-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        /* Stats Section */
+        .stats {
+            padding: 4rem 0;
+            background: linear-gradient(135deg, var(--light-color) 0%, #e9ecef 100%);
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+        
+        /* CTA Section */
+        .cta {
+            padding: 6rem 0;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+        
+        .cta .container {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .cta-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .cta-description {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        /* Footer */
+        .footer {
+            background: var(--dark-color);
+            color: white;
+            padding: 3rem 0 2rem 0;
+            text-align: center;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .footer-links a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: var(--transition-medium);
+        }
+        
+        .footer-links a:hover {
+            color: white;
+        }
+        
+        .footer-copyright {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-menu {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+                width: 100%;
+            }
+            
+            .nav-auth {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .feature-card {
+                padding: 2rem;
+            }
+            
+            .stat-number {
+                font-size: 2.5rem;
+            }
+            
+            .cta-title {
+                font-size: 2rem;
+            }
+        }
+        
+        /* Smooth Scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Enhanced Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="{% url 'home' %}" class="nav-logo">
+                <i class="fas fa-graduation-cap"></i>
+                Training System
+            </a>
+            
+            <ul class="nav-menu">
+                <li><a href="{% url 'formations:list' %}"><i class="fas fa-graduation-cap"></i> Formations</a></li>
+                <li><a href="{% url 'courses:list' %}"><i class="fas fa-book"></i> Cours</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'messaging:inbox' %}"><i class="fas fa-comments"></i> Messages</a></li>
+                    <li><a href="{% url 'formations:task_list' %}"><i class="fas fa-tasks"></i> Mes Tâches</a></li>
+                    {% if user.role == 'administrateur' %}
+                        <li><a href="{% url 'comprehensive_admin_dashboard' %}"><i class="fas fa-building"></i> Admin Complet</a></li>
+                        <li><a href="{% url 'formations:admin_dashboard' %}"><i class="fas fa-cogs"></i> Admin Formations</a></li>
+                        <li><a href="{% url 'moderation:dashboard' %}"><i class="fas fa-robot"></i> Modération IA</a></li>
+                    {% endif %}
+                    <li><a href="{% url 'users:dashboard' %}"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                {% endif %}
+            </ul>
+            
+            <div class="nav-auth">
+                {% if user.is_authenticated %}
+                    <span>{{ user.prenom }} {{ user.nom }}</span>
+                    <a href="{% url 'users:profile' %}" class="btn btn-outline">Profil</a>
+                    <a href="{% url 'users:logout' %}" class="btn btn-primary">Déconnexion</a>
+                {% else %}
+                    <a href="{% url 'users:login' %}" class="btn btn-outline">Connexion</a>
+                    <a href="{% url 'users:register' %}" class="btn btn-primary">Inscription</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Développez vos compétences avec notre plateforme de formation</h1>
+                <p class="hero-subtitle">
+                    Découvrez des formations de qualité, des formateurs experts et une communauté d'apprenants passionnés. 
+                    Commencez votre parcours d'apprentissage dès aujourd'hui.
+                </p>
+                <div class="hero-actions">
+                    <a href="{% url 'formations:list' %}" class="hero-btn hero-btn-primary">
+                        <i class="fas fa-search"></i> Explorer les Formations
+                    </a>
+                    <a href="{% url 'users:register' %}" class="hero-btn hero-btn-secondary">
+                        <i class="fas fa-user-plus"></i> Commencer Gratuitement
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">Pourquoi choisir notre plateforme ?</h2>
+            <p class="section-subtitle">
+                Nous offrons une expérience d'apprentissage moderne et personnalisée pour tous les niveaux
+            </p>
+            
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <h3 class="feature-title">Formations de Qualité</h3>
+                        <p class="feature-description">
+                            Accédez à des formations créées par des experts du domaine, avec un contenu mis à jour régulièrement.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3 class="feature-title">Communauté Active</h3>
+                        <p class="feature-description">
+                            Rejoignez une communauté d'apprenants et de formateurs passionnés pour échanger et progresser ensemble.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-certificate"></i>
+                        </div>
+                        <h3 class="feature-title">Certificats Reconnus</h3>
+                        <p class="feature-description">
+                            Obtenez des certificats de fin de formation pour valoriser vos compétences et votre parcours.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h3 class="feature-title">Apprentissage Flexible</h3>
+                        <p class="feature-description">
+                            Apprenez à votre rythme, quand vous voulez et où vous voulez, avec un accès illimité au contenu.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <h3 class="feature-title">Formateurs Experts</h3>
+                        <p class="feature-description">
+                            Bénéficiez de l'expertise de formateurs qualifiés et expérimentés dans leurs domaines respectifs.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <h3 class="feature-title">Multi-Plateforme</h3>
+                        <p class="feature-description">
+                            Accédez à vos formations depuis n'importe quel appareil : ordinateur, tablette ou smartphone.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <span class="stat-number">500+</span>
+                        <div class="stat-label">Formations disponibles</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <span class="stat-number">50+</span>
+                        <div class="stat-label">Formateurs experts</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <span class="stat-number">10k+</span>
+                        <div class="stat-label">Apprenants satisfaits</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <span class="stat-number">95%</span>
+                        <div class="stat-label">Taux de satisfaction</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <h2 class="cta-title">Prêt à commencer votre apprentissage ?</h2>
+            <p class="cta-description">
+                Rejoignez des milliers d'apprenants qui ont déjà transformé leur carrière avec nos formations.
+            </p>
+            <div class="hero-actions">
+                <a href="{% url 'users:register' %}" class="hero-btn hero-btn-primary">
+                    <i class="fas fa-user-plus"></i> Commencer Maintenant
+                </a>
+                <a href="{% url 'formations:list' %}" class="hero-btn hero-btn-secondary">
+                    <i class="fas fa-search"></i> Voir les Formations
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="{% url 'formations:list' %}">Formations</a>
+                <a href="{% url 'courses:list' %}">Cours</a>
+                <a href="{% url 'users:register' %}">Inscription</a>
+                <a href="{% url 'users:login' %}">Connexion</a>
+                <a href="mailto:contact@training.com">Contact</a>
+            </div>
+            <div class="footer-copyright">
+                &copy; 2025 Training Management System. Tous droits réservés.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    </script>
+</body>
+</html>

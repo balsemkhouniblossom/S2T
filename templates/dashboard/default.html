@@ -1,0 +1,369 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Utilisateur{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+    
+    .dashboard-header .container {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .welcome-card {
+        background: rgba(255,255,255,0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 2rem;
+        border: 1px solid rgba(255,255,255,0.2);
+        box-shadow: var(--shadow-medium);
+        margin-bottom: 2rem;
+    }
+    
+    .feature-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-light);
+        transition: var(--transition-medium);
+        position: relative;
+        overflow: hidden;
+        border: none;
+    }
+    
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        transform: scaleX(0);
+        transition: var(--transition-medium);
+    }
+    
+    .feature-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: var(--transition-medium);
+    }
+    
+    .feature-card:hover .feature-icon {
+        transform: scale(1.1);
+    }
+    
+    .feature-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        transition: var(--transition-medium);
+    }
+    
+    .feature-card:hover .feature-title {
+        color: var(--primary-color);
+    }
+    
+    .feature-description {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+    
+    .feature-btn {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: var(--transition-medium);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: var(--shadow-light);
+    }
+    
+    .feature-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .alert-custom {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-light);
+        border-left: 4px solid var(--warning-color);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .alert-custom::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+        transform: translateX(-100%);
+        transition: var(--transition-slow);
+    }
+    
+    .alert-custom:hover::before {
+        transform: translateX(100%);
+    }
+    
+    .contact-section {
+        background: linear-gradient(135deg, var(--light-color) 0%, #e9ecef 100%);
+        padding: 2rem;
+        border-radius: 16px;
+        text-align: center;
+        margin-top: 2rem;
+        box-shadow: var(--shadow-light);
+    }
+    
+    .contact-btn {
+        background: var(--info-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: var(--transition-medium);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: var(--shadow-light);
+    }
+    
+    .contact-btn:hover {
+        background: #138496;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: var(--shadow-light);
+        transition: var(--transition-medium);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        transform: scaleX(0);
+        transition: var(--transition-medium);
+    }
+    
+    .stat-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .stat-label {
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-header {
+            padding: 2rem 0;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .feature-card {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="display-4 fw-bold mb-3">Dashboard Utilisateur</h1>
+                <p class="lead mb-0">Bienvenue sur votre espace personnel</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Welcome Alert -->
+    <div class="alert-custom">
+        <h4 class="alert-heading">
+            <i class="fas fa-exclamation-triangle"></i> Aucun rôle spécifique assigné
+        </h4>
+        <p class="mb-2">{{ message }}</p>
+        <hr>
+        <p class="mb-0">
+            Votre compte existe mais aucun rôle spécifique (Formateur, Apprenant, ou Administrateur) n'a été assigné.
+        </p>
+    </div>
+    
+    <!-- Quick Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Formations suivies</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Cours complétés</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Certificats obtenus</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Heures d'apprentissage</div>
+        </div>
+    </div>
+    
+    <!-- Feature Cards -->
+    <div class="row">
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h5 class="feature-title">Explorer les Formations</h5>
+                <p class="feature-description">
+                    Découvrez les formations disponibles sur la plateforme et développez vos compétences.
+                </p>
+                <a href="{% url 'formations:list' %}" class="feature-btn">
+                    <i class="fas fa-search"></i> Voir les Formations
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <h5 class="feature-title">Parcourir les Cours</h5>
+                <p class="feature-description">
+                    Explorez les cours individuels disponibles et enrichissez vos connaissances.
+                </p>
+                <a href="{% url 'courses:list' %}" class="feature-btn">
+                    <i class="fas fa-list"></i> Voir les Cours
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h5 class="feature-title">Mon Profil</h5>
+                <p class="feature-description">
+                    Consultez et modifiez vos informations personnelles et préférences.
+                </p>
+                <a href="{% url 'users:profile' %}" class="feature-btn">
+                    <i class="fas fa-cog"></i> Mon Profil
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Contact Section -->
+    <div class="contact-section">
+        <h3 class="mb-3">
+            <i class="fas fa-question-circle"></i> Besoin d'aide ?
+        </h3>
+        <p class="mb-4">
+            <strong>Pour obtenir un rôle spécifique :</strong><br>
+            Contactez l'administrateur à <strong>admin@training.com</strong> ou via l'interface d'administration.
+        </p>
+        <a href="mailto:admin@training.com" class="contact-btn">
+            <i class="fas fa-envelope"></i> Contacter l'Admin
+        </a>
+    </div>
+</div>
+{% endblock %}

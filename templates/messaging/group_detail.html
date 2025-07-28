@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Groupe - {{ group.nom }}{% endblock %}
+{% block extra_css %}
+<style>
+    .chat-container {
+        height: calc(100vh - 120px);
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow-light);
+        overflow: hidden;
+        margin: 2rem 0;
+        display: flex;
+        flex-direction: column;
+    }
+    .chat-header {
+        padding: 1rem;
+        background: #f7f7f7;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    .chat-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .chat-participant {
+        display: flex;
+        align-items: center;
+    }
+    .participant-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #007bff;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-right: 0.5rem;
+    }
+    .participant-info h4 {
+        margin: 0;
+        font-size: 1.1rem;
+    }
+    .participant-status {
+        font-size: 0.9rem;
+        color: #666;
+    }
+    .chat-actions {
+        display: flex;
+        align-items: center;
+    }
+    .btn-chat-action {
+        background: none;
+        border: none;
+        color: #007bff;
+        font-size: 1.2rem;
+        cursor: pointer;
+    }
+    .chat-messages {
+        flex: 1;
+        padding: 1rem;
+        overflow-y: auto;
+    }
+    .message-date {
+        text-align: center;
+        margin: 1rem 0;
+        color: #999;
+        font-size: 0.9rem;
+    }
+    .message-group {
+        display: flex;
+        margin-bottom: 1rem;
+    }
+    .message-bubble {
+        max-width: 70%;
+        padding: 0.75rem 1rem;
+        border-radius: 20px;
+        position: relative;
+        line-break: anywhere;
+    }
+    .message-bubble.sent {
+        background: #dcf8c6;
+        margin-left: auto;
+    }
+    .message-bubble.received {
+        background: #f1f1f1;
+        margin-right: auto;
+    }
+    .message-content {
+        white-space: pre-wrap;
+    }
+    .message-info {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 0.25rem;
+    }
+    .message-time {
+        font-size: 0.8rem;
+        color: #666;
+    }
+    .chat-input-container {
+        padding: 0.5rem;
+        background: #f7f7f7;
+        border-top: 1px solid #e0e0e0;
+    }
+    .chat-input-form {
+        display: flex;
+        align-items: center;
+    }
+    .input-group {
+        flex: 1;
+        position: relative;
+    }
+    .chat-textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #007bff;
+        border-radius: 20px;
+        resize: none;
+        line-height: 1.5;
+    }
+    .btn-success {
+        margin-left: 0.5rem;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="chat-container">
+    <div class="chat-header">
+        <div class="chat-header-content">
+            <div class="chat-participant">
+                <div class="participant-avatar">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="participant-info">
+                    <h4>{{ group.nom }}</h4>
+                    <div class="participant-status">
+                        {{ group.membres.count }} membres
+                    </div>
+                    <div class="participant-list" style="margin-top: 0.5rem;">
+                        <strong>Membres :</strong>
+                        <ul style="list-style: none; padding-left: 0; margin: 0;">
+                            {% for membre in group.membres.all %}
+                                <li style="display: inline-block; margin-right: 1rem;">
+                                    {% if membre == request.user %}
+                                        <span style="font-weight: bold; color: #007bff;">Vous</span>
+                                    {% else %}
+                                        <span>{{ membre.get_full_name|default:membre.username|cut:"@" }}</span>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-actions">
+                <a href="{% url 'messaging:groups' %}" class="btn-chat-action">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+        {% if group_messages %}
+            {% with prev_date=None %}
+            {% for message in group_messages %}
+                {% if forloop.first or message.date_envoi|date:"Y-m-d" != prev_date %}
+                    <div class="message-date">
+                        <span>{{ message.date_envoi|date:"l j F Y" }}</span>
+                    </div>
+                {% endif %}
+                <div class="message-group">
+                    <div class="message-bubble {% if message.auteur == request.user %}sent{% else %}received{% endif %}">
+                        <div class="message-content">
+                            <span style="font-size:0.95em; color:#007bff; font-weight:bold;">
+                                {% if message.auteur == request.user %}
+                                    Vous
+                                {% else %}
+                                    {{ message.auteur.get_full_name|default:message.auteur.username|cut:"@" }}
+                                {% endif %}
+                            </span><br>
+                            {{ message.contenu|linebreaks }}
+                        </div>
+                        <div class="message-info">
+                            <span class="message-time">{{ message.date_envoi|time:"H:i" }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% with message.date_envoi|date:"Y-m-d" as prev_date %}{% endwith %}
+            {% endfor %}
+            {% endwith %}
+        {% else %}
+            <div class="alert alert-info">Aucun message dans ce groupe.</div>
+        {% endif %}
+    </div>
+    <div class="chat-input-container">
+        <form method="POST" class="chat-input-form" id="chatForm">
+            {% csrf_token %}
+            <div class="input-group">
+                <textarea 
+                    name="contenu" 
+                    class="chat-textarea" 
+                    placeholder="Tapez votre message..."
+                    id="messageInput"
+                    rows="1"
+                    required></textarea>
+            </div>
+            <button type="submit" class="btn btn-success"><i class="fas fa-paper-plane"></i> Envoyer</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

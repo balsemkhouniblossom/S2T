@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Supprimer Tâche - Training Management System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Confirmer la suppression</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <strong>Attention!</strong> Cette action est irréversible.
+                    </div>
+                    
+                    <p>Êtes-vous sûr de vouloir supprimer la tâche suivante ?</p>
+                    
+                    <div class="border p-3 bg-light mb-4">
+                        <h5>{{ task.titre }}</h5>
+                        {% if task.description %}
+                            <p class="text-muted">{{ task.description|truncatewords:20 }}</p>
+                        {% endif %}
+                        <div class="d-flex gap-2">
+                            <span class="badge {{ task.get_priority_badge_class }}">{{ task.get_priorite_display }}</span>
+                            <span class="badge {{ task.get_status_badge_class }}">{{ task.get_statut_display }}</span>
+                            <span class="badge badge-info">{{ task.get_categorie_display }}</span>
+                        </div>
+                    </div>
+
+                    <form method="post" class="d-flex justify-content-between">
+                        {% csrf_token %}
+                        <a href="{% url 'formations:task_detail' task.id %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Annuler
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Supprimer définitivement
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.badge-info {
+    background-color: #17a2b8;
+}
+</style>
+{% endblock %}

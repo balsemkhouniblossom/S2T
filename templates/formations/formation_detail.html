@@ -1,0 +1,724 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ formation.titre }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .formation-header {
+        background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{{ formation.image.url }}') center/cover;
+        color: white;
+        padding: 6rem 0;
+        margin-bottom: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .formation-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+        animation: shimmer 3s ease-in-out infinite;
+    }
+    
+    @keyframes shimmer {
+        0%, 100% { transform: translateX(-100%); }
+        50% { transform: translateX(100%); }
+    }
+    
+    .formation-header .container {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .formation-info-card {
+        position: sticky;
+        top: 2rem;
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow-medium);
+        padding: 2rem;
+        border: none;
+        transition: var(--transition-medium);
+    }
+    
+    .formation-info-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-heavy);
+    }
+    
+    .instructor-card {
+        border: none;
+        box-shadow: var(--shadow-light);
+        border-radius: 12px;
+        transition: var(--transition-medium);
+        overflow: hidden;
+    }
+    
+    .instructor-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .instructor-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 0 auto 1rem;
+        box-shadow: var(--shadow-light);
+        transition: var(--transition-medium);
+    }
+    
+    .instructor-card:hover .instructor-avatar {
+        transform: scale(1.1);
+    }
+    
+    .progress-section {
+        background: linear-gradient(135deg, var(--light-color) 0%, #e9ecef 100%);
+        padding: 2.5rem;
+        border-radius: 16px;
+        margin: 2rem 0;
+        box-shadow: var(--shadow-light);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .progress-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    }
+    
+    .rating-stars {
+        color: #ffc107;
+        font-size: 1.2rem;
+    }
+    
+    .price-highlight {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--success-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .price-highlight::before {
+        content: 'TND';
+        font-size: 1.5rem;
+        opacity: 0.8;
+    }
+    
+    .badge-custom {
+        font-size: 0.9rem;
+        padding: 0.75rem 1.25rem;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: var(--transition-medium);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0.25rem;
+    }
+    
+    .badge-custom:hover {
+        transform: scale(1.05);
+    }
+    
+    .content-section {
+        background: white;
+        border-radius: 16px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-light);
+        transition: var(--transition-medium);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .content-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        transform: scaleX(0);
+        transition: var(--transition-medium);
+    }
+    
+    .content-section:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .content-section:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .section-title {
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .section-title i {
+        color: var(--primary-color);
+        font-size: 1.25rem;
+    }
+    
+    .feature-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-color);
+        transition: var(--transition-medium);
+    }
+    
+    .feature-item:last-child {
+        border-bottom: none;
+    }
+    
+    .feature-item:hover {
+        background: var(--light-color);
+        margin: 0 -1rem;
+        padding: 1rem;
+        border-radius: 8px;
+    }
+    
+    .feature-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+    
+    .feature-content {
+        flex: 1;
+    }
+    
+    .feature-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+    
+    .feature-description {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    
+    .enrollment-section {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        padding: 2.5rem;
+        border-radius: 16px;
+        text-align: center;
+        margin: 2rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .enrollment-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+    
+    .enrollment-section .container {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .enrollment-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+    
+    .enrollment-description {
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+    }
+    
+    .enrollment-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .btn-enroll {
+        background: white;
+        color: var(--primary-color);
+        border: none;
+        border-radius: 8px;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: var(--transition-medium);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: var(--shadow-light);
+    }
+    
+    .btn-enroll:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+        color: var(--primary-color);
+        text-decoration: none;
+    }
+    
+    .btn-apply {
+        background: var(--success-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: var(--transition-medium);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: var(--shadow-light);
+    }
+    
+    .btn-apply:hover {
+        background: #218838;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: var(--shadow-light);
+        transition: var(--transition-medium);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        transform: scaleX(0);
+        transition: var(--transition-medium);
+    }
+    
+    .stat-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .stat-label {
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+    
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin-bottom: 2rem;
+    }
+    
+    .breadcrumb-item a {
+        color: rgba(255,255,255,0.8);
+        text-decoration: none;
+        transition: var(--transition-medium);
+    }
+    
+    .breadcrumb-item a:hover {
+        color: white;
+    }
+    
+    .breadcrumb-item.active {
+        color: white;
+    }
+    
+    @media (max-width: 768px) {
+        .formation-header {
+            padding: 3rem 0;
+        }
+        
+        .enrollment-actions {
+            flex-direction: column;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .content-section,
+        .formation-info-card {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Formation Header -->
+<div class="formation-header {% if not formation.image %}bg-primary{% endif %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'home' %}">Accueil</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'formations:list' %}">Formations</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ formation.titre }}</li>
+                    </ol>
+                </nav>
+                
+                <h1 class="display-4 mb-3 fw-bold">{{ formation.titre }}</h1>
+                <p class="lead mb-4">{{ formation.description }}</p>
+
+                <!-- Badge candidatures ouvertes/fermées -->
+                {% if formation.applications_ouvertes %}
+                  <span class="badge bg-success mb-3 badge-custom">
+                      <i class="fas fa-user-plus"></i> Candidatures formateur ouvertes
+                  </span>
+                  <a href="{% url 'formations:apply_formation' formation.id %}" class="btn btn-outline-success btn-sm ms-2 mb-3">
+                    <i class="fas fa-paper-plane"></i> Candidater comme formateur
+                  </a>
+                {% else %}
+                  <span class="badge bg-danger mb-3 badge-custom">
+                      <i class="fas fa-user-times"></i> Candidatures formateur fermées
+                  </span>
+                {% endif %}
+                
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    <span class="badge bg-light text-dark badge-custom">
+                        <i class="fas fa-signal"></i> {{ formation.get_niveau_display }}
+                    </span>
+                    <span class="badge bg-light text-dark badge-custom">
+                        <i class="fas fa-clock"></i> {{ formation.duree_heures }}h
+                    </span>
+                    <span class="badge bg-light text-dark badge-custom">
+                        <i class="fas fa-users"></i> {{ formation.apprenants.count }} inscrit{{ formation.apprenants.count|pluralize }}
+                    </span>
+                    <span class="badge bg-light text-dark badge-custom">
+                        <i class="fas fa-calendar"></i> {{ formation.date_debut|date:"d M Y" }}
+                    </span>
+                </div>
+                
+                {% if formation.moyenne_evaluations %}
+                <div class="rating-display">
+                    <span class="rating-stars">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= formation.moyenne_evaluations|floatformat:0 %}
+                                <i class="fas fa-star"></i>
+                            {% else %}
+                                <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </span>
+                    <span class="ms-2">{{ formation.moyenne_evaluations|floatformat:1 }}/5 ({{ formation.evaluations.count }} avis)</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Description Section -->
+            <div class="content-section">
+                <h2 class="section-title">
+                    <i class="fas fa-info-circle"></i> Description
+                </h2>
+                <div class="formation-description">
+                    {{ formation.description_complete|linebreaks }}
+                </div>
+            </div>
+
+            <!-- Program Section -->
+            {% if formation.programme %}
+            <div class="content-section">
+                <h2 class="section-title">
+                    <i class="fas fa-list-check"></i> Programme
+                </h2>
+                <div class="formation-programme">
+                    {{ formation.programme|linebreaks }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Prerequisites Section -->
+            {% if formation.prerequis %}
+            <div class="content-section">
+                <h2 class="section-title">
+                    <i class="fas fa-clipboard-list"></i> Prérequis
+                </h2>
+                <div class="formation-prerequis">
+                    {{ formation.prerequis|linebreaks }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Instructor Section -->
+            {% if formation.formateur %}
+            <div class="content-section">
+                <h2 class="section-title">
+                    <i class="fas fa-chalkboard-teacher"></i> Formateur
+                </h2>
+                <div class="instructor-card">
+                    <div class="card-body text-center">
+                        <div class="instructor-avatar">
+                            {{ formation.formateur.prenom|first|upper }}{{ formation.formateur.nom|first|upper }}
+                        </div>
+                        <h5 class="card-title">{{ formation.formateur.get_full_name }}</h5>
+                        <p class="card-text text-muted">{{ formation.formateur.bio|default:"Formateur expérimenté" }}</p>
+                        <div class="instructor-stats">
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <div class="stat-number">{{ formation.formateur.formations.count }}</div>
+                                    <div class="stat-label">Formations</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="stat-number">{{ formation.formateur.apprenants.count }}</div>
+                                    <div class="stat-label">Apprenants</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="stat-number">4.8</div>
+                                    <div class="stat-label">Note</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Features Section -->
+            <div class="content-section">
+                <h2 class="section-title">
+                    <i class="fas fa-star"></i> Ce que vous allez apprendre
+                </h2>
+                <ul class="feature-list">
+                    <li class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div class="feature-content">
+                            <div class="feature-title">Formation complète</div>
+                            <div class="feature-description">Accédez à tous les modules et ressources de la formation</div>
+                        </div>
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-certificate"></i>
+                        </div>
+                        <div class="feature-content">
+                            <div class="feature-title">Certificat de fin</div>
+                            <div class="feature-description">Obtenez votre certificat de réussite</div>
+                        </div>
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="feature-content">
+                            <div class="feature-title">Accès illimité</div>
+                            <div class="feature-description">Accédez au contenu à votre rythme</div>
+                        </div>
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <div class="feature-content">
+                            <div class="feature-title">Support communautaire</div>
+                            <div class="feature-description">Échangez avec les autres apprenants</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Progress Section for enrolled users -->
+            {% if user.is_authenticated and user in formation.apprenants.all %}
+            <div class="progress-section">
+                <h3 class="section-title">
+                    <i class="fas fa-chart-line"></i> Votre progression
+                </h3>
+                <div class="progress mb-3" style="height: 10px;">
+                    <div class="progress-bar" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <p class="text-muted">25% complété • 2/8 modules terminés</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="formation-info-card">
+                <div class="text-center mb-4">
+                    <div class="price-highlight mb-3">
+                        {% if formation.prix == 0 %}
+                            Gratuit
+                        {% else %}
+                            {{ formation.prix }}
+                        {% endif %}
+                    </div>
+                    
+                    {% if user.is_authenticated %}
+                        {% if user in formation.apprenants.all %}
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle"></i> Vous êtes inscrit à cette formation
+                            </div>
+                        {% else %}
+                            <a href="{% url 'formations:enroll' formation.id %}" class="btn btn-primary btn-lg w-100 mb-3">
+                                <i class="fas fa-user-plus"></i> S'inscrire
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'users:login' %}" class="btn btn-primary btn-lg w-100 mb-3">
+                            <i class="fas fa-sign-in-alt"></i> Se connecter pour s'inscrire
+                        </a>
+                    {% endif %}
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">{{ formation.duree_heures }}</div>
+                        <div class="stat-label">Heures</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ formation.apprenants.count }}</div>
+                        <div class="stat-label">Inscrits</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ formation.get_niveau_display }}</div>
+                        <div class="stat-label">Niveau</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ formation.date_debut|date:"d/m" }}</div>
+                        <div class="stat-label">Début</div>
+                    </div>
+                </div>
+
+                <div class="formation-details">
+                    <h5 class="mb-3">Détails de la formation</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-calendar text-primary me-2"></i>
+                            <strong>Date de début:</strong> {{ formation.date_debut|date:"d/m/Y" }}
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-clock text-primary me-2"></i>
+                            <strong>Durée:</strong> {{ formation.duree_heures }} heures
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-users text-primary me-2"></i>
+                            <strong>Places:</strong> {{ formation.nombre_places }} places
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                            <strong>Lieu:</strong> {{ formation.lieu|default:"En ligne" }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enrollment Section -->
+    {% if not user.is_authenticated or user not in formation.apprenants.all %}
+    <div class="enrollment-section">
+        <div class="container">
+            <h2 class="enrollment-title">Prêt à commencer votre formation ?</h2>
+            <p class="enrollment-description">
+                Rejoignez {{ formation.apprenants.count }} autres apprenants et développez vos compétences dès aujourd'hui.
+            </p>
+            <div class="enrollment-actions">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'formations:enroll' formation.id %}" class="btn-enroll">
+                        <i class="fas fa-user-plus"></i> S'inscrire maintenant
+                    </a>
+                {% else %}
+                    <a href="{% url 'users:login' %}" class="btn-enroll">
+                        <i class="fas fa-sign-in-alt"></i> Se connecter
+                    </a>
+                    <a href="{% url 'users:register' %}" class="btn-apply">
+                        <i class="fas fa-user-plus"></i> Créer un compte
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

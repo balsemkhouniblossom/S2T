@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Question - {{ question.titre }}{% endblock %}
+{% block content %}
+<div class="container">
+    <h2>{{ question.titre }}</h2>
+    <p>{{ question.contenu }}</p>
+    <small>par {{ question.auteur.nom }} le {{ question.date_creation|date:'Y-m-d H:i' }}</small>
+    <hr>
+    <h4>Commentaires</h4>
+    <ul class="list-group mb-3">
+        {% for comment in comments %}
+        <li class="list-group-item">
+            <strong>{{ comment.auteur.nom }}</strong> : {{ comment.contenu }}
+            <br>
+            <small>{{ comment.date_creation|date:'Y-m-d H:i' }}</small>
+        </li>
+        {% empty %}
+        <li class="list-group-item">Aucun commentaire pour cette question.</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'forum:post_comment' question.id %}" class="btn btn-success">Ajouter un commentaire</a>
+    <a href="{% url 'forum:list' %}" class="btn btn-secondary">Retour au forum</a>
+</div>
+{% endblock %}

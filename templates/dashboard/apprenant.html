@@ -1,0 +1,448 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Apprenant - Training Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+    
+    .dashboard-header .container {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 16px;
+        text-align: center;
+        box-shadow: var(--shadow-light);
+        transition: var(--transition-medium);
+        position: relative;
+        overflow: hidden;
+        border: none;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        transform: scaleX(0);
+        transition: var(--transition-medium);
+    }
+    
+    .stat-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        margin: 0 auto 1rem;
+        transition: var(--transition-medium);
+    }
+    
+    .stat-card:hover .stat-icon {
+        transform: scale(1.1);
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .stat-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+    
+    .stat-label {
+        color: var(--text-secondary);
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+    }
+    
+    .content-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 2rem;
+        margin: 2rem 0;
+    }
+    
+    .content-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: var(--shadow-light);
+        transition: var(--transition-medium);
+        position: relative;
+        overflow: hidden;
+        border: none;
+    }
+    
+    .content-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        transform: scaleX(0);
+        transition: var(--transition-medium);
+    }
+    
+    .content-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .content-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .content-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border-color);
+    }
+    
+    .content-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .item-card {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        transition: var(--transition-medium);
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .item-card:last-child {
+        border-bottom: none;
+    }
+    
+    .item-card:hover {
+        background: var(--light-color);
+        transform: translateX(4px);
+    }
+    
+    .item-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        transition: var(--transition-medium);
+    }
+    
+    .item-card:hover .item-title {
+        color: var(--primary-color);
+    }
+    
+    .item-description {
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+    
+    .item-meta {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    .badge-custom {
+        background: var(--primary-color);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: var(--transition-medium);
+    }
+    
+    .badge-custom:hover {
+        transform: scale(1.05);
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+    
+    .meta-item i {
+        color: var(--primary-color);
+        font-size: 0.85rem;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-secondary);
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .empty-state h4 {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+    
+    .empty-state a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition-medium);
+    }
+    
+    .empty-state a:hover {
+        color: var(--secondary-color);
+        text-decoration: underline;
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-header {
+            padding: 2rem 0;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .content-card {
+            padding: 1.5rem;
+        }
+        
+        .item-meta {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="display-4 fw-bold mb-3">Dashboard Apprenant</h1>
+                <p class="lead mb-4">Suivez votre progression et gérez vos formations</p>
+                <a href="{% url 'formations:list' %}" class="btn btn-light btn-lg">
+                    <i class="fas fa-search"></i> Découvrir les Formations
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <div class="stat-number" style="color: var(--primary-color);">{{ formations.count }}</div>
+            <div class="stat-title">Mes Formations</div>
+            <div class="stat-label">Formations inscrites</div>
+            <a href="{% url 'formations:my_formations' %}" class="btn btn-outline">
+                <i class="fas fa-eye"></i> Voir tout
+            </a>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="stat-number" style="color: var(--success-color);">{{ courses.count }}</div>
+            <div class="stat-title">Mes Cours</div>
+            <div class="stat-label">Cours suivis</div>
+            <a href="{% url 'courses:my_courses' %}" class="btn btn-outline">
+                <i class="fas fa-eye"></i> Voir tout
+            </a>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <div class="stat-number" style="color: var(--info-color);">{{ tasks.count|default:0 }}</div>
+            <div class="stat-title">Mes Tâches</div>
+            <div class="stat-label">Tâches à accomplir</div>
+            <a href="{% url 'formations:task_list' %}" class="btn btn-outline">
+                <i class="fas fa-eye"></i> Voir tout
+            </a>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-life-ring"></i>
+            </div>
+<div class="stat-number" style="color:white;">{{ reclamations|length }}</div>            <div class="stat-title">Demande d'aide</div>
+            <div class="stat-label">Support & suivi</div>
+            <a href="{% url 'users:reclamation_list' %}" class="btn btn-outline-danger">
+                <i class="fas fa-eye"></i> Accéder au support
+            </a>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="stat-number" style="color: var(--warning-color);">{{ progression_globale }}%</div>
+            <div class="stat-title">Progression</div>
+            <div class="stat-label">Progression globale</div>
+            <a href="{% url 'users:profile' %}" class="btn btn-outline">
+                <i class="fas fa-user"></i> Mon Profil
+            </a>
+        </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="content-grid">
+        <div class="content-card">
+            <div class="content-header">
+                <h3 class="content-title">
+                    <i class="fas fa-graduation-cap"></i> Mes Formations en Cours
+                </h3>
+                <a href="{% url 'formations:list' %}" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Toutes les Formations
+                </a>
+            </div>
+            
+            {% for formation in formations|slice:":5" %}
+                <div class="item-card">
+                    <h4 class="item-title">{{ formation.titre }}</h4>
+                    <p class="item-description">{{ formation.description|truncatewords:15 }}</p>
+                    <div class="item-meta">
+                        <span class="badge-custom">{{ formation.niveau }}</span>
+                        <div class="meta-item">
+        <a href="{% url 'users:reclamation_list' %}" class="btn btn-outline-danger">
+            <i class="fas fa-eye"></i> Voir / Soumettre
+        </a>
+                        <a href="{% url 'formations:detail' formation.id %}" class="btn btn-outline btn-sm">
+                            <i class="fas fa-play"></i> Continuer
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="empty-state">
+                    <i class="fas fa-graduation-cap"></i>
+                    <h4>Aucune formation inscrite</h4>
+                    <p>Commencez votre parcours d'apprentissage en découvrant nos formations.</p>
+                    <a href="{% url 'formations:list' %}">
+                        <i class="fas fa-search"></i> Découvrir les formations
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="content-card">
+            <div class="content-header">
+                <h3 class="content-title">
+                    <i class="fas fa-book"></i> Mes Cours en Cours
+                </h3>
+                <a href="{% url 'courses:list' %}" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Tous les Cours
+                </a>
+            </div>
+            
+            {% for course in courses|slice:":5" %}
+                <div class="item-card">
+                    <h4 class="item-title">{{ course.titre }}</h4>
+                    <p class="item-description">{{ course.description|truncatewords:15 }}</p>
+                    <div class="item-meta">
+                        <span class="badge-custom">{{ course.niveau }}</span>
+                        <div class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span>{{ course.duree_minutes }} min</span>
+                        </div>
+                        <a href="{% url 'courses:watch' course.id %}" class="btn btn-outline btn-sm">
+                            <i class="fas fa-play"></i> Regarder
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="empty-state">
+                    <i class="fas fa-book"></i>
+                    <h4>Aucun cours inscrit</h4>
+                    <p>Explorez nos cours pour enrichir vos connaissances.</p>
+                    <a href="{% url 'courses:list' %}">
+                        <i class="fas fa-search"></i> Découvrir les cours
+                        <br><a href="/forum/" class="status-link"><i class="fas fa-comments"></i> Forum Global (Q&A)</a>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
