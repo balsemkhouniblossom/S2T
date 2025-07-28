@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Tâches - Training Management System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="fas fa-chart-line"></i> Dashboard Tâches</h2>
+            <p class="text-muted">Vue d'ensemble de vos tâches et productivité</p>
+        </div>
+        <div>
+            <a href="{% url 'formations:task_list' %}" class="btn btn-outline-primary me-2">
+                <i class="fas fa-list"></i> Liste des tâches
+            </a>
+            <a href="{% url 'formations:task_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nouvelle tâche
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Overview -->
+    <div class="row mb-4">
+        <div class="col-md-2">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h3>{{ stats.total_tasks }}</h3>
+                    <p class="mb-0">Total</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-secondary text-white">
+                <div class="card-body text-center">
+                    <h3>{{ stats.todo_tasks }}</h3>
+                    <p class="mb-0">À faire</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h3>{{ stats.in_progress_tasks }}</h3>
+                    <p class="mb-0">En cours</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3>{{ stats.completed_tasks }}</h3>
+                    <p class="mb-0">Terminées</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-danger text-white">
+                <div class="card-body text-center">
+                    <h3>{{ stats.overdue_tasks }}</h3>
+                    <p class="mb-0">En retard</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h3>{{ stats.completion_rate|floatformat:0 }}%</h3>
+                    <p class="mb-0">Taux completion</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Tasks -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5><i class="fas fa-clock"></i> Tâches récentes</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_tasks %}
+                        {% for task in recent_tasks %}
+                            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                                <div>
+                                    <h6 class="mb-1">
+                                        <a href="{% url 'formations:task_detail' task.id %}">{{ task.titre }}</a>
+                                    </h6>
+                                    <small class="text-muted">{{ task.date_creation|date:"d/m/Y H:i" }}</small>
+                                </div>
+                                <div>
+                                    <span class="badge {{ task.get_priority_badge_class }}">{{ task.get_priorite_display }}</span>
+                                    <span class="badge {{ task.get_status_badge_class }}">{{ task.get_statut_display }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center">Aucune tâche récente</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Deadlines -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5><i class="fas fa-calendar-alt"></i> Échéances à venir</h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_tasks %}
+                        {% for task in upcoming_tasks %}
+                            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                                <div>
+                                    <h6 class="mb-1">
+                                        <a href="{% url 'formations:task_detail' task.id %}">{{ task.titre }}</a>
+                                    </h6>
+                                    <small class="{% if task.is_overdue %}text-danger{% elif task.days_until_due <= 3 %}text-warning{% else %}text-muted{% endif %}">
+                                        {{ task.date_echeance|date:"d/m/Y H:i" }}
+                                        {% if task.is_overdue %}
+                                            <span class="badge badge-danger">En retard</span>
+                                        {% elif task.days_until_due <= 3 %}
+                                            <span class="badge badge-warning">Urgent</span>
+                                        {% endif %}
+                                    </small>
+                                </div>
+                                <span class="badge {{ task.get_status_badge_class }}">{{ task.get_statut_display }}</span>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center">Aucune échéance prochaine</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overdue Tasks -->
+    {% if overdue_tasks %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h5><i class="fas fa-exclamation-triangle"></i> Tâches en retard</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for task in overdue_tasks %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card border-danger">
+                                        <div class="card-body">
+                                            <h6><a href="{% url 'formations:task_detail' task.id %}">{{ task.titre }}</a></h6>
+                                            <p class="text-muted small">{{ task.description|truncatewords:15 }}</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-danger">
+                                                    Échéance: {{ task.date_echeance|date:"d/m/Y" }}
+                                                </small>
+                                                <div>
+                                                    <span class="badge {{ task.get_priority_badge_class }}">{{ task.get_priorite_display }}</span>
+                                                    <button onclick="toggleTaskStatus({{ task.id }}, 'completed')" 
+                                                            class="btn btn-success btn-sm">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Analytics Charts -->
+    <div class="row">
+        <!-- Tasks by Category -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-pie"></i> Tâches par catégorie</h5>
+                </div>
+                <div class="card-body">
+                    {% if tasks_by_category %}
+                        {% for item in tasks_by_category %}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>{{ item.categorie|capfirst }}</span>
+                                <div>
+                                    <span class="badge bg-primary">{{ item.count }}</span>
+                                    <div class="progress" style="width: 100px; height: 8px;">
+                                        <div class="progress-bar" style="width: {% widthratio item.count stats.total_tasks 100 %}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center">Aucune donnée disponible</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Tasks by Priority -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-bar"></i> Tâches par priorité</h5>
+                </div>
+                <div class="card-body">
+                    {% if tasks_by_priority %}
+                        {% for item in tasks_by_priority %}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>{{ item.priorite|capfirst }}</span>
+                                <div>
+                                    <span class="badge bg-info">{{ item.count }}</span>
+                                    <div class="progress" style="width: 100px; height: 8px;">
+                                        <div class="progress-bar bg-{% if item.priorite == 'urgent' %}danger{% elif item.priorite == 'high' %}warning{% elif item.priorite == 'medium' %}info{% else %}success{% endif %}" 
+                                             style="width: {% widthratio item.count stats.total_tasks 100 %}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center">Aucune donnée disponible</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleTaskStatus(taskId, newStatus) {
+    fetch(`/formations/tasks/${taskId}/toggle-status/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({status: newStatus})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+</script>
+
+{% csrf_token %}
+{% endblock %}

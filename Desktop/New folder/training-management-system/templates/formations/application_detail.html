@@ -1,0 +1,306 @@
+{% extends 'base.html' %}
+
+{% block title %}Détail de Candidature - Training Management System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'formations:my_applications' %}">Mes Candidatures</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    {{ application.formation.titre }}
+                </li>
+            </ol>
+        </nav>
+        <div>
+            {% if application.statut == 'en_attente' %}
+                <span class="badge bg-warning text-dark fs-6">En attente</span>
+            {% elif application.statut == 'acceptee' %}
+                <span class="badge bg-success fs-6">Acceptée</span>
+            {% elif application.statut == 'rejetee' %}
+                <span class="badge bg-danger fs-6">Rejetée</span>
+            {% elif application.statut == 'retiree' %}
+                <span class="badge bg-secondary fs-6">Retirée</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Formation Information -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4><i class="fas fa-graduation-cap"></i> Information sur la Formation</h4>
+                </div>
+                <div class="card-body">
+                    <h3>{{ application.formation.titre }}</h3>
+                    <p class="text-muted mb-3">{{ application.formation.description }}</p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-item mb-3">
+                                <strong><i class="fas fa-clock"></i> Durée:</strong>
+                                <span>{{ application.formation.duree_heures }} heures</span>
+                            </div>
+                            <div class="info-item mb-3">
+                                <strong><i class="fas fa-signal"></i> Niveau:</strong>
+                                <span>{{ application.formation.get_niveau_display }}</span>
+                            </div>
+                            <div class="info-item mb-3">
+                                <strong><i class="fas fa-users"></i> Participants max:</strong>
+                                <span>{{ application.formation.max_participants }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item mb-3">
+                                <strong><i class="fas fa-calendar-start"></i> Date de début:</strong>
+                                <span>{{ application.formation.date_debut|date:"d/m/Y" }}</span>
+                            </div>
+                            <div class="info-item mb-3">
+                                <strong><i class="fas fa-calendar-end"></i> Date de fin:</strong>
+                                <span>{{ application.formation.date_fin|date:"d/m/Y" }}</span>
+                            </div>
+                            {% if application.formation.date_limite_candidature %}
+                                <div class="info-item mb-3">
+                                    <strong><i class="fas fa-exclamation-triangle"></i> Date limite candidature:</strong>
+                                    <span>{{ application.formation.date_limite_candidature|date:"d/m/Y" }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if application.formation.prerequis %}
+                        <div class="alert alert-info">
+                            <strong><i class="fas fa-info-circle"></i> Prérequis:</strong><br>
+                            {{ application.formation.prerequis }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Application Details -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4><i class="fas fa-file-alt"></i> Détails de ma Candidature</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-item mb-3">
+                                <strong><i class="fas fa-calendar"></i> Date de candidature:</strong>
+                                <span>{{ application.date_candidature|date:"d/m/Y H:i" }}</span>
+                            </div>
+                            {% if application.tarif_propose %}
+                                <div class="info-item mb-3">
+                                    <strong>Tarif proposé (TND):</strong>
+                                    <span>{{ application.tarif_propose }} TND/heure</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if application.date_reponse %}
+                                <div class="info-item mb-3">
+                                    <strong><i class="fas fa-reply"></i> Date de réponse:</strong>
+                                    <span>{{ application.date_reponse|date:"d/m/Y H:i" }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if application.motivation %}
+                        <div class="mb-3">
+                            <strong><i class="fas fa-heart"></i> Ma motivation:</strong>
+                            <div class="border p-3 mt-2 bg-light">
+                                {{ application.motivation|linebreaks }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if application.experience_pertinente %}
+                        <div class="mb-3">
+                            <strong><i class="fas fa-briefcase"></i> Mon expérience pertinente:</strong>
+                            <div class="border p-3 mt-2 bg-light">
+                                {{ application.experience_pertinente|linebreaks }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if application.disponibilite %}
+                        <div class="mb-3">
+                            <strong><i class="fas fa-calendar-check"></i> Ma disponibilité:</strong>
+                            <div class="border p-3 mt-2 bg-light">
+                                {{ application.disponibilite|linebreaks }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if application.commentaire_admin %}
+                        <div class="alert alert-{% if application.statut == 'acceptee' %}success{% elif application.statut == 'rejetee' %}danger{% else %}info{% endif %}">
+                            <strong><i class="fas fa-comment"></i> Commentaire de l'administrateur:</strong><br>
+                            {{ application.commentaire_admin|linebreaks }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Actions -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-cogs"></i> Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'formations:my_applications' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour à mes candidatures
+                        </a>
+                        
+                        {% if application.statut == 'en_attente' %}
+                            <a href="{% url 'formations:withdraw_application' application.id %}" 
+                               class="btn btn-outline-danger"
+                               onclick="return confirm('Êtes-vous sûr de vouloir retirer cette candidature ? Cette action est irréversible.')">
+                                <i class="fas fa-times"></i> Retirer ma candidature
+                            </a>
+                        {% endif %}
+
+                        {% if application.statut == 'acceptee' %}
+                            <a href="{% url 'formations:detail' application.formation.id %}" 
+                               class="btn btn-success">
+                                <i class="fas fa-graduation-cap"></i> Accéder à la formation
+                            </a>
+                        {% endif %}
+
+                        <a href="{% url 'formations:detail' application.formation.id %}" 
+                           class="btn btn-outline-primary">
+                            <i class="fas fa-info-circle"></i> Voir la formation complète
+                        </a>
+
+                        <a href="{% url 'formations:available_formations' %}" 
+                           class="btn btn-outline-primary">
+                            <i class="fas fa-search"></i> Autres opportunités
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Application Stats -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6><i class="fas fa-chart-bar"></i> Statistiques de cette formation</h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="border-end">
+                                    <h4 class="text-primary">{{ application.formation.applications.count }}</h4>
+                                    <small class="text-muted">Candidature(s)</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <h4 class="text-success">{{ application.formation.applications.filter.statut='acceptee'|length }}</h4>
+                                <small class="text-muted">Acceptée(s)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            {% if application.statut != 'en_attente' %}
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6><i class="fas fa-timeline"></i> Chronologie</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-primary"></div>
+                                <div class="timeline-content">
+                                    <h6 class="timeline-title">Candidature envoyée</h6>
+                                    <p class="timeline-text">{{ application.date_candidature|date:"d/m/Y H:i" }}</p>
+                                </div>
+                            </div>
+                            {% if application.date_reponse %}
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-{% if application.statut == 'acceptee' %}success{% else %}danger{% endif %}"></div>
+                                    <div class="timeline-content">
+                                        <h6 class="timeline-title">
+                                            {% if application.statut == 'acceptee' %}
+                                                Candidature acceptée
+                                            {% elif application.statut == 'rejetee' %}
+                                                Candidature rejetée
+                                            {% elif application.statut == 'retiree' %}
+                                                Candidature retirée
+                                            {% endif %}
+                                        </h6>
+                                        <p class="timeline-text">{{ application.date_reponse|date:"d/m/Y H:i" }}</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.info-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -25px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #dee2e6;
+}
+
+.timeline-title {
+    margin-bottom: 5px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.timeline-text {
+    margin: 0;
+    font-size: 12px;
+    color: #6c757d;
+}
+</style>
+{% endblock %}

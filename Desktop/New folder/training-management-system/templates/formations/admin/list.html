@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+
+{% block title %}Liste des Formations - Administration{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-5">📋 Liste des Formations</h1>
+        <div>
+            <a href="{% url 'formations:admin_dashboard' %}" class="btn btn-outline-secondary me-2">
+                <i class="fas fa-arrow-left"></i> Retour Dashboard
+            </a>
+            <a href="{% url 'formations:admin_formation_create' %}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Nouvelle Formation
+            </a>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <label for="search" class="form-label">Rechercher</label>
+                    <input type="text" class="form-control" id="search" name="search" 
+                           value="{{ query }}" placeholder="Titre, description, formateur...">
+                </div>
+                <div class="col-md-3">
+                    <label for="statut" class="form-label">Statut</label>
+                    <select class="form-select" id="statut" name="statut">
+                        <option value="">Tous les statuts</option>
+                        {% for value, label in statuts %}
+                            <option value="{{ value }}" {% if value == selected_statut %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="niveau" class="form-label">Niveau</label>
+                    <select class="form-select" id="niveau" name="niveau">
+                        <option value="">Tous les niveaux</option>
+                        {% for value, label in niveaux %}
+                            <option value="{{ value }}" {% if value == selected_niveau %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Filtrer
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Formations List -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                Formations 
+                {% if formations.paginator.count %}
+                    ({{ formations.paginator.count }} formation{{ formations.paginator.count|pluralize }})
+                {% endif %}
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if formations %}
+                <form method="post" action="{% url 'formations:admin_formation_bulk_status_update' %}">
+                    {% csrf_token %}
+                    <div class="mb-3 d-flex align-items-center">
+                        <input type="checkbox" id="select-all" class="form-check-input me-2" onclick="toggleAll(this)">
+                        <label for="select-all" class="form-label me-3 mb-0">Tout sélectionner</label>
+                        <select name="bulk_statut" class="form-select form-select-sm me-2" style="max-width:180px;">
+                            <option value="">-- Mettre à jour le statut --</option>
+                            {% for value, label in statuts %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary">Mettre à jour la sélection</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Formation</th>
+                                    <th>Formateur</th>
+                                    <th>Statut</th>
+                                    <th>Participants</th>
+                                    <th>Dates</th>
+                                    <th>Prix</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for formation in formations %}
+                                <tr>
+                                    <td><input type="checkbox" name="formation_ids" value="{{ formation.id }}" class="form-check-input"></td>
+                                    <td>
+                                        <strong>{{ formation.titre }}</strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            <i class="fas fa-tag"></i> {{ formation.get_niveau_display }}
+                                            | <i class="fas fa-clock"></i> {{ formation.duree_heures }}h
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-user-tie me-2"></i>
+                                            <div>
+                                                <strong>{{ formation.formateur.utilisateur.get_full_name }}</strong>
+                                                <br>
+                                                <small class="text-muted">{{ formation.formateur.utilisateur.email }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <form method="post" action="{% url 'formations:admin_formation_status_update' formation.id %}" class="d-flex align-items-center">
+                                            {% csrf_token %}
+                                            <select name="statut" class="form-select form-select-sm me-2" style="min-width:120px;">
+                                                {% for value, label in statuts %}
+                                                    <option value="{{ value }}" {% if value == formation.statut %}selected{% endif %}>{{ label }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <button type="submit" class="btn btn-sm btn-outline-primary" title="Mettre à jour le statut">
+                                                <i class="fas fa-save"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                <td>
+                                    <div class="text-center">
+                                        <strong>{{ formation.participants_inscrits }}/{{ formation.participants_max }}</strong>
+                                        <br>
+                                        {% if formation.places_restantes > 0 %}
+                                            <small class="text-success">{{ formation.places_restantes }} place{{ formation.places_restantes|pluralize }} restante{{ formation.places_restantes|pluralize }}</small>
+                                        {% else %}
+                                            <small class="text-danger">Complet</small>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <small>
+                                        <strong>Début:</strong> {{ formation.date_debut|date:"d/m/Y H:i" }}<br>
+                                        <strong>Fin:</strong> {{ formation.date_fin|date:"d/m/Y H:i" }}
+                                    </small>
+                                </td>
+                                <td>
+                                    <strong>{{ formation.prix }} TND</strong>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'formations:admin_formation_detail' formation.id %}" 
+                                           class="btn btn-outline-primary" title="Voir détails">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'formations:admin_formation_edit' formation.id %}" 
+                                           class="btn btn-outline-warning" title="Modifier">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'formations:admin_formation_delete' formation.id %}" 
+                                           class="btn btn-outline-danger" title="Supprimer"
+                                           onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette formation?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if formations.has_other_pages %}
+                    <nav aria-label="Pagination des formations">
+                        <ul class="pagination justify-content-center">
+                            {% if formations.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if query %}&search={{ query }}{% endif %}{% if selected_statut %}&statut={{ selected_statut }}{% endif %}{% if selected_niveau %}&niveau={{ selected_niveau }}{% endif %}">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ formations.previous_page_number }}{% if query %}&search={{ query }}{% endif %}{% if selected_statut %}&statut={{ selected_statut }}{% endif %}{% if selected_niveau %}&niveau={{ selected_niveau }}{% endif %}">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% for num in formations.paginator.page_range %}
+                                {% if formations.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > formations.number|add:'-3' and num < formations.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if query %}&search={{ query }}{% endif %}{% if selected_statut %}&statut={{ selected_statut }}{% endif %}{% if selected_niveau %}&niveau={{ selected_niveau }}{% endif %}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if formations.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ formations.next_page_number }}{% if query %}&search={{ query }}{% endif %}{% if selected_statut %}&statut={{ selected_statut }}{% endif %}{% if selected_niveau %}&niveau={{ selected_niveau }}{% endif %}">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ formations.paginator.num_pages }}{% if query %}&search={{ query }}{% endif %}{% if selected_statut %}&statut={{ selected_statut }}{% endif %}{% if selected_niveau %}&niveau={{ selected_niveau }}{% endif %}">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">Aucune formation trouvée</h4>
+                    {% if query or selected_statut or selected_niveau %}
+                        <p class="text-muted">Essayez de modifier vos critères de recherche.</p>
+                        <a href="{% url 'formations:admin_list' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-times"></i> Effacer les filtres
+                        </a>
+                    {% else %}
+                        <p class="text-muted">Commencez par créer votre première formation.</p>
+                        <a href="{% url 'formations:admin_formation_create' %}" class="btn btn-success">
+                            <i class="fas fa-plus"></i> Créer une formation
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

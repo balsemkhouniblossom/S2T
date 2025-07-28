@@ -1,0 +1,341 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ formation.titre }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .formation-header {
+        background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('{{ formation.image.url }}') center/cover;
+        color: white;
+        padding: 5rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .formation-info-card {
+        position: sticky;
+        top: 2rem;
+    }
+    
+    .instructor-card {
+        border: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .progress-section {
+        background: #f8f9fa;
+        padding: 2rem 0;
+        border-radius: 10px;
+        margin: 2rem 0;
+    }
+    
+    .rating-stars {
+        color: #ffc107;
+    }
+    
+    .price-highlight {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #28a745;
+    }
+    
+    .badge-custom {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Formation Header -->
+<div class="formation-header {% if not formation.image %}bg-primary{% endif %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-white">Accueil</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'formations:list' %}" class="text-white">Formations</a></li>
+                        <li class="breadcrumb-item active text-white" aria-current="page">{{ formation.titre }}</li>
+                    </ol>
+                </nav>
+                
+                <h1 class="display-4 mb-3">{{ formation.titre }}</h1>
+                <p class="lead">{{ formation.description }}</p>
+                
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <span class="badge bg-light text-dark badge-custom">
+                        <i class="fas fa-signal"></i> {{ formation.get_niveau_display }}
+                    </span>
+                    <span class="badge bg-light text-dark badge-custom">
+                        <i class="fas fa-clock"></i> {{ formation.duree_heures }}h
+                    </span>
+                    <span class="badge bg-light text-dark badge-custom">
+                        <i class="fas fa-users"></i> {{ formation.apprenants.count }} inscrit{{ formation.apprenants.count|pluralize }}
+                    </span>
+                    <span class="badge bg-light text-dark badge-custom">
+                        <i class="fas fa-calendar"></i> {{ formation.date_debut|date:"d M Y" }}
+                    </span>
+                </div>
+                
+                {% if formation.moyenne_evaluations %}
+                <div class="rating-display">
+                    <span class="rating-stars">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= formation.moyenne_evaluations|floatformat:0 %}
+                                <i class="fas fa-star"></i>
+                            {% else %}
+                                <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </span>
+                    <span class="text-white ms-2">
+                        {{ formation.moyenne_evaluations|floatformat:1 }}/5 
+                        ({{ formation.evaluations.count }} avis)
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Description -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3 class="card-title">Description</h3>
+                    <p class="card-text">{{ formation.description }}</p>
+                    
+                    {% if formation.prerequis %}
+                    <h5 class="mt-4">Prérequis</h5>
+                    <p class="text-muted">{{ formation.prerequis }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Planning -->
+            {% if plannings %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3 class="card-title">Planning</h3>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Horaire</th>
+                                    <th>Salle</th>
+                                    <th>Localisation</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for planning in plannings %}
+                                <tr>
+                                    <td>{{ planning.jour|date:"d M Y" }}</td>
+                                    <td>{{ planning.heure_debut }} - {{ planning.heure_fin }}</td>
+                                    <td>{{ planning.salle.nom }}</td>
+                                    <td>{{ planning.salle.localisation }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Progress Section (for enrolled users) -->
+            {% if user_enrolled %}
+            <div class="progress-section">
+                <div class="container">
+                    <h4 class="mb-3">Votre progression</h4>
+                    <div class="progress mb-3" style="height: 20px;">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                            0%
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <h5>Heures complétées</h5>
+                            <p class="text-muted">0 / {{ formation.duree_heures }}h</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <h5>Dernière activité</h5>
+                            <p class="text-muted">Jamais</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <h5>Certificat</h5>
+                            <p class="text-muted">Non disponible</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Evaluations -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3 class="card-title">Évaluations</h3>
+                    
+                    {% if user_enrolled and not user_evaluation %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Vous pouvez évaluer cette formation après l'avoir terminée.
+
+                    </div>
+                    {% endif %}
+
+                    {% for evaluation in evaluations %}
+                    <div class="evaluation-item border-bottom pb-3 mb-3">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <strong>{{ evaluation.apprenant.get_full_name }}</strong>
+                                <div class="rating-stars">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= evaluation.note %}
+                                            <i class="fas fa-star"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <small class="text-muted">{{ evaluation.date_evaluation|date:"d M Y" }}</small>
+                        </div>
+                        <p class="mt-2 mb-1">{{ evaluation.commentaire }}</p>
+                        {% if evaluation.recommande %}
+                            <span class="badge bg-success">Recommande cette formation</span>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">Aucune évaluation pour le moment.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Enrollment Card -->
+            <div class="card formation-info-card mb-4">
+                <div class="card-body text-center">
+                    <div class="price-highlight mb-3">
+                        {% if formation.prix == 0 %}
+                            Gratuit
+                        {% else %}
+                            {{ formation.prix }} TND
+                        {% endif %}
+                    </div>
+                    
+                    {% if user.is_authenticated %}
+                        {% if not user_enrolled %}
+                            <a href="{% url 'formations:enroll' formation.id %}" class="btn btn-primary btn-lg w-100 mb-3">
+                                <i class="fas fa-graduation-cap"></i> S'inscrire
+                            </a>
+                        {% else %}
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle"></i> Vous êtes inscrit à cette formation
+                            </div>
+                            <a href="{% url 'formations:unenroll' formation.id %}" class="btn btn-outline-danger w-100 mb-3">
+                                Se désinscrire
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'users:login' %}" class="btn btn-primary btn-lg w-100 mb-3">
+                            Connectez-vous pour vous inscrire
+                        </a>
+                    {% endif %}
+                    
+                    <!-- Formation Info -->
+                    <hr>
+                    <div class="formation-details">
+                        <div class="detail-item d-flex justify-content-between mb-2">
+                            <span><i class="fas fa-calendar"></i> Date de début:</span>
+                            <span>{{ formation.date_debut|date:"d M Y" }}</span>
+                        </div>
+                        <div class="detail-item d-flex justify-content-between mb-2">
+                            <span><i class="fas fa-calendar-alt"></i> Date de fin:</span>
+                            <span>{{ formation.date_fin|date:"d M Y" }}</span>
+                        </div>
+                        <div class="detail-item d-flex justify-content-between mb-2">
+                            <span><i class="fas fa-clock"></i> Durée:</span>
+                            <span>{{ formation.duree_heures }}h</span>
+                        </div>
+                        <div class="detail-item d-flex justify-content-between mb-2">
+                            <span><i class="fas fa-signal"></i> Niveau:</span>
+                            <span>{{ formation.get_niveau_display }}</span>
+                        </div>
+                        <div class="detail-item d-flex justify-content-between">
+                            <span><i class="fas fa-users"></i> Inscrits:</span>
+                            <span>{{ formation.apprenants.count }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instructor Card -->
+            <div class="card instructor-card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Formateur</h5>
+                    <div class="instructor-info">
+                        <div class="d-flex align-items-center mb-3">
+                            {% if formation.formateur.photo %}
+                                <img src="{{ formation.formateur.photo.url }}" 
+                                     class="rounded-circle me-3" width="60" height="60" 
+                                     alt="{{ formation.formateur.get_full_name }}">
+                            {% else %}
+                                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center me-3" 
+                                     style="width: 60px; height: 60px;">
+                                    <i class="fas fa-user text-white"></i>
+                                </div>
+                            {% endif %}
+                            <div>
+                                <h6 class="mb-1">{{ formation.formateur.get_full_name }}</h6>
+                                <small class="text-muted">{{ formation.formateur.specialite|default:"Formateur" }}</small>
+                            </div>
+                        </div>
+                        {% if formation.formateur.bio %}
+                            <p class="small text-muted">{{ formation.formateur.bio|truncatewords:20 }}</p>
+                        {% endif %}
+                        <div class="instructor-stats">
+                            <small class="text-muted">
+                                <i class="fas fa-graduation-cap"></i> 
+                                {{ formation.formateur.formations.count }} formation{{ formation.formateur.formations.count|pluralize }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions (for admin/formateur) -->
+            {% if user.is_authenticated and user == formation.formateur or user.user_type == 'administrateur' %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Actions</h5>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'formations:edit' formation.id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-edit"></i> Modifier
+                        </a>
+                        <a href="{% url 'formations:planning' formation.id %}" class="btn btn-outline-info">
+                            <i class="fas fa-calendar"></i> Gérer le planning
+                        </a>
+                        <a href="{% url 'formations:attendance' formation.id %}" class="btn btn-outline-warning">
+                            <i class="fas fa-check-square"></i> Gérer les présences
+                        </a>
+                        <a href="{% url 'formations:delete' formation.id %}" class="btn btn-outline-danger"
+                           onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette formation ?')">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

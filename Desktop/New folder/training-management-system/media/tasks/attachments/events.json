@@ -1,0 +1,193 @@
+[
+
+  {
+    "title": "WAAH APPLICATION: NODE.JS WORKSHOP",
+    "description": "In order to continue with the WAAH APP development, members needed to get more familiar with the tools we are using. So, that's why we organized a Node.js workshop.",
+    "date": "2023-01-25",
+    "location": null,
+    "img": "WAAH_nodejs.webp"
+  },
+  {
+    "title": "SIGHT FAMILY HANGOUT",
+    "description": "In order to get to know our members, we organized a Friday night meeting with them. We started it by watching a movie about technology and artificial intelligence then it followed with a mini debate to discuss and share our point of views about the movie. After, we played activities that were organized by our dear RH manager.",
+    "date": "2023-02-03",
+    "location": "ESPRIT School of Engineering",
+    "img": "hangout.webp"
+  },
+  {
+    "title": "AEROKIDS 3.0",
+    "description": "In order to celebrate the SIGHT DAY, we've decided to make another AEROKIDS edition in collaboration with IEEE ESPRIT AESS SBC. During this edition, we've visited the Integrated Center Of Youth And Children to simplify the concept of Aerospace and IT to children.",
+    "date": "2023-04-28",
+    "location": "Integrated Center Of Youth and Children",
+    "img": "aerokids_3.0.webp"
+  },
+  {
+    "title": "CLOUD COMPUTING WORKSHOP",
+    "description": "The 17th of February, we organized an online workshop about cloud computing for our members presented by our vice chairman. Our aim is to introduce this next generation technology to them and why not encourage them to proceed a career in this field. During the session, we have talked about the definition of cloud computing, its importance and its usage. We've finished the session by listing the multiple benefits of cloud computing.",
+    "date": "2023-02-17",
+    "location": "IEEE ESPRIT SB DISCORD SERVER",
+    "img": "cloud.webp"
+  },
+  {
+    "title": "AEROKIDS 4.0",
+    "description": "In order to celebrate the SIGHT DAY, we organised another special edition of AEROKIDS 4.0 in collaboration with IEEE ESPRIT AESS SBC in Socio-Educational center \"ESSANAD\" in SIDI THABET. Merging the values of humanity with technology, an event that aims to educate kids in both aerospace and IT fields and show them simplified advanced technologies at their young age is crucial and will help them in their journey in life.",
+    "date": "2023-04-29",
+    "location": "W3CM+6RJ, Avenue De L'Environnement، Sidi Thabet",
+    "img": "aerokids_4.0.webp"
+  },
+  {
+    "title": "ESPRIT SIGHT WEBINAR 3.0",
+    "description": "In order to celebrate SIGHT day, we have decided to host a webinar in collaboration with the IEEE HTB while inviting international speakers to talk about their experiences and share with us tips and some piece of advice. We were enriched by the amount of information they gave us. They considered talking about the different opportunities that IEEE SIGHT GROUP provides for students as well as the benefits we gain from our group. It was a night full of quality information and fun.",
+    "date": "2023-04-29",
+    "location": "Google meet",
+    "img": "webinar.webp"
+  },
+  {
+    "title": "PITCHING COMPETITION 2.0",
+    "description": "Pitching Competition 2.0 is an event in collaboration with IEEE ESPRIT WIE SBAG. It's an innovative initiative that aims to leverage technology for humanitarian purposes and make a positive impact in our local communities and it's open to all IEEE student branches. The main goal of the competition is to find innovative technologic ideas that can solve real-world humanitarian problems.",
+    "date": "2023-05-06",
+    "location": "ESPRIT, Ariana",
+    "img": "pitching.webp"
+  },
+  {
+    "title": "SIGHT DAY CELEBRATION",
+    "description": "As a celebration for the SIGHT DAY, we decided to come together as IEEE SIGHT TUNISIA SECTION and IEEE ESSTHS SIGHT SBG and make the most exceptional celebration. This event consisted of bringing all sighters to participate in  a technical and non-technical challenges.",
+    "date": "2023-05-06",
+    "location": "ESPRIT, Ariana",
+    "img": "sight day.webp"
+  },
+  {
+    "title": "CRISIS MANAGEMENT WORKSHOP",
+    "description": "Crisis Management Workshop is the first SIGHT certified academic workshop for professional development, during this mandate, for our executive board and members where our speaker MR. Raouf Riahi, a leading expert in business continuity and crisis management, held the first session of this workshop (a two session workshop).",
+    "date": "2023-07-(11-10)",
+    "location": "Online on Microsoft Teams",
+    "img": "crisis_management.webp"
+  },
+  {
+    "title": "PARTICIPATION IN IEEE REGION 8 HUMANITARIAN ACTIVITIES COMMITTEE",
+    "description": "Our SIGHT vice-chair participated in 2023 IEEE Region 8 Humanitarian Activities Committee, which was a webinar to learn about the crucial roles engineers play in both agribusiness and protecting our oceans from the effects of climate change by Dr Victor Grimblatt, The director of R&D Group and Synopsys Chile General Manager, with Dr R.Venkatesan, Technical consultant Senior Scientist Grade at National Centre for Coastal Research (NCCR) Chennai.",
+    "date": "2023-08-29",
+    "location": "Google Meet",
+    "img": "r8_activities.webp"
+  },
+  {
+    "title": "IEEE DAY DESIGN THINKING AND PITCHING",
+    "description": "During IEEE DAY, the IEEE ESPRIT SIGHT GROUP organized a workshop that explored the concept of \"design thinking,\" facilitated by Mrs. Jihene Rezgui, an esteemed associate professor, soft skills trainer, and transformation coach. Renowned for her diligent and meticulous approach, Mrs. Rezgui guided participants in acquiring valuable insights on enhancing adaptability and fostering creativity in their thinking. The workshop emphasized the importance of exploring the interconnectedness of ideas, urging attendees to move beyond binary thinking and embrace a more holistic perspective.",
+    "date": "2023-10-11",
+    "location": "ESPRIT, Ariana, Ariana, Tunisia",
+    "img": "ieee day.webp"
+  },
+  {
+    "title": "AEROKIDS 5.0",
+    "description": "This is another special edition of AEROKIDS in collaboration with IEEE ESPRIT AESS SBC in Socio-Educational center \"ESSANAD\" in SIDI THABET. This innovative event merged humanity with technology, providing children with aerospace and IT insights in a simplified manner.",
+    "date": "2023-11-04",
+    "location": "ESSANAD CENTER, Ariana, Ariana, Tunisia",
+    "img": "aerokids_5.0.webp"
+  },
+  {
+    "title": "WAAH APPLICATION: INTRODUCTION TO REACT NATIVE WORKSHOP",
+    "description": "In the \"Introduction to React Native\" workshop, our focus was on teaching our members the fundamental skills needed to enhance their capabilities. This session served as a starting point for our team members to build a strong foundation in React Native, with the ultimate goal of improving their skills for collaborative work on the \"We Are All Humans\" app project. We took a step-by-step approach, ensuring everyone could grasp the basics, empowering them to contribute effectively to the ongoing project.",
+    "date": "2023-11-08",
+    "location": "Google Meet",
+    "img": "react_native.webp"
+  },
+  {
+    "title": "ELDERLY ROBOT: PID CONTROLLER WORKSHOP",
+    "description": "In a digital convergence of innovation and compassion, participants gathered for a virtual learning session dedicated to unraveling the mysteries of PID (Proportional-Integral-Derivative) controllers for the advancement of the Elderly Robot Project. This virtual meeting marked the commencement of a transformative journey, where attendees explored the application of PID controllers to enhance the precision and responsiveness of robots designed to assist the elderly.",
+    "date": "2023-11-10",
+    "location": "Google Meet",
+    "img": "PID workshop.webp"
+  },
+  {
+    "title": "SOLIDWORKS WORKSHOP",
+    "description": "Due to the HLC training center's support, a Solidworks trainer was made available for the IEEE ESPRIT SB RAS chapter, SIGHT group, and IAS/IES/PES joint chapter. Attendees were immersed in an engaging session that not only introduced them to the subject but also heightened their awareness of its importance. The workshop was structured into two segments: the initial theoretical half, providing an introduction, and the subsequent practical part, during which the trainer demonstrated the application of Solidworks to the participants.",
+    "date": "2023-11-16",
+    "location": "ESPRIT, Ariana, Ariana, Tunisia",
+    "img": "solidworks.webp"
+  },
+  {
+    "title": "UX/UI DESIGN WORKSHOP",
+    "description": "In a dynamic and creative meeting, the IEEE ESPRIT SIGHT SBG orchestrated an impactful UI/UX Design Workshop that unfolded as a vibrant forum for innovation and skill development. The session, brought together a diverse group of participants eager to delve into the realm of user interface and experience design.",
+    "date": "2023-11-23",
+    "location": "Google Meet",
+    "img": "UI-UX.webp"
+  },
+  {
+    "title": "UX/UI DESIGN WORKSHOP",
+    "description": "In a dynamic and creative meeting, the IEEE ESPRIT SIGHT SBG orchestrated an impactful UI/UX Design Workshop that unfolded as a vibrant forum for innovation and skill development. The session brought together a diverse group of participants eager to delve into the realm of user interface and experience design.",
+    "date": "23rd Nov 2023",
+    "location": "Online",
+    "img": "UI-UX.webp"
+  },
+  {
+    "title": "HackArts: Design Basics Workshop",
+    "description": "The online workshop, led by Ines Lachiheb, introduced beginners to the basics of Photoshop and Illustrator in preparation for HackArts.",
+    "date": "11th Feb 2024",
+    "location": "Online",
+    "img": "ines1.webp"
+  },
+  {
+    "title": "HackArts: Graphic Design Workshop",
+    "description": "The workshop covered the basics of Photoshop, with Aziz Hbaili sharing tips and creative techniques to boost design skills.",
+    "date": "14th Feb 2024",
+    "location": "Online",
+    "img": "aziz1.webp"
+  },
+
+  {
+    "title": "HackArts 1.0",
+    "description": "HackArts is truly a one-of-a-kind event. It’s the first graphic design hackathon in Tunisia with a unique focus on humanitarian technologies aligned with the Sustainable Development Goals (SDGs). HackArts contains an intensive 16-hour challenge, during which participants embark on a creative journey through several key stages.",
+    "date": "17th Feb 2024",
+    "location": "Esprit, bloc H",
+    "img": "Hackarts1.0.webp"
+  },
+  {
+    "title": "Esprit SIGHT Webinar 4.0",
+    "description": "The Esprit SIGHT Webinar 4.0 celebrated the contributions of volunteers and the power of Humanitarian technologies. The event featured three distinguished speakers: Engr. Abdullateef Aliyu, Dr. Mohamed S. Darweesh, and Dr. Mousa Al Akhras.",
+    "date": "4th May 2024",
+    "location": "Online",
+    "img": "webinaire.webp"
+  },
+  {
+    "title": "IEEE DAY: Sight Experience, Technology at the Heart of Our Mission",
+    "description": "In a technical online workshop, Nour Sabaoulji introduced the IEEE SIGHT Group and its mission, and Mohamed Bouzayani talked about the beach cleaner project. The session covered the project’s mission, engineering design, and use of autonomous systems and sensors to detect and remove beach waste.",
+    "date": "8th Oct 2024",
+    "location": "Online",
+    "img": "ieeeday.webp"
+  },
+  {
+    "title": "Aerokids 6.0",
+    "description": "The AeroKids event was organized with IEEE ESPRIT AESS SBC. Children joined workshops on Arduino, airplanes, and rockets, exploring technology and science in a fun way.",
+    "date": "19th Oct 2024",
+    "location": "Sidi Thabet",
+    "img": "Aerokids6.0.webp"
+  },
+  {
+    "title": "Introduction to Graphic Design",
+    "description": "In this online workshop, Ines introduced key graphic design concepts.",
+    "date": "14th Nov 2024",
+    "location": "Online",
+    "img": "ines2.webp"
+  },
+  {
+    "title": "Adobe Photoshop Workshop: Boost Your Design Skills",
+    "description": "The interactive online session focused on essential tools and helped beginners learn the basics of Photoshop.",
+    "date": "22nd Nov 2024",
+    "location": "Online",
+    "img": null
+  },
+  {
+    "title": "HackArts 2.0",
+    "description": "HackArts 2.0 is the second edition of HackArts. It also included video editing. The theme was Multiverse. Participants explored creative possibilities in both digital art and video.",
+    "date": "23rd Nov 2024",
+    "location": "Nefel Education",
+    "img": "Hackarts2.0.webp"
+  },
+  {
+    "title": "PAW STOP: SMART FEEDING STATION",
+    "description": "Paw Stop, a groundbreaking, smart feeding station designed to support stray animals, particularly dogs and cats, by providing them with access to food and clean water. This innovative solution integrates advanced technology and sustainability principles, aiming to address the challenges faced by street animals while promoting environmental responsibility and public awareness.",
+    "date": "19th and 20th of March 2025",
+    "location": "Ariana",
+    "img": null
+  }
+]

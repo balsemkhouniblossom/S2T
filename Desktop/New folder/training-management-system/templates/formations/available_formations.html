@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}Opportunités de Formation - Training Management System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="fas fa-search"></i> Opportunités de Formation</h2>
+            <p class="text-muted">Formations ouvertes aux candidatures de formateurs</p>
+        </div>
+        <a href="{% url 'formations:my_applications' %}" class="btn btn-outline-primary">
+            <i class="fas fa-list"></i> Mes Candidatures
+        </a>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-6">
+                    <label for="search" class="form-label">Rechercher</label>
+                    <input type="text" class="form-control" id="search" name="search" 
+                           value="{{ query }}" placeholder="Titre ou description...">
+                </div>
+                <div class="col-md-4">
+                    <label for="niveau" class="form-label">Niveau</label>
+                    <select class="form-control" id="niveau" name="niveau">
+                        <option value="">Tous les niveaux</option>
+                        {% for value, label in niveaux %}
+                            <option value="{{ value }}" {% if selected_niveau == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> Filtrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Formation Cards -->
+    <div class="row">
+        {% for formation in formations %}
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">{{ formation.titre }}</h5>
+                        <span class="badge bg-primary">{{ formation.get_niveau_display }}</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">{{ formation.description|truncatewords:20 }}</p>
+                        
+                        <div class="row text-center mb-3">
+                            <div class="col-4">
+                                <strong>{{ formation.duree_heures }}h</strong>
+                                <br><small class="text-muted">Durée</small>
+                            </div>
+                            <div class="col-4">
+                                <strong>{{ formation.prix }} TND</strong>
+                                <br><small class="text-muted">Prix</small>
+                            </div>
+                            <div class="col-4">
+                                <strong>{{ formation.participants_max }}</strong>
+                                <br><small class="text-muted">Max participants</small>
+                            </div>
+                        </div>
+
+                        {% if formation.date_limite_candidature %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-clock"></i> 
+                                <strong>Date limite:</strong> {{ formation.date_limite_candidature|date:"d/m/Y H:i" }}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-2">
+                            <strong>Dates:</strong> 
+                            {{ formation.date_debut|date:"d/m/Y" }} au {{ formation.date_fin|date:"d/m/Y" }}
+                        </div>
+
+                        {% if formation.pending_applications_count > 0 %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-users"></i> 
+                                {{ formation.pending_applications_count }} candidature{{ formation.pending_applications_count|pluralize }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-grid">
+                            <a href="{% url 'formations:apply_formation' formation.id %}" 
+                               class="btn btn-success">
+                                <i class="fas fa-paper-plane"></i> Candidater
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h4>Aucune opportunité disponible</h4>
+                    <p class="text-muted">Il n'y a actuellement aucune formation ouverte aux candidatures.</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- My Recent Applications -->
+    {% if user_applications %}
+        <div class="mt-5">
+            <h4><i class="fas fa-history"></i> Mes Candidatures Récentes</h4>
+            <div class="card">
+                <div class="card-body">
+                    {% for application in user_applications|slice:":5" %}
+                        <div class="d-flex justify-content-between align-items-center py-2 {% if not forloop.last %}border-bottom{% endif %}">
+                            <div>
+                                <strong>{{ application.formation.titre }}</strong>
+                                <br><small class="text-muted">{{ application.date_candidature|date:"d/m/Y H:i" }}</small>
+                            </div>
+                            <div class="text-end">
+                                {% if application.statut == 'en_attente' %}
+                                    <span class="badge bg-warning">En attente</span>
+                                {% elif application.statut == 'acceptee' %}
+                                    <span class="badge bg-success">Acceptée</span>
+                                {% elif application.statut == 'rejetee' %}
+                                    <span class="badge bg-danger">Rejetée</span>
+                                {% elif application.statut == 'retiree' %}
+                                    <span class="badge bg-secondary">Retirée</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                    {% if user_applications.count > 5 %}
+                        <div class="text-center mt-3">
+                            <a href="{% url 'formations:my_applications' %}" class="btn btn-outline-primary">
+                                Voir toutes mes candidatures
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

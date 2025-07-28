@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block title %}Mes Candidatures - Training Management System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="fas fa-list-alt"></i> Mes Candidatures</h2>
+            <p class="text-muted">Suivi de vos candidatures pour des formations</p>
+        </div>
+        <a href="{% url 'formations:available_formations' %}" class="btn btn-primary">
+            <i class="fas fa-search"></i> Nouvelles Opportunités
+        </a>
+    </div>
+
+    <!-- Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="statut" class="form-label">Filtrer par statut</label>
+                    <select class="form-control" id="statut" name="statut">
+                        <option value="">Tous les statuts</option>
+                        {% for value, label in statuts %}
+                            <option value="{{ value }}" {% if selected_statut == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-filter"></i> Filtrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Applications List -->
+    {% for application in applications %}
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">{{ application.formation.titre }}</h5>
+                <div>
+                    {% if application.statut == 'en_attente' %}
+                        <span class="badge bg-warning text-dark">En attente</span>
+                    {% elif application.statut == 'acceptee' %}
+                        <span class="badge bg-success">Acceptée</span>
+                    {% elif application.statut == 'rejetee' %}
+                        <span class="badge bg-danger">Rejetée</span>
+                    {% elif application.statut == 'retiree' %}
+                        <span class="badge bg-secondary">Retirée</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <p class="mb-2">{{ application.formation.description|truncatewords:25 }}</p>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar"></i> 
+                                    Candidature envoyée: {{ application.date_candidature|date:"d/m/Y H:i" }}
+                                </small>
+                            </div>
+                            {% if application.date_reponse %}
+                                <div class="col-sm-6">
+                                    <small class="text-muted">
+                                        <i class="fas fa-reply"></i> 
+                                        Réponse: {{ application.date_reponse|date:"d/m/Y H:i" }}
+                                    </small>
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% if application.tarif_propose %}
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    <span class="fw-bold">TND</span>
+                                    Tarif proposé: {{ application.tarif_propose }} TND/h
+                                </small>
+                            </div>
+                        {% endif %}
+                        {% if application.commentaire_admin %}
+                            <div class="alert alert-info mt-2">
+                                <strong>Commentaire administrateur:</strong><br>
+                                {{ application.commentaire_admin }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-end">
+                            <div class="mb-2">
+                                <strong>{{ application.formation.duree_heures }}h</strong> • 
+                                <strong>{{ application.formation.get_niveau_display }}</strong>
+                            </div>
+                            <div class="mb-2">
+                                {{ application.formation.date_debut|date:"d/m/Y" }} au 
+                                {{ application.formation.date_fin|date:"d/m/Y" }}
+                            </div>
+                            <div class="btn-group-vertical w-100">
+                                <a href="{% url 'formations:application_detail' application.id %}" 
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-eye"></i> Détails
+                                </a>
+                                {% if application.statut == 'en_attente' %}
+                                    <a href="{% url 'formations:withdraw_application' application.id %}" 
+                                       class="btn btn-outline-danger btn-sm"
+                                       onclick="return confirm('Êtes-vous sûr de vouloir retirer cette candidature ?')">
+                                        <i class="fas fa-times"></i> Retirer
+                                    </a>
+                                {% endif %}
+                                {% if application.statut == 'acceptee' %}
+                                    <a href="{% url 'formations:detail' application.formation.id %}" 
+                                       class="btn btn-success btn-sm">
+                                        <i class="fas fa-graduation-cap"></i> Voir formation
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="text-center py-5">
+            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+            <h4>Aucune candidature</h4>
+            <p class="text-muted">Vous n'avez encore envoyé aucune candidature pour des formations.</p>
+            <a href="{% url 'formations:available_formations' %}" class="btn btn-primary">
+                <i class="fas fa-search"></i> Découvrir les opportunités
+            </a>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

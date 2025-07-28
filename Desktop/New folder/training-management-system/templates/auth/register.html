@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+
+{% block title %}Inscription - Training Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        padding: 2rem 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .auth-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+    
+    .auth-card {
+        background: white;
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: var(--shadow-heavy);
+        position: relative;
+        z-index: 2;
+        max-width: 550px;
+        width: 100%;
+        transition: var(--transition-medium);
+    }
+    
+    .auth-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(102,126,234,0.25);
+    }
+    
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .auth-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2rem;
+        margin: 0 auto 1.5rem;
+        transition: var(--transition-medium);
+    }
+    
+    .auth-card:hover .auth-icon {
+        transform: scale(1.1);
+    }
+    
+    .auth-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .auth-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: var(--transition-medium);
+        background: white;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+    }
+    
+    .form-control:hover {
+        border-color: var(--primary-color);
+    }
+    
+    .btn-auth {
+        width: 100%;
+        padding: 1rem;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        transition: var(--transition-medium);
+        border: none;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-auth::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: var(--transition-medium);
+    }
+    
+    .btn-auth:hover::before {
+        left: 100%;
+    }
+    
+    .btn-auth:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .auth-footer {
+        text-align: center;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid var(--border-color);
+    }
+    
+    .auth-footer p {
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+    }
+    
+    .btn-link {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+        transition: var(--transition-medium);
+        padding: 0.75rem 1.5rem;
+        border: 2px solid var(--primary-color);
+        border-radius: 12px;
+        display: inline-block;
+    }
+    
+    .btn-link:hover {
+        background: var(--primary-color);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-light);
+    }
+    
+    @media (max-width: 768px) {
+        .auth-card {
+            padding: 2rem;
+            margin: 1rem;
+        }
+        
+        .auth-title {
+            font-size: 1.75rem;
+        }
+        
+        .auth-icon {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-icon">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <h1 class="auth-title">Créer un compte</h1>
+            <p class="auth-subtitle">Rejoignez notre communauté d'apprentissage</p>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="prenom" class="form-label">
+                        <i class="fas fa-user"></i> Prénom
+                    </label>
+                    <input type="text" id="prenom" name="prenom" class="form-control" required
+                           placeholder="Votre prénom">
+                </div>
+                
+                <div class="form-group">
+                    <label for="nom" class="form-label">
+                        <i class="fas fa-user"></i> Nom
+                    </label>
+                    <input type="text" id="nom" name="nom" class="form-control" required
+                           placeholder="Votre nom">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email" class="form-label">
+                    <i class="fas fa-envelope"></i> Email
+                </label>
+                <input type="email" id="email" name="email" class="form-control" required
+                       placeholder="votre@email.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="password" class="form-label">
+                    <i class="fas fa-key"></i> Mot de passe
+                </label>
+                <input type="password" id="password" name="password" class="form-control" required
+                       placeholder="Votre mot de passe">
+            </div>
+            
+            <div class="form-group">
+                <label for="user_type" class="form-label">
+                    <i class="fas fa-users"></i> Type de compte
+                </label>
+                <select id="user_type" name="user_type" class="form-control" required>
+                    <option value="">Sélectionnez un type</option>
+                    <option value="apprenant">🎓 Apprenant</option>
+                    <option value="formateur">👨‍🏫 Formateur</option>
+                    <option value="administrateur">⚙️ Administrateur</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-auth">
+                <i class="fas fa-user-plus"></i> Créer mon compte
+            </button>
+        </form>
+        
+        <div class="auth-footer">
+            <p>Déjà un compte ?</p>
+            <a href="{% url 'users:login' %}" class="btn-link">
+                <i class="fas fa-sign-in-alt"></i> Se connecter
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

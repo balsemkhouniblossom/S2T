@@ -1,0 +1,615 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Formateur - Training Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+    
+    .dashboard-header .container {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 16px;
+        text-align: center;
+        box-shadow: var(--shadow-light);
+        transition: var(--transition-medium);
+        position: relative;
+        overflow: hidden;
+        border: none;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        transform: scaleX(0);
+        transition: var(--transition-medium);
+    }
+    
+    .stat-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        margin: 0 auto 1rem;
+        transition: var(--transition-medium);
+    }
+    
+    .stat-card:hover .stat-icon {
+        transform: scale(1.1);
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .stat-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+    
+    .stat-label {
+        color: var(--text-secondary);
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+    }
+    
+    .opportunities-section {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        margin: 2rem 0;
+        box-shadow: var(--shadow-light);
+        transition: var(--transition-medium);
+        position: relative;
+        overflow: hidden;
+        border: none;
+    }
+    
+    .opportunities-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        transform: scaleX(0);
+        transition: var(--transition-medium);
+    }
+    
+    .opportunities-section:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .opportunities-section:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border-color);
+    }
+    
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .opportunity-item {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        transition: var(--transition-medium);
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .opportunity-item:last-child {
+        border-bottom: none;
+    }
+    
+    .opportunity-item:hover {
+        background: var(--light-color);
+        transform: translateX(4px);
+    }
+    
+    .opportunity-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+    
+    .opportunity-content {
+        flex: 1;
+    }
+    
+    .opportunity-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        transition: var(--transition-medium);
+    }
+    
+    .opportunity-item:hover .opportunity-title {
+        color: var(--primary-color);
+    }
+    
+    .opportunity-description {
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+    
+    .opportunity-meta {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    .badge-custom {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: var(--transition-medium);
+    }
+    
+    .badge-info {
+        background: var(--info-color);
+        color: white;
+    }
+    
+    .badge-success {
+        background: var(--success-color);
+        color: white;
+    }
+    
+    .badge-custom:hover {
+        transform: scale(1.05);
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+    
+    .meta-item i {
+        color: var(--danger-color);
+        font-size: 0.85rem;
+    }
+    
+    .opportunity-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-direction: column;
+    }
+    
+    .content-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 2rem;
+        margin: 2rem 0;
+    }
+    
+    .content-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: var(--shadow-light);
+        transition: var(--transition-medium);
+        position: relative;
+        overflow: hidden;
+        border: none;
+    }
+    
+    .content-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        transform: scaleX(0);
+        transition: var(--transition-medium);
+    }
+    
+    .content-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .content-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .item-card {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        transition: var(--transition-medium);
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .item-card:last-child {
+        border-bottom: none;
+    }
+    
+    .item-card:hover {
+        background: var(--light-color);
+        transform: translateX(4px);
+    }
+    
+    .item-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        transition: var(--transition-medium);
+    }
+    
+    .item-card:hover .item-title {
+        color: var(--primary-color);
+    }
+    
+    .item-description {
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+    
+    .item-meta {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-secondary);
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .empty-state h4 {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+    
+    .empty-state a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition-medium);
+    }
+    
+    .empty-state a:hover {
+        color: var(--secondary-color);
+        text-decoration: underline;
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-header {
+            padding: 2rem 0;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .content-card {
+            padding: 1.5rem;
+        }
+        
+        .opportunity-header {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .opportunity-actions {
+            flex-direction: row;
+        }
+        
+        .item-meta {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="display-4 fw-bold mb-3">Dashboard Formateur</h1>
+                <p class="lead mb-4">Gérez vos formations et développez votre expertise</p>
+                <a href="{% url 'formations:create' %}" class="btn btn-light btn-lg">
+                    <i class="fas fa-plus"></i> Créer une Formation
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <div class="stat-number" style="color: var(--primary-color);">{{ formations.count }}</div>
+            <div class="stat-title">Mes Formations</div>
+            <div class="stat-label">Formations créées</div>
+            <a href="{% url 'formations:my_formations' %}" class="btn btn-outline">
+                <i class="fas fa-eye"></i> Voir tout
+            </a>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="stat-number" style="color: var(--success-color);">{{ courses.count }}</div>
+            <div class="stat-title">Mes Cours</div>
+            <div class="stat-label">Cours créés</div>
+            <a href="{% url 'courses:my_courses' %}" class="btn btn-outline">
+                <i class="fas fa-eye"></i> Voir tout
+            </a>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <div class="stat-number" style="color: var(--info-color);">{{ tasks.count|default:0 }}</div>
+            <div class="stat-title">Mes Tâches</div>
+            <div class="stat-label">Tâches à accomplir</div>
+            <a href="{% url 'formations:task_list' %}" class="btn btn-outline">
+                <i class="fas fa-eye"></i> Voir tout
+            </a>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <div class="stat-number" style="color: #ff6b6b;">{{ applications.count }}</div>
+            <div class="stat-title">Mes Candidatures</div>
+            <div class="stat-label">Candidatures envoyées</div>
+            <a href="{% url 'formations:my_applications' %}" class="btn btn-outline">
+                <i class="fas fa-eye"></i> Voir tout
+            </a>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-comments"></i>
+            </div>
+            <div class="stat-number" style="color: var(--warning-color);">5</div>
+            <div class="stat-title">Messages</div>
+            <div class="stat-label">Messages non lus</div>
+            <a href="{% url 'messaging:inbox' %}" class="btn btn-outline">
+                <i class="fas fa-envelope"></i> Messagerie
+            </a>
+        </div>
+    </div>
+
+    <!-- Opportunities Section -->
+    <div class="opportunities-section">
+        <div class="section-header">
+            <h3 class="section-title">
+                <i class="fas fa-bullseye"></i> Opportunités de Formation
+            </h3>
+            <a href="{% url 'formations:available_formations' %}" class="btn btn-primary">
+                <i class="fas fa-search"></i> Voir Toutes les Opportunités
+            </a>
+        </div>
+        
+        {% if available_opportunities %}
+            {% for formation in available_opportunities|slice:":3" %}
+                <div class="opportunity-item">
+                    <div class="opportunity-header">
+                        <div class="opportunity-content">
+                            <h4 class="opportunity-title">{{ formation.titre }}</h4>
+                            <p class="opportunity-description">{{ formation.description|truncatewords:20 }}</p>
+                            <div class="opportunity-meta">
+                                <span class="badge-custom badge-info">{{ formation.duree_heures }}h</span>
+                                <span class="badge-custom badge-success">{{ formation.get_niveau_display }}</span>
+                                {% if formation.date_limite_candidature %}
+                                    <div class="meta-item">
+                                        <i class="fas fa-clock"></i>
+                                        <span>Limite: {{ formation.date_limite_candidature|date:"d/m/Y" }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="opportunity-actions">
+                            <a href="{% url 'formations:apply_formation' formation.id %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-paper-plane"></i> Candidater
+                            </a>
+                            <a href="{% url 'formations:detail' formation.id %}" class="btn btn-outline btn-sm">
+                                <i class="fas fa-eye"></i> Détails
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-bullseye"></i>
+                <h4>Aucune opportunité disponible</h4>
+                <p>Aucune opportunité de formation disponible pour le moment.</p>
+                <a href="{% url 'formations:available_formations' %}">
+                    <i class="fas fa-search"></i> Vérifier régulièrement
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Content Grid -->
+    <div class="content-grid">
+        <div class="content-card">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <i class="fas fa-graduation-cap"></i> Dernières Formations
+                </h3>
+                <a href="{% url 'formations:create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nouvelle Formation
+                </a>
+            </div>
+            
+            {% for formation in formations|slice:":5" %}
+                <div class="item-card">
+                    <h4 class="item-title">{{ formation.titre }}</h4>
+                    <p class="item-description">{{ formation.description|truncatewords:15 }}</p>
+                    <div class="item-meta">
+                        <span class="badge-custom">{{ formation.statut }}</span>
+                        <div class="meta-item">
+                            <i class="fas fa-users"></i>
+                            <span>{{ formation.participants_inscrits }}/{{ formation.participants_max }} participants</span>
+                        </div>
+                        <a href="{% url 'formations:detail' formation.id %}" class="btn btn-outline btn-sm">
+                            <i class="fas fa-eye"></i> Voir
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="empty-state">
+                    <i class="fas fa-graduation-cap"></i>
+                    <h4>Aucune formation créée</h4>
+                    <p>Commencez par créer votre première formation.</p>
+                    <a href="{% url 'formations:create' %}">
+                        <i class="fas fa-plus"></i> Créer votre première formation
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="content-card">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <i class="fas fa-book"></i> Derniers Cours
+                </h3>
+                <a href="{% url 'courses:create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nouveau Cours
+                </a>
+            </div>
+            
+            {% for course in courses|slice:":5" %}
+                <div class="item-card">
+                    <h4 class="item-title">{{ course.titre }}</h4>
+                    <p class="item-description">{{ course.description|truncatewords:15 }}</p>
+                    <div class="item-meta">
+                        <span class="badge-custom">{{ course.niveau }}</span>
+                        <div class="meta-item">
+                            <i class="fas fa-users"></i>
+                            <span>{{ course.nombre_inscrits }} inscrits</span>
+                        </div>
+                        <a href="{% url 'courses:detail' course.id %}" class="btn btn-outline btn-sm">
+                            <i class="fas fa-eye"></i> Voir
+                        </a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="empty-state">
+                    <i class="fas fa-book"></i>
+                    <h4>Aucun cours créé</h4>
+                    <p>Commencez par créer votre premier cours.</p>
+                    <a href="{% url 'courses:create' %}">
+                        <i class="fas fa-plus"></i> Créer votre premier cours
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

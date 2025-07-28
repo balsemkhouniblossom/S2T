@@ -1,0 +1,306 @@
+{% extends 'base.html' %}
+
+{% block title %}Tableau de Bord de Modération{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="h2 mb-4">🤖 Modération de Contenu IA</h1>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ today_stats.total_content_checked }}</h4>
+                            <p class="mb-0">Contenu Vérifié</p>
+                            <small>Aujourd'hui</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-shield-alt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ today_stats.flagged_content }}</h4>
+                            <p class="mb-0">Contenu Signalé</p>
+                            <small>Aujourd'hui</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-flag fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ today_stats.auto_blocked }}</h4>
+                            <p class="mb-0">Auto-Bloqué</p>
+                            <small>Aujourd'hui</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-ban fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ pending_reviews }}</h4>
+                            <p class="mb-0">En Attente</p>
+                            <small>Révision manuelle</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Reports -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">📋 Rapports Récents</h5>
+                    <a href="{% url 'moderation:pending_reports' %}" class="btn btn-sm btn-outline-primary">
+                        Voir tous les rapports
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if recent_reports %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Auteur</th>
+                                        <th>Gravité</th>
+                                        <th>Statut</th>
+                                        <th>Confiance IA</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for report in recent_reports %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge badge-secondary">
+                                                {{ report.get_content_type_label_display }}
+                                            </span>
+                                        </td>
+                                        <td>{{ report.author.prenom }} {{ report.author.nom }}</td>
+                                        <td>
+                                            {% if report.severity == 'critical' %}
+                                                <span class="badge badge-danger">{{ report.get_severity_display }}</span>
+                                            {% elif report.severity == 'high' %}
+                                                <span class="badge badge-warning">{{ report.get_severity_display }}</span>
+                                            {% elif report.severity == 'medium' %}
+                                                <span class="badge badge-info">{{ report.get_severity_display }}</span>
+                                            {% else %}
+                                                <span class="badge badge-success">{{ report.get_severity_display }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if report.status == 'pending' %}
+                                                <span class="badge badge-warning">{{ report.get_status_display }}</span>
+                                            {% elif report.status == 'approved' %}
+                                                <span class="badge badge-success">{{ report.get_status_display }}</span>
+                                            {% elif report.status == 'rejected' %}
+                                                <span class="badge badge-danger">{{ report.get_status_display }}</span>
+                                            {% else %}
+                                                <span class="badge badge-secondary">{{ report.get_status_display }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                {% with confidence_percent=report.ai_confidence|floatformat:0|add:0 %}
+                                                <div class="progress-bar 
+                                                    {% if confidence_percent > 80 %}bg-danger
+                                                    {% elif confidence_percent > 60 %}bg-warning
+                                                    {% else %}bg-success{% endif %}" 
+                                                    role="progressbar" 
+                                                    style="width: {{ report.ai_confidence|floatformat:0 }}%"
+                                                    aria-valuenow="{{ report.ai_confidence|floatformat:0 }}" 
+                                                    aria-valuemin="0" aria-valuemax="100">
+                                                    {{ report.ai_confidence|floatformat:0 }}%
+                                                </div>
+                                                {% endwith %}
+                                            </div>
+                                        </td>
+                                        <td>{{ report.created_at|date:"d/m H:i" }}</td>
+                                        <td>
+                                            {% if report.status == 'pending' %}
+                                                <a href="{% url 'moderation:review_report' report.id %}" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i> Réviser
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted">Traité</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                            <p class="text-muted">Aucun rapport récent. Tout va bien ! 🎉</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">⚡ Actions Rapides</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'moderation:pending_reports' %}" class="btn btn-outline-warning">
+                            <i class="fas fa-flag"></i> Rapports En Attente
+                            {% if pending_reviews > 0 %}
+                                <span class="badge badge-warning">{{ pending_reviews }}</span>
+                            {% endif %}
+                        </a>
+                        
+                        <a href="{% url 'moderation:stats' %}" class="btn btn-outline-info">
+                            <i class="fas fa-chart-bar"></i> Statistiques Détaillées
+                        </a>
+                        
+                        <a href="{% url 'moderation:test_content' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-vial"></i> Tester le Contenu
+                        </a>
+                        
+                        <a href="{% url 'admin:moderation_contentmoderationrule_changelist' %}" 
+                           class="btn btn-outline-secondary">
+                            <i class="fas fa-cogs"></i> Gérer les Règles
+                        </a>
+                        
+                        <a href="{% url 'admin:moderation_contentmoderationwhitelist_changelist' %}" 
+                           class="btn btn-outline-success">
+                            <i class="fas fa-list"></i> Liste Blanche
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weekly Stats Chart -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">📊 Tendance Hebdomadaire</h5>
+                </div>
+                <div class="card-body">
+                    {% if weekly_stats %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Vérifié</th>
+                                        <th>Signalé</th>
+                                        <th>%</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for stat in weekly_stats %}
+                                    <tr>
+                                        <td>{{ stat.date|date:"d/m" }}</td>
+                                        <td>{{ stat.total_content_checked }}</td>
+                                        <td>{{ stat.flagged_content }}</td>
+                                        <td>
+                                            {% if stat.total_content_checked > 0 %}
+                                                {% widthratio stat.flagged_content stat.total_content_checked 100 %}%
+                                            {% else %}
+                                                0%
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">Aucune donnée disponible</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Active Rules Info -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">🔧 Configuration</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="text-primary">{{ active_rules }}</h4>
+                            <small class="text-muted">Règles Actives</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success">IA</h4>
+                            <small class="text-muted">Statut</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="text-center">
+                        <small class="text-muted">
+                            La modération IA fonctionne 24/7 pour maintenir un environnement sûr
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.progress {
+    border-radius: 10px;
+}
+
+.card {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.badge {
+    font-size: 0.8em;
+}
+
+.btn {
+    border-radius: 20px;
+}
+</style>
+{% endblock %}

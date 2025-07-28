@@ -1,0 +1,254 @@
+# Training Management System
+
+A comprehensive Django-based training management system with PostgreSQL integration, featuring user management, formation/course management, messaging, and payment processing.
+
+## 🚀 Features
+
+### 👥 User Management
+- **Utilisateur**: Base user model with email authentication
+- **Formateur**: Trainers who create and manage formations/courses  
+- **Apprenant**: Learners who enroll in formations and courses
+- **Administrateur**: System administrators with full management access
+- Profile management with photos and CV uploads
+- Notification system for all users
+
+### 📚 Formation Management
+- Create and manage training formations
+- Room scheduling and planning
+- Participant enrollment and tracking
+- Attendance marking with presence codes
+- Formation evaluations and feedback
+- Automatic certificate generation
+
+### 📖 Course Management  
+- Individual course creation and publishing
+- Resource management (files, videos, documents)
+- Progress tracking for learners
+- Course ratings and comments system
+- Multi-level course difficulty
+
+### 💬 Messaging System
+- Private messaging between users
+- Group chat functionality for formations
+- Discussion threads and forums
+- File attachments in messages
+- Real-time communication features
+
+### 💳 Payment System
+- Individual and organization payments
+- Invoice generation and management
+- Discount codes and promotional offers
+- Corporate sponsorship tracking
+- Multiple payment methods support
+
+## 🛠️ Technical Stack
+
+- **Backend**: Django 4.2.7 with Python 3.12
+- **Database**: PostgreSQL (SQLite for development)
+- **File Storage**: Local file system with upload handling
+- **API**: Django REST Framework
+- **Authentication**: Custom email-based user model
+
+## 📦 Installation
+
+### Prerequisites
+- Python 3.8+
+- PostgreSQL 12+ (optional, SQLite included for development)
+- pip (Python package manager)
+
+### 1. Clone and Setup
+```bash
+# Dependencies are already installed in this project
+# If you need to reinstall:
+pip install -r requirements.txt
+```
+
+### 2. Database Setup
+
+#### For Development (SQLite - Already configured)
+```bash
+# Migrations already applied
+python manage.py runserver
+```
+
+#### For Production (PostgreSQL)
+1. Install PostgreSQL and create database:
+   ```sql
+   CREATE DATABASE training_management_db;
+   ```
+
+2. Update `training_management/settings.py`:
+   ```python
+   # Uncomment the PostgreSQL configuration
+   # Comment out the SQLite configuration
+   ```
+
+3. Run migrations:
+   ```bash
+   python manage.py migrate
+   python manage.py createsuperuser
+   ```
+
+### 3. Run the Application
+```bash
+python manage.py runserver
+```
+
+## 🌐 Access Points
+
+- **Home Page**: http://localhost:8000/
+- **Admin Panel**: http://localhost:8000/admin/
+  - Username: admin
+  - Email: admin@training.com
+  - Password: [your-password]
+
+### 🏠 Homepage Navigation
+
+From the homepage (`http://localhost:8000/`), users can access:
+
+#### 📋 Public Access (All Visitors)
+- **🎓 Training System Logo** → Returns to homepage
+- **📚 Formations** → `/formations/` - Browse available training formations
+- **📖 Cours** → `/courses/` - Browse individual courses
+- **🔧 Accéder à l'Administration** → `/admin/` - Admin panel access
+- **Connexion** → `/auth/login/` - User login page
+- **Inscription** → `/auth/register/` - User registration page
+
+#### 🔐 Authenticated User Access
+Once logged in, additional navigation options appear:
+- **💬 Messages** → `/messaging/inbox/` - Personal messaging system
+- **📊 Dashboard** → `/users/dashboard/` - Role-based dashboard
+- **Profil** → `/users/profile/` - User profile management
+- **Déconnexion** → Logout functionality
+
+#### 🎯 Quick Access URLs
+- **Formations List**: http://localhost:8000/formations/
+- **Courses List**: http://localhost:8000/courses/
+- **Login**: http://localhost:8000/auth/login/
+- **Register**: http://localhost:8000/auth/register/
+- **Dashboard**: http://localhost:8000/dashboard/ (authenticated users)
+- **Messages**: http://localhost:8000/messaging/inbox/ (authenticated users)
+
+## 📁 Project Structure
+
+```
+training-management-system/
+├── manage.py
+├── requirements.txt
+├── db.sqlite3                    # Development database
+├── users/                        # User management app
+│   ├── models.py                 # User models (Utilisateur, Formateur, etc.)
+│   ├── admin.py                  # Admin configurations
+│   └── migrations/               # Database migrations
+├── formations/                   # Formation management app
+│   ├── models.py                 # Formation, Planning, Salle models
+│   ├── admin.py                  # Admin configurations
+│   └── migrations/
+├── courses/                      # Course management app
+│   ├── models.py                 # Cours, RessourceCours models
+│   ├── admin.py                  # Admin configurations
+│   └── migrations/
+├── messaging/                    # Communication system app
+│   ├── models.py                 # Message, GroupeChat models
+│   ├── admin.py                  # Admin configurations
+│   └── migrations/
+├── payments/                     # Payment processing app
+│   ├── models.py                 # Paiement, Facture models
+│   ├── admin.py                  # Admin configurations
+│   └── migrations/
+└── training_management/          # Main Django settings
+    ├── settings.py               # Django configuration
+    ├── urls.py                   # URL routing
+    └── wsgi.py                   # WSGI application
+```
+
+## 🗄️ Database Models
+
+### Users App
+- `Utilisateur`: Custom user model with email authentication
+- `Formateur`: Trainer profiles with skills and experience
+- `Apprenant`: Learner profiles with company information
+- `Administrateur`: Admin users with access levels
+- `Notification`: System notifications
+- `Reclamation`: User complaints and issues
+
+### Formations App
+- `Formation`: Training formations with enrollment
+- `Salle`: Training rooms with capacity and equipment
+- `Planning`: Session scheduling and room assignments
+- `Presence`: Attendance tracking with codes
+- `Evaluation`: Formation ratings and feedback
+- `Attestation`: Completion certificates
+
+### Courses App
+- `Cours`: Individual courses with resources
+- `RessourceCours`: Course materials (videos, docs, files)
+- `ProgressionCours`: Learning progress tracking
+- `CommentaireCours`: Course reviews and ratings
+
+### Messaging App
+- `Message`: Private messaging system
+- `GroupeChat`: Group conversations
+- `MessageGroupe`: Group message content
+- `FilDiscussion`: Discussion threads
+- `ReponseDiscussion`: Thread replies
+
+### Payments App
+- `Organisation`: Company/sponsor information
+- `Paiement`: Payment transactions
+- `Facture`: Invoice generation
+- `Remise`: Discount codes and promotions
+- `SponsoringOrganisation`: Corporate sponsorships
+
+## 🔧 Configuration
+
+### Media Files
+Uploaded files are stored in:
+```
+media/
+├── profiles/          # User profile images
+├── cvs/              # Trainer CVs
+├── cours/            # Course materials
+├── messages/         # Message attachments
+├── groupes/          # Group chat files
+├── discussions/      # Forum attachments
+├── attestations/     # Generated certificates
+└── factures/         # Invoice PDFs
+```
+
+### Admin Interface
+All models are fully configured in the Django admin with:
+- List views with filtering and search
+- Inline editing for related objects
+- Custom admin actions
+- Proper field organization
+
+## 🚀 Next Steps
+
+1. **Frontend Development**: Create custom templates and views
+2. **API Endpoints**: Implement REST API using Django REST Framework  
+3. **Real-time Features**: Add WebSocket support for messaging
+4. **Payment Integration**: Connect with payment gateways
+5. **Email Notifications**: Configure email settings
+6. **File Processing**: Add video/document processing
+7. **Reporting**: Generate analytics and reports
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 📞 Support
+
+For support and questions, please contact the development team.
+
+---
+
+**Project Status**: ✅ Database models complete, ✅ Admin interface ready, 🔄 Frontend in development

@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestion des Candidatures - Training Management System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="fas fa-clipboard-list"></i> Gestion des Candidatures de Formateurs</h2>
+            <p class="text-muted">Examiner et traiter les candidatures des formateurs</p>
+        </div>
+        <div>
+            <a href="{% url 'formations:admin_dashboard' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Retour au Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="statut" class="form-label">Statut</label>
+                    <select class="form-control" id="statut" name="statut">
+                        <option value="">Tous les statuts</option>
+                        {% for value, label in statuts %}
+                            <option value="{{ value }}" {% if selected_statut == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="formation" class="form-label">Formation</label>
+                    <input type="text" class="form-control" id="formation" name="formation" 
+                           value="{{ formation_filter }}" placeholder="Nom de formation...">
+                </div>
+                <div class="col-md-3">
+                    <label for="formateur" class="form-label">Formateur</label>
+                    <input type="text" class="form-control" id="formateur" name="formateur" 
+                           value="{{ formateur_filter }}" placeholder="Nom du formateur...">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-filter"></i> Filtrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h3>{{ stats.en_attente }}</h3>
+                    <p class="mb-0">En attente</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3>{{ stats.acceptees }}</h3>
+                    <p class="mb-0">Acceptées</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body text-center">
+                    <h3>{{ stats.rejetees }}</h3>
+                    <p class="mb-0">Rejetées</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-secondary text-white">
+                <div class="card-body text-center">
+                    <h3>{{ stats.retirees }}</h3>
+                    <p class="mb-0">Retirées</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Applications List -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-list"></i> 
+                Liste des Candidatures ({{ applications.paginator.count }} total{{ applications.paginator.count|pluralize }})
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            {% if applications %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Formation</th>
+                                <th>Formateur</th>
+                                <th>Date candidature</th>
+                                <th>Tarif proposé</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for application in applications %}
+                                <tr>
+                                    <td>
+                                        <div>
+                                            <strong>{{ application.formation.titre }}</strong><br>
+                                            <small class="text-muted">
+                                                {{ application.formation.duree_heures }}h • 
+                                                {{ application.formation.get_niveau_display }}
+                                            </small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong>{{ application.formateur.utilisateur.get_full_name }}</strong><br>
+                                            <small class="text-muted">{{ application.formateur.utilisateur.email }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <small>{{ application.date_candidature|date:"d/m/Y H:i" }}</small>
+                                    </td>
+                                    <td>
+                                        {% if application.tarif_propose %}
+                                            <strong>{{ application.tarif_propose }} TND/h</strong>
+                                        {% else %}
+                                            <span class="text-muted">Non spécifié</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if application.statut == 'en_attente' %}
+                                            <span class="badge bg-warning text-dark">En attente</span>
+                                        {% elif application.statut == 'acceptee' %}
+                                            <span class="badge bg-success">Acceptée</span>
+                                        {% elif application.statut == 'rejetee' %}
+                                            <span class="badge bg-danger">Rejetée</span>
+                                        {% elif application.statut == 'retiree' %}
+                                            <span class="badge bg-secondary">Retirée</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'formations:admin_application_review' application.id %}" 
+                                               class="btn btn-outline-primary">
+                                                <i class="fas fa-eye"></i> Examiner
+                                            </a>
+                                            {% if application.statut == 'en_attente' %}
+                                                <a href="{% url 'formations:admin_application_review' application.id %}" 
+                                                   class="btn btn-primary">
+                                                    <i class="fas fa-check-circle"></i> Traiter
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if applications.has_other_pages %}
+                    <div class="card-footer">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center mb-0">
+                                {% if applications.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ applications.previous_page_number }}{% if request.GET.statut %}&statut={{ request.GET.statut }}{% endif %}{% if request.GET.formation %}&formation={{ request.GET.formation }}{% endif %}{% if request.GET.formateur %}&formateur={{ request.GET.formateur }}{% endif %}">
+                                            Précédent
+                                        </a>
+                                    </li>
+                                {% endif %}
+
+                                {% for num in applications.paginator.page_range %}
+                                    {% if applications.number == num %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                    {% elif num > applications.number|add:'-3' and num < applications.number|add:'3' %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ num }}{% if request.GET.statut %}&statut={{ request.GET.statut }}{% endif %}{% if request.GET.formation %}&formation={{ request.GET.formation }}{% endif %}{% if request.GET.formateur %}&formateur={{ request.GET.formateur }}{% endif %}">
+                                                {{ num }}
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if applications.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ applications.next_page_number }}{% if request.GET.statut %}&statut={{ request.GET.statut }}{% endif %}{% if request.GET.formation %}&formation={{ request.GET.formation }}{% endif %}{% if request.GET.formateur %}&formateur={{ request.GET.formateur }}{% endif %}">
+                                            Suivant
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h4>Aucune candidature trouvée</h4>
+                    <p class="text-muted">Aucune candidature ne correspond aux critères de recherche.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

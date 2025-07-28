@@ -1,0 +1,92 @@
+    <h3 class="mt-5">Inscriptions à activer</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Apprenant</th>
+                <th>Formation</th>
+                <th>Date paiement</th>
+                <th>Statut paiement</th>
+                <th>Statut inscription</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pending in pending_enrollments %}
+            <tr>
+                <td>{{ pending.apprenant }}</td>
+                <td>{{ pending.formation }}</td>
+                <td>{{ pending.paiement.date_paiement|date:'d/m/Y H:i' }}</td>
+                <td>{{ pending.paiement.get_statut_display }}</td>
+                <td>{{ pending.statut }}</td>
+                <td>
+                    <form method="post" action="{% url 'payments:activate_enrollment' pending.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success btn-sm">Activer</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="text-center">Aucune inscription en attente</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% extends 'base.html' %}
+{% block title %}Dashboard Paiements{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Tableau de bord des paiements</h1>
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Nombre total de paiements</h5>
+                    <p class="display-6">{{ total_payments }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Montant total validé</h5>
+                    <p class="display-6">{{ total_amount }} TND</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Organisations</h5>
+                    <p class="display-6">{{ org_count }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <h3>Paiements récents</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Référence</th>
+                <th>Formation</th>
+                <th>Montant (TND)</th>
+                <th>Payeur</th>
+                <th>Statut</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for paiement in recent_payments %}
+            <tr>
+                <td>{{ paiement.reference_transaction }}</td>
+                <td>{{ paiement.formation }}</td>
+                <td>{{ paiement.montant }} TND</td>
+                <td>{{ paiement.payeur }}</td>
+                <td>{{ paiement.get_statut_display }}</td>
+                <td>{{ paiement.date_paiement|date:'d/m/Y H:i' }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="text-center">Aucun paiement récent</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

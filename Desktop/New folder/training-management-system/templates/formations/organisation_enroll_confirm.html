@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2>Confirmation d'inscription via organisation</h2>
+  <p>Formation : <strong>{{ enrollment.formation.titre }}</strong></p>
+  <p>Organisation : <strong>{{ enrollment.organisation.name }}</strong></p>
+  <p>Statut : <span class="badge bg-info">{{ enrollment.get_status_display }}</span></p>
+  {% if enrollment.status == 'pending' %}
+    <div class="alert alert-info mt-3">Votre inscription est en attente de confirmation par l'organisation.</div>
+  {% elif enrollment.status == 'active' %}
+    <div class="alert alert-success mt-3">Votre inscription a été activée !</div>
+  {% elif enrollment.status == 'rejected' %}
+    <div class="alert alert-danger mt-3">Votre inscription a été rejetée par l'organisation.</div>
+  {% endif %}
+  <a href="{% url 'formations:detail' enrollment.formation.id %}" class="btn btn-secondary mt-3">Retour à la formation</a>
+</div>
+{% endblock %}

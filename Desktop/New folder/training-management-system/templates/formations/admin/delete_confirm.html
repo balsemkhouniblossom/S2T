@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Supprimer "{{ formation.titre }}" - Administration{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> Confirmation de suppression
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-warning"></i> Attention !</h6>
+                        <p class="mb-0">Cette action est irréversible. Toutes les données associées à cette formation seront définitivement perdues.</p>
+                    </div>
+
+                    <h6>Vous êtes sur le point de supprimer :</h6>
+                    <div class="bg-light p-3 rounded mb-3">
+                        <h5 class="mb-2">{{ formation.titre }}</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <small class="text-muted">
+                                    <i class="fas fa-user"></i> <strong>Formateur:</strong><br>
+                                    {{ formation.formateur.utilisateur.get_full_name }}
+                                </small>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar"></i> <strong>Date:</strong><br>
+                                    {{ formation.date_debut|date:"d/m/Y" }}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <small class="text-muted">
+                                    <i class="fas fa-users"></i> <strong>Participants:</strong><br>
+                                    {{ participants_count }}/{{ formation.participants_max }}
+                                </small>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted">
+                                    <i class="fas fa-tag"></i> <strong>Statut:</strong><br>
+                                    {{ formation.get_statut_display }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if participants_count > 0 %}
+                        <div class="alert alert-danger">
+                            <h6><i class="fas fa-users"></i> Impact sur les participants</h6>
+                            <p class="mb-2">Cette formation compte <strong>{{ participants_count }} participant{{ participants_count|pluralize }}</strong> inscrit{{ participants_count|pluralize }}.</p>
+                            <p class="mb-0">En supprimant cette formation, vous :</p>
+                            <ul class="mb-0">
+                                <li>Annulerez leur inscription</li>
+                                <li>Supprimerez leur historique de formation</li>
+                                <li>Perdrez les évaluations associées</li>
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <h6>Les éléments suivants seront supprimés :</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-danger"></i> La formation et ses détails</li>
+                            <li><i class="fas fa-check text-danger"></i> Les sessions programmées</li>
+                            <li><i class="fas fa-check text-danger"></i> Les inscriptions des participants</li>
+                            <li><i class="fas fa-check text-danger"></i> Les évaluations et commentaires</li>
+                            <li><i class="fas fa-check text-danger"></i> Les attestations émises</li>
+                            <li><i class="fas fa-check text-danger"></i> L'historique des présences</li>
+                        </ul>
+                    </div>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'formations:admin_formation_detail' formation.id %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Annuler
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Confirmer la suppression
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Alternative Actions -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-lightbulb"></i> Alternatives à la suppression
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Plutôt que de supprimer définitivement cette formation, vous pourriez :</p>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'formations:admin_formation_edit' formation.id %}" class="btn btn-outline-warning btn-sm">
+                            <i class="fas fa-edit"></i> Modifier le statut vers "Annulée"
+                        </a>
+                        <a href="{% url 'formations:admin_formation_edit' formation.id %}" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-archive"></i> Archiver la formation
+                        </a>
+                        <a href="{% url 'formations:admin_formation_edit' formation.id %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-pause"></i> Mettre en pause temporairement
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

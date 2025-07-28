@@ -1,0 +1,597 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Messagerie{% endblock %}
+
+{% block extra_css %}
+<style>
+    .messaging-container {
+        min-height: calc(100vh - 120px);
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow-light);
+        overflow: hidden;
+        margin: 2rem 0;
+    }
+    
+    .messaging-sidebar {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        min-height: calc(100vh - 120px);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .messaging-sidebar::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+    
+    .sidebar-header {
+        padding: 2rem;
+        border-bottom: 1px solid rgba(255,255,255,0.2);
+        position: relative;
+        z-index: 2;
+    }
+    
+    .sidebar-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .sidebar-subtitle {
+        opacity: 0.8;
+        font-size: 0.9rem;
+    }
+    
+    .sidebar-nav {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .sidebar-nav li {
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .sidebar-nav a {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 2rem;
+        color: white;
+        text-decoration: none;
+        transition: var(--transition-medium);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .sidebar-nav a::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        transition: var(--transition-medium);
+    }
+    
+    .sidebar-nav a:hover::before {
+        left: 100%;
+    }
+    
+    .sidebar-nav a:hover, .sidebar-nav a.active {
+        background: rgba(255,255,255,0.1);
+        transform: translateX(4px);
+    }
+    
+    .sidebar-nav i {
+        margin-right: 0.75rem;
+        width: 20px;
+        text-align: center;
+    }
+    
+    .sidebar-stats {
+        padding: 2rem;
+        border-top: 1px solid rgba(255,255,255,0.2);
+        position: relative;
+        z-index: 2;
+    }
+    
+    .stat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .stat-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+    
+    .stat-label {
+        opacity: 0.8;
+        font-size: 0.9rem;
+    }
+    
+    .stat-value {
+        font-weight: 600;
+    }
+    
+    .messages-header {
+        padding: 2rem;
+        border-bottom: 2px solid var(--border-color);
+        background: white;
+    }
+    
+    .search-form {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+    
+    .search-input {
+        flex: 1;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        transition: var(--transition-medium);
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+    }
+    
+    .search-btn {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        transition: var(--transition-medium);
+    }
+    
+    .search-btn:hover {
+        background: var(--secondary-color);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-light);
+    }
+    
+    .message-content {
+        max-height: calc(100vh - 300px);
+        overflow-y: auto;
+    }
+    
+    .conversation-item {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        transition: var(--transition-medium);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .conversation-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+        transform: scaleY(0);
+        transition: var(--transition-medium);
+    }
+    
+    .conversation-item:hover::before {
+        transform: scaleY(1);
+    }
+    
+    .conversation-item:hover {
+        background: var(--light-color);
+        transform: translateX(4px);
+    }
+    
+    .conversation-item.unread {
+        background: linear-gradient(135deg, rgba(102,126,234,0.05) 0%, rgba(118,75,162,0.05) 100%);
+        border-left: 4px solid var(--primary-color);
+    }
+    
+    .conversation-item.unread::before {
+        transform: scaleY(1);
+    }
+    
+    .conversation-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        font-weight: 600;
+        transition: var(--transition-medium);
+    }
+    
+    .conversation-item:hover .conversation-avatar {
+        transform: scale(1.1);
+    }
+    
+    .conversation-info {
+        flex: 1;
+        margin-left: 1rem;
+    }
+    
+    .conversation-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+        transition: var(--transition-medium);
+    }
+    
+    .conversation-item:hover .conversation-name {
+        color: var(--primary-color);
+    }
+    
+    .conversation-preview {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        line-height: 1.4;
+        margin-bottom: 0.5rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .conversation-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .conversation-time {
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+    }
+    
+    .conversation-badges {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .badge-new {
+        background: var(--primary-color);
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-secondary);
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+        opacity: 0.5;
+    }
+    
+    .empty-state h4 {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+    
+    .compose-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 1000;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        border: none;
+        box-shadow: var(--shadow-medium);
+        transition: var(--transition-medium);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+    
+    .compose-btn:hover {
+        transform: scale(1.1);
+        box-shadow: var(--shadow-heavy);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .pagination {
+        padding: 2rem;
+        border-top: 2px solid var(--border-color);
+        background: white;
+    }
+    
+    .page-link {
+        border-radius: 8px;
+        margin: 0 0.25rem;
+        border: none;
+        color: var(--text-primary);
+        transition: var(--transition-medium);
+    }
+    
+    .page-link:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .page-item.active .page-link {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    
+    @media (max-width: 768px) {
+        .messaging-container {
+            margin: 1rem 0;
+        }
+        
+        .sidebar-header,
+        .sidebar-stats {
+            padding: 1.5rem;
+        }
+        
+        .messages-header {
+            padding: 1.5rem;
+        }
+        
+        .conversation-item {
+            padding: 1rem;
+        }
+        
+        .compose-btn {
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="messaging-container">
+        <div class="row g-0">
+            <!-- Sidebar -->
+            <div class="col-md-3 messaging-sidebar">
+                <div class="sidebar-header">
+                    <h3 class="sidebar-title">Messagerie</h3>
+                    <p class="sidebar-subtitle">Gérez vos conversations</p>
+                </div>
+                
+                <!-- Navigation -->
+                <ul class="sidebar-nav">
+                    <li>
+                        <a href="{% url 'messaging:inbox' %}" class="active">
+                            <span>
+                                <i class="fas fa-inbox"></i> Boîte de réception
+                            </span>
+                            {% if total_unread > 0 %}
+                                <span class="badge bg-light text-primary">{{ total_unread }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'messaging:compose' %}">
+                            <span>
+                                <i class="fas fa-edit"></i> Nouveau message
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'messaging:groups' %}">
+                            <span>
+                                <i class="fas fa-users"></i> Groupes
+                            </span>
+                            {% if group_messages_count > 0 %}
+                                <span class="badge bg-light text-info">{{ group_messages_count }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'messaging:discussions' %}">
+                            <span>
+                                <i class="fas fa-comments"></i> Discussions
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- Quick Stats -->
+                <div class="sidebar-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Conversations</span>
+                        <span class="stat-value">{{ conversations|length }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Messages non lus</span>
+                        <span class="stat-value">{{ total_unread }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Groupes actifs</span>
+                        <span class="stat-value">{{ active_groups }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conversations List -->
+            <div class="col-md-9">
+                <div class="messages-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h4 class="mb-0">Conversations</h4>
+                        </div>
+                        <div class="col-md-6">
+                            <!-- Search -->
+                            <form method="GET" class="search-form">
+                                <input type="text" name="q" class="form-control search-input" 
+                                       placeholder="Rechercher une conversation..." value="{{ request.GET.q }}">
+                                <button type="submit" class="btn search-btn">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conversations Content -->
+                <div class="message-content">
+                    {% if conversations %}
+                        {% for conversation in conversations %}
+                        <div class="conversation-item {% if conversation.unread_count > 0 %}unread{% endif %}" 
+                             onclick="window.location.href='{% url 'messaging:chat_conversation' conversation.partner.id %}'">
+                            <div class="d-flex align-items-start">
+                                <div class="conversation-avatar">
+                                    {% if conversation.partner.photo %}
+                                        <img src="{{ conversation.partner.photo.url }}" 
+                                             class="rounded-circle" width="50" height="50" 
+                                             alt="{{ conversation.partner.get_full_name }}">
+                                    {% else %}
+                                        {{ conversation.partner.get_full_name|first|upper }}
+                                    {% endif %}
+                                </div>
+                                <div class="conversation-info">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <div class="conversation-name">
+                                                {{ conversation.partner.get_full_name }}
+                                            </div>
+                                            <div class="conversation-preview">
+                                                {% if conversation.latest_message %}
+                                                    {{ conversation.latest_message.contenu|truncatewords:15 }}
+                                                {% else %}
+                                                    Aucun message
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="conversation-meta">
+                                            <div class="conversation-time">
+                                                {% if conversation.latest_message %}
+                                                    {{ conversation.latest_message.date_envoi|timesince }} ago
+                                                {% endif %}
+                                            </div>
+                                            <div class="conversation-badges">
+                                                {% if conversation.unread_count > 0 %}
+                                                    <span class="badge-new">{{ conversation.unread_count }}</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <h4>Aucune conversation</h4>
+                            <p>Commencez par envoyer un message à quelqu'un</p>
+                            <a href="{% url 'messaging:compose' %}" class="btn btn-primary">
+                                <i class="fas fa-edit"></i> Envoyer votre premier message
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Pagination -->
+                {% if is_paginated %}
+                <div class="pagination">
+                    <nav aria-label="Navigation des conversations">
+                        <ul class="pagination justify-content-center mb-0">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+                                        <i class="fas fa-angle-double-left"></i> Premier
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+                                        <i class="fas fa-angle-left"></i> Précédent
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            <li class="page-item active">
+                                <span class="page-link">
+                                    Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
+                                </span>
+                            </li>
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+                                        Suivant <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+                                        Dernier <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Compose Button -->
+<a href="{% url 'messaging:compose' %}" class="compose-btn">
+    <i class="fas fa-plus fa-lg"></i>
+</a>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-mark conversations as read after viewing for 2 seconds
+    const conversationItems = document.querySelectorAll('.conversation-item.unread');
+    
+    conversationItems.forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            setTimeout(() => {
+                if (this.matches(':hover')) {
+                    // Mark as read logic would go here
+                    this.classList.remove('unread');
+                }
+            }, 2000);
+        });
+    });
+});
+</script>
+{% endblock %}

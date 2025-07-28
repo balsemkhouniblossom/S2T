@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Paiement d'une formation{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Paiement d'une formation</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Enregistrer le paiement</button>
+    </form>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const apprenantSelect = document.getElementById('id_apprenant');
+        const orgSelect = document.getElementById('id_organisation');
+        if (apprenantSelect && orgSelect) {
+            apprenantSelect.addEventListener('change', function() {
+                const apprenantId = this.value;
+                if (apprenantId) {
+                    fetch(`/payments/api/apprenant/${apprenantId}/organisation/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.organisation_id) {
+                                orgSelect.value = data.organisation_id;
+                            } else {
+                                orgSelect.value = '';
+                            }
+                        });
+                } else {
+                    orgSelect.value = '';
+                }
+            });
+        }
+    });
+    </script>
+</div>
+{% endblock %}

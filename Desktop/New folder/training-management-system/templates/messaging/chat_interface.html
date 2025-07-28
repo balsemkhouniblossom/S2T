@@ -1,0 +1,672 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Chat - {{ conversation_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-container {
+        height: calc(100vh - 120px);
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow-light);
+        overflow: hidden;
+        margin: 2rem 0;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .chat-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .chat-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+    
+    .chat-header-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .chat-participant {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .participant-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1.2rem;
+        border: 2px solid rgba(255,255,255,0.3);
+    }
+    
+    .participant-info h4 {
+        margin: 0;
+        font-weight: 600;
+    }
+    
+    .participant-status {
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+    
+    .chat-actions {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .btn-chat-action {
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        transition: var(--transition-medium);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-chat-action:hover {
+        background: rgba(255,255,255,0.3);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+    
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 2rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        position: relative;
+    }
+    
+    .chat-messages::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="0.5" fill="rgba(102,126,234,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.5;
+    }
+    
+    .message-group {
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .message-date {
+        text-align: center;
+        margin: 2rem 0;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        font-weight: 500;
+        position: relative;
+    }
+    
+    .message-date::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: var(--border-color);
+        z-index: -1;
+    }
+    
+    .message-date span {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+    }
+    
+    .message-bubble {
+        max-width: 70%;
+        margin-bottom: 1rem;
+        position: relative;
+        animation: messageSlideIn 0.3s ease-out;
+    }
+    
+    @keyframes messageSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .message-bubble.sent {
+        margin-left: auto;
+    }
+    
+    .message-bubble.received {
+        margin-right: auto;
+    }
+    
+    .message-content {
+        padding: 1rem 1.5rem;
+        border-radius: 20px;
+        position: relative;
+        word-wrap: break-word;
+        line-height: 1.5;
+    }
+    
+    .message-bubble.sent .message-content {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        border-bottom-right-radius: 5px;
+    }
+    
+    .message-bubble.received .message-content {
+        background: white;
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        border-bottom-left-radius: 5px;
+        box-shadow: var(--shadow-light);
+    }
+    
+    .message-bubble.sent .message-content::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        right: -10px;
+        width: 0;
+        height: 0;
+        border: 10px solid transparent;
+        border-left-color: var(--secondary-color);
+        border-bottom: none;
+        border-right: none;
+    }
+    
+    .message-bubble.received .message-content::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: -10px;
+        width: 0;
+        height: 0;
+        border: 10px solid transparent;
+        border-right-color: white;
+        border-bottom: none;
+        border-left: none;
+    }
+    
+    .message-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        opacity: 0.7;
+    }
+    
+    .message-bubble.sent .message-info {
+        justify-content: flex-end;
+        color: rgba(255,255,255,0.8);
+    }
+    
+    .message-bubble.received .message-info {
+        justify-content: flex-start;
+        color: var(--text-secondary);
+    }
+    
+    .message-time {
+        font-weight: 500;
+    }
+    
+    .message-status {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .status-icon {
+        font-size: 0.75rem;
+    }
+    
+    .message-attachment {
+        margin-top: 0.5rem;
+        padding: 0.75rem;
+        background: rgba(255,255,255,0.1);
+        border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .message-bubble.received .message-attachment {
+        background: var(--light-color);
+        border-color: var(--border-color);
+    }
+    
+    .attachment-icon {
+        margin-right: 0.5rem;
+        color: var(--primary-color);
+    }
+    
+    .chat-input-container {
+        background: white;
+        padding: 1.5rem 2rem;
+        border-top: 2px solid var(--border-color);
+        position: relative;
+    }
+    
+    .chat-input-form {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-end;
+    }
+    
+    .input-group {
+        flex: 1;
+        position: relative;
+    }
+    
+    .chat-textarea {
+        width: 100%;
+        min-height: 50px;
+        max-height: 120px;
+        padding: 1rem 1.5rem;
+        border: 2px solid var(--border-color);
+        border-radius: 25px;
+        resize: none;
+        font-family: inherit;
+        font-size: 1rem;
+        line-height: 1.5;
+        transition: var(--transition-medium);
+        background: white;
+    }
+    
+    .chat-textarea:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+    }
+    
+    .chat-textarea::placeholder {
+        color: var(--text-secondary);
+    }
+    
+    .input-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    
+    .btn-attachment {
+        background: var(--light-color);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition-medium);
+        cursor: pointer;
+    }
+    
+    .btn-attachment:hover {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+        transform: scale(1.1);
+    }
+    
+    .btn-send {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition-medium);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-send::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: var(--transition-medium);
+    }
+    
+    .btn-send:hover::before {
+        left: 100%;
+    }
+    
+    .btn-send:hover {
+        transform: scale(1.1);
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .btn-send:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .typing-indicator {
+        display: none;
+        padding: 1rem;
+        color: var(--text-secondary);
+        font-style: italic;
+        font-size: 0.9rem;
+    }
+    
+    .typing-indicator.show {
+        display: block;
+        animation: typingPulse 1.5s infinite;
+    }
+    
+    @keyframes typingPulse {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 1; }
+    }
+    
+    .empty-chat {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-secondary);
+    }
+    
+    .empty-chat i {
+        font-size: 4rem;
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+        opacity: 0.5;
+    }
+    
+    .empty-chat h4 {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+        .chat-container {
+            margin: 1rem 0;
+            height: calc(100vh - 100px);
+        }
+        
+        .chat-header {
+            padding: 1rem 1.5rem;
+        }
+        
+        .chat-messages {
+            padding: 1rem;
+        }
+        
+        .chat-input-container {
+            padding: 1rem 1.5rem;
+        }
+        
+        .message-bubble {
+            max-width: 85%;
+        }
+        
+        .chat-input-form {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .input-actions {
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="chat-container">
+        <!-- Chat Header -->
+        <div class="chat-header">
+            <div class="chat-header-content">
+                <div class="chat-participant">
+                    <div class="participant-avatar">
+                        {% if other_user.photo %}
+                            <img src="{{ other_user.photo.url }}" 
+                                 class="rounded-circle" width="50" height="50" 
+                                 alt="{{ other_user.get_full_name }}">
+                        {% else %}
+                            {{ other_user.get_full_name|first|upper }}
+                        {% endif %}
+                    </div>
+                    <div class="participant-info">
+                        <h4>{{ other_user.get_full_name }}</h4>
+                        <div class="participant-status">
+                            {% if other_user.is_online %}
+                                <i class="fas fa-circle text-success"></i> En ligne
+                            {% else %}
+                                <i class="fas fa-circle text-muted"></i> Hors ligne
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-actions">
+                    <a href="{% url 'messaging:inbox' %}" class="btn-chat-action">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                    <button class="btn-chat-action" onclick="toggleChatInfo()">
+                        <i class="fas fa-info-circle"></i> Info
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Messages -->
+        <div class="chat-messages" id="chatMessages">
+            {% if messages %}
+                {% with prev_date=None %}
+                {% for message in messages %}
+                    {% if forloop.first or message.date_envoi|date:"Y-m-d" != prev_date %}
+                        <div class="message-date">
+                            <span>{{ message.date_envoi|date:"l j F Y" }}</span>
+                        </div>
+                    {% endif %}
+                    <div class="message-group">
+                        <div class="message-bubble {% if message.expediteur == request.user %}sent{% else %}received{% endif %}">
+                            <div class="message-content">
+                                {{ message.contenu|linebreaks }}
+                                {% if message.fichier_joint %}
+                                    <div class="message-attachment">
+                                        <i class="fas fa-paperclip attachment-icon"></i>
+                                        <a href="{{ message.fichier_joint.url }}" target="_blank" class="text-decoration-none">
+                                            {{ message.fichier_joint.name|slice:"8:" }}
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="message-info">
+                                <span class="message-time">{{ message.date_envoi|time:"H:i" }}</span>
+                                {% if message.expediteur == request.user %}
+                                    <div class="message-status">
+                                        {% if message.lu %}
+                                            <i class="fas fa-check-double status-icon text-primary"></i>
+                                        {% else %}
+                                            <i class="fas fa-check status-icon"></i>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% with message.date_envoi|date:"Y-m-d" as prev_date %}{% endwith %}
+                {% endfor %}
+                {% endwith %}
+            {% endif %}
+            
+            <div class="typing-indicator" id="typingIndicator">
+                <i class="fas fa-ellipsis-h"></i> {{ other_user.prenom }} tape...
+            </div>
+        </div>
+
+        <!-- Chat Input -->
+        <div class="chat-input-container">
+            <form method="POST" class="chat-input-form" id="chatForm">
+                {% csrf_token %}
+                <div class="input-group">
+                    <textarea 
+                        name="contenu" 
+                        class="chat-textarea" 
+                        placeholder="Tapez votre message..."
+                        id="messageInput"
+                        rows="1"
+                        required></textarea>
+                    <div class="input-actions">
+                        <label for="fileInput" class="btn-attachment">
+                            <i class="fas fa-paperclip"></i>
+                        </label>
+                        <input type="file" id="fileInput" name="fichier_joint" style="display: none;">
+                    </div>
+                </div>
+                <button type="submit" class="btn-send" id="sendButton">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatMessages = document.getElementById('chatMessages');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const chatForm = document.getElementById('chatForm');
+    const fileInput = document.getElementById('fileInput');
+    const typingIndicator = document.getElementById('typingIndicator');
+    
+    // Auto-resize textarea
+    messageInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+    
+    // Handle file selection
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            const fileName = this.files[0].name;
+            messageInput.placeholder = `Fichier sélectionné: ${fileName}`;
+        }
+    });
+    
+    // Handle form submission
+    chatForm.addEventListener('submit', function(e) {
+        if (!messageInput.value.trim()) {
+            e.preventDefault();
+            return;
+        }
+        
+        sendButton.disabled = true;
+        sendButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    });
+    
+    // Scroll to bottom
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    // Initial scroll
+    scrollToBottom();
+    
+    // Simulate typing indicator (for demo)
+    let typingTimeout;
+    messageInput.addEventListener('input', function() {
+        clearTimeout(typingTimeout);
+        typingIndicator.classList.add('show');
+        
+        typingTimeout = setTimeout(() => {
+            typingIndicator.classList.remove('show');
+        }, 2000);
+    });
+    
+    // Auto-focus on input
+    messageInput.focus();
+    
+    // Handle Enter key
+    messageInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            chatForm.dispatchEvent(new Event('submit'));
+        }
+    });
+});
+
+function toggleChatInfo() {
+    // Implementation for chat info modal
+    alert('Informations du chat - À implémenter');
+}
+
+// Function to add new message (for real-time updates)
+function addMessage(messageData) {
+    const chatMessages = document.getElementById('chatMessages');
+    const messageGroup = document.createElement('div');
+    messageGroup.className = 'message-group';
+    
+    const messageBubble = document.createElement('div');
+    messageBubble.className = 'message-bubble sent';
+    
+    const messageContent = document.createElement('div');
+    messageContent.className = 'message-content';
+    messageContent.innerHTML = messageData.content;
+    
+    const messageInfo = document.createElement('div');
+    messageInfo.className = 'message-info';
+    messageInfo.innerHTML = `
+        <span class="message-time">${messageData.time}</span>
+        <div class="message-status">
+            <i class="fas fa-check status-icon"></i>
+        </div>
+    `;
+    
+    messageBubble.appendChild(messageContent);
+    messageBubble.appendChild(messageInfo);
+    messageGroup.appendChild(messageBubble);
+    chatMessages.appendChild(messageGroup);
+    
+    // Scroll to bottom
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+</script>
+{% endblock %}

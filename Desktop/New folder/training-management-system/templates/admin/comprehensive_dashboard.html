@@ -1,0 +1,560 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Administrateur Complet - Training Management System{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .metric-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: transform 0.3s;
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin: 0.5rem 0;
+    }
+    
+    .metric-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .metric-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin: 1rem 0;
+    }
+    
+    .activity-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+    }
+    
+    .pending-badge {
+        background: #dc3545;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 50%;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .status-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .progress-bar-custom {
+        height: 8px;
+        border-radius: 4px;
+        overflow: hidden;
+        background: #e9ecef;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-4 mb-2">🏢 Dashboard Administrateur</h1>
+                <p class="lead mb-0">Vue d'ensemble complète de votre système de formation</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="text-white-50">
+                    <i class="fas fa-clock"></i> Dernière mise à jour: <span id="lastUpdate"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Key Metrics Row -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="metric-card border-start border-primary border-4">
+                <div class="metric-icon text-primary">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="metric-value text-primary">{{ total_users }}</div>
+                <div class="metric-label">Utilisateurs Total</div>
+                <small class="text-success">
+                    <i class="fas fa-arrow-up"></i> +{{ new_users_this_month }} ce mois
+                </small>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="metric-card border-start border-success border-4">
+                <div class="metric-icon text-success">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div class="metric-value text-success">{{ total_formations }}</div>
+                <div class="metric-label">Formations Total</div>
+                <small class="text-info">
+                    {{ formations_publiees }} publiées
+                </small>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="metric-card border-start border-warning border-4">
+                <div class="metric-icon text-warning">
+                    <span class="fw-bold">TND</span>
+                </div>
+                <div class="metric-value text-warning">{{ monthly_revenue }} TND</div>
+                <div class="metric-label">Revenus ce Mois</div>
+                <small class="text-muted">
+                    Total: {{ total_revenue }} TND
+                </small>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="metric-card border-start border-info border-4">
+                <div class="metric-icon text-info">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="metric-value text-info">{{ avg_rating }}/5</div>
+                <div class="metric-label">Note Moyenne</div>
+                <small class="text-muted">
+                    {{ total_evaluations }} évaluations
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Charts Row -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">📊 Revenus et Croissance</h5>
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-primary active" onclick="showChart('revenue')">Revenus</button>
+                        <button type="button" class="btn btn-outline-primary" onclick="showChart('users')">Utilisateurs</button>
+                        <button type="button" class="btn btn-outline-primary" onclick="showChart('enrollments')">Inscriptions</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="analyticsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">⚠️ Actions Requises</h5>
+                </div>
+                <div class="card-body">
+                    <div class="status-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>Formations en brouillon</span>
+                            {% if pending_actions.formations_brouillon > 0 %}
+                                <span class="pending-badge">{{ pending_actions.formations_brouillon }}</span>
+                            {% else %}
+                                <span class="badge bg-success">0</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="status-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>Paiements en attente</span>
+                            {% if pending_actions.pending_payments > 0 %}
+                                <span class="pending-badge">{{ pending_actions.pending_payments }}</span>
+                            {% else %}
+                                <span class="badge bg-success">0</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="status-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>Paiements échoués</span>
+                            {% if pending_actions.failed_payments > 0 %}
+                                <span class="pending-badge">{{ pending_actions.failed_payments }}</span>
+                            {% else %}
+                                <span class="badge bg-success">0</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="status-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>Messages non lus</span>
+                            {% if pending_actions.unread_messages > 0 %}
+                                <span class="pending-badge">{{ pending_actions.unread_messages }}</span>
+                            {% else %}
+                                <span class="badge bg-success">0</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Statistics Row -->
+    <div class="row mb-4">
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">👥 Répartition Utilisateurs</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Administrateurs</span>
+                            <strong>{{ admins_count }}</strong>
+                        </div>
+                        <div class="progress-bar-custom">
+                            <div class="progress-fill bg-danger" style="width: {% widthratio admins_count total_users 100 %}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Formateurs</span>
+                            <strong>{{ formateurs_count }}</strong>
+                        </div>
+                        <div class="progress-bar-custom">
+                            <div class="progress-fill bg-warning" style="width: {% widthratio formateurs_count total_users 100 %}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Apprenants</span>
+                            <strong>{{ apprenants_count }}</strong>
+                        </div>
+                        <div class="progress-bar-custom">
+                            <div class="progress-fill bg-success" style="width: {% widthratio apprenants_count total_users 100 %}%"></div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <span>Utilisateurs actifs (30j)</span>
+                        <strong class="text-primary">{{ active_users_30_days }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📚 État des Formations</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Publiées</span>
+                            <strong class="text-success">{{ formations_publiees }}</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>En cours</span>
+                            <strong class="text-warning">{{ formations_en_cours }}</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Terminées</span>
+                            <strong class="text-info">{{ formations_terminees }}</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Brouillons</span>
+                            <strong class="text-secondary">{{ formations_brouillon }}</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Annulées</span>
+                            <strong class="text-danger">{{ formations_annulees }}</strong>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    <div class="text-center">
+                        <small class="text-muted">Taux de complétion cours: {{ course_completion_rate }}%</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">🏆 Top Formations</h5>
+                </div>
+                <div class="card-body">
+                    {% for formation in popular_formations %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="flex-grow-1">
+                            <strong class="d-block">{{ formation.titre|truncatechars:25 }}</strong>
+                            <small class="text-muted">{{ formation.formateur.utilisateur.get_full_name }}</small>
+                        </div>
+                        <span class="badge bg-primary">{{ formation.participant_count|default:0 }}</span>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted text-center">Aucune donnée disponible</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance and Activity Row -->
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">🏅 Performance Formateurs</h5>
+                </div>
+                <div class="card-body">
+                    {% for trainer in trainer_performance %}
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" 
+                             style="width: 40px; height: 40px;">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <strong>{{ trainer.utilisateur.get_full_name }}</strong>
+                            <div class="small text-muted">
+                                {{ trainer.formation_count|default:0 }} formation{{ trainer.formation_count|pluralize }} • 
+                                {{ trainer.total_participants|default:0 }} participant{{ trainer.total_participants|pluralize }}
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <strong class="text-warning">
+                                {% if trainer.avg_rating %}{{ trainer.avg_rating|floatformat:1 }}/5{% else %}N/A{% endif %}
+                            </strong>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted text-center">Aucun formateur évalué</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">🕒 Activité Récente</h5>
+                </div>
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    {% for activity in recent_activity %}
+                    <div class="activity-item">
+                        <div class="activity-icon bg-{{ activity.color }} text-white">
+                            <i class="fas fa-{{ activity.icon }}"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div>{{ activity.message }}</div>
+                            <small class="text-muted">{{ activity.date|timesince }} ago</small>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted text-center">Aucune activité récente</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions Row -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">⚡ Actions Rapides</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                            <a href="{% url 'formations:admin_formation_create' %}" class="btn btn-success w-100">
+                                <i class="fas fa-plus-circle"></i><br>
+                                <small>Nouvelle Formation</small>
+                            </a>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                            <a href="{% url 'formations:admin_list' %}" class="btn btn-primary w-100">
+                                <i class="fas fa-graduation-cap"></i><br>
+                                <small>Gérer Formations</small>
+                            </a>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                            <a href="/admin/users/utilisateur/" class="btn btn-info w-100">
+                                <i class="fas fa-users"></i><br>
+                                <small>Gérer Utilisateurs</small>
+                            </a>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                            <a href="/admin/payments/paiement/" class="btn btn-warning w-100">
+                                <i class="fas fa-credit-card"></i><br>
+                                <small>Gérer Paiements</small>
+                            </a>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                            <a href="/admin/messaging/message/" class="btn btn-secondary w-100">
+                                <i class="fas fa-envelope"></i><br>
+                                <small>Messages</small>
+                            </a>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                            <a href="/admin/" class="btn btn-dark w-100">
+                                <i class="fas fa-cog"></i><br>
+                                <small>Admin Django</small>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Update timestamp
+    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+    
+    // Chart data
+    const chartData = {
+        revenue: {
+            labels: {{ revenue_by_month_json|safe }}.map(item => item.month),
+            data: {{ revenue_by_month_json|safe }}.map(item => item.revenue),
+            label: 'Revenus (TND)',
+            color: 'rgb(255, 193, 7)'
+        },
+        users: {
+            labels: {{ user_growth_json|safe }}.map(item => item.month),
+            data: {{ user_growth_json|safe }}.map(item => item.users),
+            label: 'Nouveaux Utilisateurs',
+            color: 'rgb(13, 110, 253)'
+        },
+        enrollments: {
+            labels: {{ enrollment_trends_json|safe }}.map(item => item.month),
+            data: {{ enrollment_trends_json|safe }}.map(item => item.enrollments),
+            label: 'Inscriptions',
+            color: 'rgb(25, 135, 84)'
+        }
+    };
+    
+    // Initialize chart
+    const ctx = document.getElementById('analyticsChart').getContext('2d');
+    let currentChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartData.revenue.labels,
+            datasets: [{
+                label: chartData.revenue.label,
+                data: chartData.revenue.data,
+                borderColor: chartData.revenue.color,
+                backgroundColor: chartData.revenue.color + '20',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Chart switching function
+    window.showChart = function(type) {
+        // Update button states
+        document.querySelectorAll('.btn-group .btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        
+        // Update chart
+        const data = chartData[type];
+        currentChart.data.labels = data.labels;
+        currentChart.data.datasets[0].label = data.label;
+        currentChart.data.datasets[0].data = data.data;
+        currentChart.data.datasets[0].borderColor = data.color;
+        currentChart.data.datasets[0].backgroundColor = data.color + '20';
+        currentChart.update();
+    };
+    
+    // Auto-refresh every 5 minutes
+    setInterval(function() {
+        location.reload();
+    }, 5 * 60 * 1000);
+});
+</script>
+{% endblock %}

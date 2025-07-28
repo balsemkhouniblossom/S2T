@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+        
+        p {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .feature {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .feature h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .feature p {
+            font-size: 0.9em;
+            margin: 0;
+        }
+        
+        .admin-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: transform 0.3s ease;
+        }
+        
+        .admin-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .stats {
+            background: #e8f4f8;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .stats h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 {{ title }}</h1>
+        <p>{{ description }}</p>
+        
+        <div class="stats">
+            <h3>📊 Système Opérationnel</h3>
+            <p>✅ Base de données configurée<br>
+            ✅ Modèles créés et migrés<br>
+            ✅ Interface d'administration prête<br>
+            ✅ Système d'authentification actif</p>
+        </div>
+        
+        <div class="features">
+            <div class="feature">
+                <h3>👥 Gestion des Utilisateurs</h3>
+                <p>Formateurs, Apprenants, Administrateurs avec profils complets</p>
+            </div>
+            
+            <div class="feature">
+                <h3>📚 Formations</h3>
+                <p>Planification, salles, présences, évaluations et attestations</p>
+            </div>
+            
+            <div class="feature">
+                <h3>📖 Cours</h3>
+                <p>Ressources, progression, commentaires et évaluations</p>
+            </div>
+            
+            <div class="feature">
+                <h3>💬 Messagerie</h3>
+                <p>Messages privés, groupes de discussion et forums</p>
+            </div>
+            
+            <div class="feature">
+                <h3>💳 Paiements</h3>
+                <p>Facturations, remises, sponsoring et organisations</p>
+            </div>
+            
+            <div class="feature">
+                <h3>🔔 Notifications</h3>
+                <p>Système de notifications et gestion des réclamations</p>
+            </div>
+        </div>
+        
+        <a href="/admin/" class="admin-link">
+            🔧 Accéder à l'Administration
+        </a>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+            <p style="font-size: 0.9em; color: #999;">
+                Connectez-vous avec votre compte administrateur pour commencer à utiliser la plateforme.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

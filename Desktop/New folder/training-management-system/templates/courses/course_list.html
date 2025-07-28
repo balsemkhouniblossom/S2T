@@ -1,0 +1,305 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cours disponibles{% endblock %}
+
+{% block extra_css %}
+<style>
+    .course-card {
+        border: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+        height: 100%;
+    }
+    
+    .course-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+    
+    .course-image {
+        height: 180px;
+        object-fit: cover;
+        width: 100%;
+    }
+    
+    .niveau-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1;
+    }
+    
+    .duration-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 1;
+        background: rgba(0,0,0,0.7);
+        color: white;
+    }
+    
+    .search-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .rating-stars {
+        color: #ffc107;
+        font-size: 0.9rem;
+    }
+    
+    .course-meta {
+        font-size: 0.85rem;
+    }
+    
+    .filter-section {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Search Section -->
+<div class="search-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 mx-auto text-center">
+                <h1 class="mb-4">Bibliothèque de Cours</h1>
+                <p class="lead mb-4">Apprenez à votre rythme avec nos cours en ligne</p>
+                
+                <!-- Search Form -->
+                <form method="GET" class="mb-4">
+                    <div class="row g-2">
+                        <div class="col-md-5">
+                            <input type="text" name="q" class="form-control form-control-lg" 
+                                   placeholder="Rechercher un cours..." value="{{ request.GET.q }}">
+                        </div>
+                        <div class="col-md-3">
+                            <select name="niveau" class="form-control form-control-lg">
+                                <option value="">Tous les niveaux</option>
+                                <option value="debutant" {% if request.GET.niveau == 'debutant' %}selected{% endif %}>Débutant</option>
+                                <option value="intermediaire" {% if request.GET.niveau == 'intermediaire' %}selected{% endif %}>Intermédiaire</option>
+                                <option value="avance" {% if request.GET.niveau == 'avance' %}selected{% endif %}>Avancé</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-light btn-lg w-100">
+                                <i class="fas fa-search"></i> Rechercher
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Filters -->
+    <div class="filter-section">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Durée minimum (min)</label>
+                <input type="number" name="duree_min" class="form-control" 
+                       value="{{ request.GET.duree_min }}" placeholder="Ex: 30">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Durée maximum (min)</label>
+                <input type="number" name="duree_max" class="form-control" 
+                       value="{{ request.GET.duree_max }}" placeholder="Ex: 120">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Formateur</label>
+                <select name="formateur" class="form-control">
+                    <option value="">Tous les formateurs</option>
+                    {% for formateur in formateurs %}
+                        <option value="{{ formateur.id }}" {% if request.GET.formateur == formateur.id|stringformat:"s" %}selected{% endif %}>
+                            {{ formateur.get_full_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2>Cours disponibles</h2>
+            <p class="text-muted">{{ courses|length }} cours trouvé{{ courses|length|pluralize }}</p>
+        </div>
+        <div class="col-md-6 text-end">
+            {% if user.is_authenticated and user.user_type == 'formateur' or user.user_type == 'administrateur' %}
+                <a href="{% url 'courses:create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Créer un cours
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Courses Grid -->
+    <div class="row">
+        {% for course in courses %}
+        <div class="col-md-4 col-lg-3 mb-4">
+            <div class="card course-card">
+                <div class="position-relative">
+                    {% if course.image %}
+                        <img src="{{ course.image.url }}" class="card-img-top course-image" alt="{{ course.titre }}">
+                    {% else %}
+                        <div class="course-image bg-light d-flex align-items-center justify-content-center">
+                            <i class="fas fa-play-circle fa-3x text-muted"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <span class="badge bg-primary niveau-badge">
+                        {{ course.get_niveau_display }}
+                    </span>
+                    
+                    <span class="badge duration-badge">
+                        <i class="fas fa-clock"></i> {{ course.duree_minutes }}min
+                    </span>
+                </div>
+                
+                <div class="card-body d-flex flex-column">
+                    <h6 class="card-title">{{ course.titre }}</h6>
+                    <p class="card-text text-muted small flex-grow-1">
+                        {{ course.description|truncatewords:15 }}
+                    </p>
+                    
+                    <div class="course-meta mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <small class="text-muted">
+                                <i class="fas fa-user"></i> {{ course.formateur.get_full_name|truncatechars:20 }}
+                            </small>
+                        </div>
+                        
+                        {% if course.moyenne_notes %}
+                        <div class="rating-display">
+                            <span class="rating-stars">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= course.moyenne_notes|floatformat:0 %}
+                                        <i class="fas fa-star"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </span>
+                            <small class="text-muted ms-1">
+                                {{ course.moyenne_notes|floatformat:1 }} ({{ course.commentaires.count }})
+                            </small>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'courses:detail' course.id %}" class="btn btn-outline-primary btn-sm">
+                            Voir détails
+                        </a>
+                        {% if user.is_authenticated %}
+                            {% if course in user.cours_progressions.all %}
+                                <a href="{% url 'courses:watch' course.id %}" class="btn btn-success btn-sm">
+                                    <i class="fas fa-play"></i> Continuer
+                                </a>
+                            {% else %}
+                                <a href="{% url 'courses:enroll' course.id %}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus"></i> Commencer
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="empty-state">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">Aucun cours trouvé</h4>
+                <p class="text-muted">Essayez de modifier vos critères de recherche</p>
+                {% if user.is_authenticated and user.user_type == 'formateur' or user.user_type == 'administrateur' %}
+                    <a href="{% url 'courses:create' %}" class="btn btn-primary mt-3">
+                        <i class="fas fa-plus"></i> Créer le premier cours
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mt-5 mb-4">
+        <div class="col-md-3 text-center">
+            <div class="stat-card">
+                <h4 class="text-primary">{{ total_courses }}</h4>
+                <p class="text-muted">Cours disponibles</p>
+            </div>
+        </div>
+        <div class="col-md-3 text-center">
+            <div class="stat-card">
+                <h4 class="text-success">{{ total_formateurs }}</h4>
+                <p class="text-muted">Formateurs actifs</p>
+            </div>
+        </div>
+        <div class="col-md-3 text-center">
+            <div class="stat-card">
+                <h4 class="text-info">{{ total_hours }}</h4>
+                <p class="text-muted">Heures de contenu</p>
+            </div>
+        </div>
+        <div class="col-md-3 text-center">
+            <div class="stat-card">
+                <h4 class="text-warning">4.7/5</h4>
+                <p class="text-muted">Note moyenne</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav aria-label="Navigation des cours">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.niveau %}&niveau={{ request.GET.niveau }}{% endif %}{% if request.GET.formateur %}&formateur={{ request.GET.formateur }}{% endif %}">
+                        &laquo; Premier
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.niveau %}&niveau={{ request.GET.niveau }}{% endif %}{% if request.GET.formateur %}&formateur={{ request.GET.formateur }}{% endif %}">
+                        Précédent
+                    </a>
+                </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <span class="page-link">
+                    Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
+                </span>
+            </li>
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.niveau %}&niveau={{ request.GET.niveau }}{% endif %}{% if request.GET.formateur %}&formateur={{ request.GET.formateur }}{% endif %}">
+                        Suivant
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.niveau %}&niveau={{ request.GET.niveau }}{% endif %}{% if request.GET.formateur %}&formateur={{ request.GET.formateur }}{% endif %}">
+                        Dernier &raquo;
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
