@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Gérer les cours de la formation : {{ formation.titre }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="cours" class="form-label">Sélectionnez les cours à inclure :</label>
+            <select id="cours" name="cours" class="form-select" multiple size="10">
+                {% for cours in all_courses %}
+                <option value="{{ cours.id }}" {% if cours in formation.cours.all %}selected{% endif %}>{{ cours.titre }} ({{ cours.get_niveau_display }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+        <a href="{% url 'formations:my_formations' %}" class="btn btn-secondary">Annuler</a>
+    </form>
+</div>
+{% endblock %}

@@ -3,8 +3,9 @@ from django.db import models
 from django.utils import timezone
 
 
+
 class Utilisateur(AbstractUser):
-    """Base user model with email authentication"""
+    """Base user model with email authentication and extended admin fields"""
     email = models.EmailField(unique=True)
     nom = models.CharField(max_length=100)
     prenom = models.CharField(max_length=100)
@@ -16,16 +17,73 @@ class Utilisateur(AbstractUser):
     derniere_connexion = models.DateTimeField(null=True, blank=True)
     derniere_deconnexion = models.DateTimeField(null=True, blank=True)
     confirmation = models.CharField(max_length=20, default='En cours')
-    
+    # New fields for admin analytics
+    is_locked = models.BooleanField(default=False)
+    failed_login_attempts = models.PositiveIntegerField(default=0)
+    last_login_ip = models.GenericIPAddressField(null=True, blank=True)
+    last_login_device = models.CharField(max_length=200, blank=True)
+    last_login_browser = models.CharField(max_length=200, blank=True)
+    two_factor_enabled = models.BooleanField(default=False)
+    subscription_plan = models.CharField(max_length=100, blank=True)
+    subscription_renewal = models.DateField(null=True, blank=True)
+    gdpr_consent = models.BooleanField(default=False)
+    marketing_consent = models.BooleanField(default=False)
+    account_deletion_requested = models.BooleanField(default=False)
+    admin_note = models.TextField(blank=True)
+    custom_tags = models.CharField(max_length=200, blank=True)
+    last_password_change = models.DateTimeField(null=True, blank=True)
+    # For gamification/achievements
+    badges = models.ManyToManyField('Badge', blank=True, related_name='users')
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'nom', 'prenom']
-    
+
     class Meta:
         verbose_name = 'Utilisateur'
         verbose_name_plural = 'Utilisateurs'
-    
+
     def __str__(self):
         return f"{self.prenom} {self.nom} ({self.email})"
+
+
+# Activity log for user actions
+class UserActivityLog(models.Model):
+    user = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, related_name='activity_logs')
+    action = models.CharField(max_length=200)
+    timestamp = models.DateTimeField(default=timezone.now)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    device = models.CharField(max_length=200, blank=True)
+    browser = models.CharField(max_length=200, blank=True)
+    details = models.TextField(blank=True)
+    def __str__(self):
+        return f"{self.user} - {self.action} @ {self.timestamp}"
+
+# Badges/achievements
+class Badge(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    icon = models.CharField(max_length=100, blank=True)
+    def __str__(self):
+        return self.name
+
+# Mentor/mentee relationships
+class Mentorship(models.Model):
+    mentor = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, related_name='mentees')
+    mentee = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, related_name='mentors')
+    start_date = models.DateField(default=timezone.now)
+    end_date = models.DateField(null=True, blank=True)
+    active = models.BooleanField(default=True)
+    def __str__(self):
+        return f"{self.mentor} mentors {self.mentee}"
+
+# Account deletion requests
+class AccountDeletionRequest(models.Model):
+    user = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, related_name='deletion_requests')
+    requested_at = models.DateTimeField(default=timezone.now)
+    processed = models.BooleanField(default=False)
+    processed_at = models.DateTimeField(null=True, blank=True)
+    def __str__(self):
+        return f"Deletion request for {self.user}"
 
 
 

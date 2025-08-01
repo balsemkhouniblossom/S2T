@@ -138,11 +138,54 @@
             <p class="text-muted">{{ courses|length }} cours trouvé{{ courses|length|pluralize }}</p>
         </div>
         <div class="col-md-6 text-end">
-            {% if user.is_authenticated and user.user_type == 'formateur' or user.user_type == 'administrateur' %}
-                <a href="{% url 'courses:create' %}" class="btn btn-primary">
+            {% if user.is_authenticated and is_admin or is_formateur %}
+                <a href="{% url 'courses:create' %}" class="btn btn-primary me-2">
                     <i class="fas fa-plus"></i> Créer un cours
                 </a>
+                <a href="#" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteCourseModal">
+                    <i class="fas fa-trash"></i> Supprimer un cours
+                </a>
             {% endif %}
+
+            <!-- Modal for course deletion (admin/formateur can select a course to delete) -->
+            <div class="modal fade" id="deleteCourseModal" tabindex="-1" aria-labelledby="deleteCourseModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="deleteCourseModalLabel">Supprimer un cours</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <form method="get" action="">
+                  <div class="modal-body">
+                    <label for="courseToDelete" class="form-label">Sélectionnez le cours à supprimer :</label>
+                    <select id="courseToDelete" name="course_id" class="form-select">
+                      {% for course in courses %}
+                        <option value="{{ course.id }}">{{ course.titre }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <a id="deleteCourseBtn" href="#" class="btn btn-danger">Supprimer</a>
+                  </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var deleteBtn = document.getElementById('deleteCourseBtn');
+                var select = document.getElementById('courseToDelete');
+                if(deleteBtn && select) {
+                    select.addEventListener('change', function() {
+                        deleteBtn.href = '/courses/' + select.value + '/delete/';
+                    });
+                    // Set initial href
+                    deleteBtn.href = '/courses/' + select.value + '/delete/';
+                }
+            });
+            </script>
         </div>
     </div>
 

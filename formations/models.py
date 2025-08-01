@@ -80,6 +80,7 @@ class Formation(models.Model):
     date_debut = models.DateTimeField()
     date_fin = models.DateTimeField()
     participants = models.ManyToManyField(Apprenant, blank=True, related_name='formations_inscrites')
+    cours = models.ManyToManyField('courses.Cours', blank=True, related_name='formations')
     
     class Meta:
         verbose_name = 'Formation'
@@ -198,9 +199,10 @@ class Attestation(models.Model):
 
 class TrainerApplication(models.Model):
     """Trainer applications for proposed formations"""
-    formation = models.ForeignKey(Formation, on_delete=models.CASCADE, related_name='trainer_applications')
-    formateur = models.ForeignKey('users.Formateur', on_delete=models.CASCADE, related_name='applications')
+    formation = models.ForeignKey(Formation, on_delete=models.CASCADE, related_name='trainer_applications', null=True, blank=True)
+    formateur = models.ForeignKey('users.Formateur', on_delete=models.CASCADE, related_name='applications', null=True, blank=True)
     message = models.TextField(blank=True, help_text="Message de motivation ou présentation")
+    suggested_formation = models.CharField(max_length=255, blank=True, null=True, help_text="Formation suggérée par le candidat")
     motivation = models.TextField(help_text="Pourquoi souhaitez-vous animer cette formation?")
     experience_pertinente = models.TextField(help_text="Expérience pertinente pour cette formation")
     tarif_propose = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, help_text="Tarif horaire proposé")

@@ -20,6 +20,7 @@ from django.conf.urls.static import static
 from django.shortcuts import redirect
 from . import views
 from . import admin_views
+from formations.views import public_trainer_application
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -41,6 +42,7 @@ urlpatterns = [
     path('login/', lambda request: redirect('/users/login/')),
     path('register/', lambda request: redirect('/users/register/')),
     path('dashboard/', lambda request: redirect('/users/dashboard/')),
+    path('devenir-formateur/', public_trainer_application, name='public_trainer_application'),
 ]
 
 # Serve media files during development

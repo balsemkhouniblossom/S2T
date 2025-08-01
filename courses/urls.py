@@ -14,6 +14,8 @@ urlpatterns = [
     
     # Course management
     path('create/', views.course_create, name='create'),
+    path('<int:course_id>/edit/', views.course_edit, name='edit'),
+    path('<int:course_id>/delete/', views.course_delete, name='delete'),
     
     # My courses
     path('my-courses/', views.my_courses, name='my_courses'),

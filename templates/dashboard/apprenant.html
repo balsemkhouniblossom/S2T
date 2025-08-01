@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load custom_filters %}
 
 {% block title %}Dashboard Apprenant - Training Management System{% endblock %}
 
@@ -366,6 +367,220 @@
             </a>
         </div>
     </div>
+
+    <!-- Progress Dashboard -->
+    <div class="content-card mb-4">
+    <div class="content-card mb-4">
+        <h5><i class="fas fa-certificate"></i> Progression vers la certification</h5>
+        {% for cert in certifications %}
+            <div class="mb-3">
+                <strong>{{ cert.titre }}</strong> ({{ cert.cours.titre }})<br>
+                {% for progress in cert_progress %}
+                    {% if progress.certification.id == cert.id %}
+                        {% if progress.completed %}
+                            <span class="badge bg-success">Certifié</span>
+                        {% else %}
+                                {% with cert_id=cert.id|stringformat:'s' %}
+                                    {% with stats=cert_quiz_stats|dict_get:cert_id %}
+                                        {% if stats %}
+                                            {{ stats.passed }} sur {{ stats.total }} quiz requis réussis
+                                            <div class="progress mt-2" style="height: 18px;">
+                                                <div class="progress-bar bg-info" role="progressbar" style="width: {{ stats.percent }}%;" aria-valuenow="{{ stats.percent }}" aria-valuemin="0" aria-valuemax="100">
+                                                    {{ stats.percent }}%
+                                                </div>
+                                            </div>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Aucune statistique</span>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endwith %}
+                        {% endif %}
+                        
+                    {% endif %}
+                {% empty %}
+                    <span class="badge bg-secondary">Aucun progrès enregistré</span>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+                                            {{ progression.progression_pourcentage }}%
+                                        </div>
+                                    </div>
+                                    <small>{{ progression.ressources_completees.count }}/{{ progression.cours.ressources.count }} leçons</small>
+                                </td>
+                    {% for progression in progressions %}
+                        ...existing code for each progression row...
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                <i class="fas fa-info-circle fa-2x mb-2"></i><br>
+                                Aucun cours suivi pour le moment.<br>
+                                <a href="{% url 'formations:list' %}" class="btn btn-outline-primary btn-sm mt-2">Découvrir les cours</a>
+                            </td>
+                        </tr>
+                    
+                                        {% endfor %}
+                                    </ul>
+                                </td>
+                                <td>
+                                    {% if progression.temps_passe_minutes %}
+                                        {{ progression.temps_passe_minutes|floatformat:0 }} min
+                                    {% else %}-{% endif %}
+                                </td>
+                                <td>
+                                    {% if progression.cours.quizzes.all %}
+                                        {% for quiz in progression.cours.quizzes.all %}
+                                            {% with result_found=False %}
+                                                {% for result in quiz.results.all %}
+                                                    {% if result.apprenant.id == apprenant.id %}
+                                                        <div>
+                                                            {{ quiz.titre }} :
+                                                            {{ result.score }}/{{ result.total }}
+                                                            {% if result.passed %}
+                                                                <span class="badge bg-success">Réussi</span>
+                                                            {% else %}
+                                                                <span class="badge bg-warning text-dark">À revoir</span>
+                                                            {% endif %}
+                                                        </div>
+                                                        {% with result_found=True %}{% endwith %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                                {% if not quiz.results.all %}
+                                                    <div>
+                                                        {{ quiz.titre }} : <span class="badge bg-secondary">Non tenté</span>
+                                                    </div>
+                                                {% endif %}
+                                            {% endwith %}
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="text-muted">Aucun quiz</span>
+                                    {% endif %}
+                                </td>
+{% for progression in progressions %}
+    <tr>
+        <!-- Cours Title -->
+        <td>
+            <strong>{{ progression.cours.titre }}</strong><br>
+            <span class="text-muted small">{{ progression.cours.niveau }}</span>
+        </td>
+        <!-- Progression Bar -->
+        <td style="min-width:180px;">
+            <div class="progress" style="height: 18px;">
+                <div class="progress-bar bg-success" role="progressbar" style="width: {{ progression.progression_pourcentage }}%;" aria-valuenow="{{ progression.progression_pourcentage }}" aria-valuemin="0" aria-valuemax="100">
+                    {{ progression.progression_pourcentage }}%
+                </div>
+            </div>
+            <small>{{ progression.ressources_completees.count }}/{{ progression.cours.ressources.count }} leçons</small>
+        </td>
+        <!-- Time Spent -->
+        <td>
+            {% if progression.temps_passe_minutes %}
+                <i class="fas fa-clock text-info"></i> {{ progression.temps_passe_minutes|floatformat:0 }} min
+            {% else %}
+                <span class="text-muted">-</span>
+            {% endif %}
+        </td>
+        <!-- Quiz Results -->
+        <td>
+            {% if progression.cours.quizzes.all %}
+                {% for quiz in progression.cours.quizzes.all %}
+                    {% with result_found=False %}
+                        {% for result in quiz.results.all %}
+                            {% if result.apprenant.id == apprenant.id %}
+                                <div>
+                                    <strong>{{ quiz.titre }}</strong> :
+                                    {{ result.score }}/{{ result.total }}
+                                    {% if result.passed %}
+                                        <span class="badge bg-success">Réussi</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">À revoir</span>
+                                    {% endif %}
+                                </div>
+                                {% with result_found=True %}{% endwith %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if not quiz.results.all %}
+                            <div>
+                                <strong>{{ quiz.titre }}</strong> : <span class="badge bg-secondary">Non tenté</span>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                {% endfor %}
+            {% else %}
+                <span class="text-muted">Aucun quiz</span>
+            {% endif %}
+        </td>
+        <!-- Action -->
+        <td>
+            <a href="{% url 'courses:watch' progression.cours.id %}" class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-play"></i> Continuer
+            </a>
+        </td>
+    </tr>
+{% empty %}
+    <tr>
+        <td colspan="5" class="text-center text-muted py-4">
+            <i class="fas fa-info-circle fa-2x mb-2"></i><br>
+            Aucun cours suivi pour le moment.<br>
+            <a href="{% url 'formations:list' %}" class="btn btn-outline-primary btn-sm mt-2">Découvrir les cours</a>
+        </td>
+    </tr>
+{% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    <!-- Time & Engagement Section -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="content-card">
+            <h5><i class="fas fa-clock"></i> Temps total passé</h5>
+            <p class="display-6">{{ total_time_minutes|default:0 }} min</p>
+            <small class="text-muted">Engagement quotidien moyen : {{ avg_daily_minutes|default:0 }} min</small>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="content-card">
+            <h5><i class="fas fa-bullseye"></i> Objectif d'apprentissage</h5>
+            {% for goal in learning_goals %}
+                <div>
+                    <strong>Objectif :</strong> {{ goal.objectif_lecons }} leçons ({{ goal.periode }})<br>
+                    <strong>Progression :</strong> {{ goal.lecons_terminees }}/{{ goal.objectif_lecons }}<br>
+                    <strong>Période :</strong> {{ goal.date_debut }} - {{ goal.date_fin }}<br>
+                    {% if goal.atteint %}
+                        <span class="badge bg-success">Atteint</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">En cours</span>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <span class="text-muted">Aucun objectif défini pour cette période.</span>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Learning Path Section -->
+<div class="content-card mb-4">
+    <h5><i class="fas fa-route"></i> Parcours d'apprentissage</h5>
+    <div class="d-flex flex-wrap gap-3">
+        {% for niveau, status in niveau_status.items %}
+            <div class="p-3 border rounded text-center" style="min-width:120px;">
+                <strong>{{ niveau|title }}</strong><br>
+                {% if status == 'completed' %}
+                    <span class="text-success"><i class="fas fa-check-circle"></i> Terminé</span>
+                {% elif status == 'in_progress' %}
+                    <span class="text-info"><i class="fas fa-spinner"></i> En cours</span>
+                {% else %}
+                    <span class="text-muted"><i class="fas fa-lock"></i> Verrouillé</span>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+
 
     <!-- Content Grid -->
     <div class="content-grid">

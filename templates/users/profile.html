@@ -166,10 +166,10 @@
                                 {% endif %}
                             </div>
 
+
                         {% elif user_type == 'apprenant' and apprenant %}
                             <hr>
                             <h6 class="text-success">👨‍🎓 Informations Apprenant</h6>
-                            
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
@@ -184,7 +184,6 @@
                                     </div>
                                 </div>
                             </div>
-
                             <div class="mb-3">
                                 <label for="niveau_etude" class="form-label">Niveau d'étude</label>
                                 <select class="form-control" id="niveau_etude" name="niveau_etude">
@@ -196,10 +195,63 @@
                                     <option value="doctorat" {% if apprenant.niveau_etude == 'doctorat' %}selected{% endif %}>Doctorat</option>
                                 </select>
                             </div>
-
                             <div class="mb-3">
                                 <label for="objectifs" class="form-label">Objectifs d'apprentissage</label>
                                 <textarea class="form-control" id="objectifs" name="objectifs" rows="3">{{ apprenant.objectifs|default:'' }}</textarea>
+                            </div>
+
+                            <!-- Progress Dashboard -->
+                            <hr>
+                            <h6 class="text-info">📈 Suivi de progression des cours</h6>
+                            <div class="table-responsive mb-3">
+                                <table class="table table-bordered table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Cours</th>
+                                            <th>Modules/Lessons complétés</th>
+                                            <th>Score/Note</th>
+                                            <th>Temps passé</th>
+                                            <th>Progression (%)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% if progressions and progressions|length > 0 %}
+                                            {% for progression in progressions %}
+                                                <tr>
+                                                    <td>{{ progression.cours.titre }}</td>
+                                                    <td>
+                                                        {% with total=progression.cours.ressources.count %}
+                                                            {{ progression.ressources_completees.count }}/{{ total }}
+                                                        {% endwith %}
+                                                    </td>
+                                                    <td>
+                                                        {% with note=progression.cours.note_moyenne %}
+                                                            {% if note %}{{ note|floatformat:1 }}/5{% else %}-{% endif %}
+                                                        {% endwith %}
+                                                    </td>
+                                                    <td>
+                                                        {% if progression.temps_passe_minutes %}
+                                                            {{ progression.temps_passe_minutes|floatformat:0 }} min
+                                                        {% else %}-{% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if progression.progression_pourcentage is not None %}
+                                                            {{ progression.progression_pourcentage|floatformat:0 }}%
+                                                        {% else %}-{% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="5" class="text-center text-muted py-4">
+                                                    <i class="fas fa-info-circle fa-2x mb-2"></i><br>
+                                                    Aucun cours suivi pour le moment.<br>
+                                                    <a href="{% url 'formations:list' %}" class="btn btn-outline-primary btn-sm mt-2">Découvrir les cours</a>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
                             </div>
 
                         {% elif user_type == 'administrateur' and admin %}

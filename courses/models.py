@@ -5,17 +5,18 @@ from users.models import Formateur, Apprenant
 
 class Cours(models.Model):
     """Individual courses"""
+    NIVEAU_CHOICES = [
+        ('debutant', 'Débutant'),
+        ('intermediaire', 'Intermédiaire'),
+        ('avance', 'Avancé'),
+        ('expert', 'Expert'),
+    ]
     titre = models.CharField(max_length=200)
     description = models.TextField()
     contenu = models.TextField()
     formateur = models.ForeignKey(Formateur, on_delete=models.CASCADE)
     duree_minutes = models.PositiveIntegerField()
-    niveau = models.CharField(max_length=50, choices=[
-        ('debutant', 'Débutant'),
-        ('intermediaire', 'Intermédiaire'),
-        ('avance', 'Avancé'),
-        ('expert', 'Expert'),
-    ])
+    niveau = models.CharField(max_length=50, choices=NIVEAU_CHOICES)
     categorie = models.CharField(max_length=100)
     mots_cles = models.CharField(max_length=500, help_text="Mots-clés séparés par des virgules")
     image_couverture = models.ImageField(upload_to='cours/', blank=True, null=True)

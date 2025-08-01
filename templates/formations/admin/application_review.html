@@ -40,8 +40,24 @@
                     <h4><i class="fas fa-graduation-cap"></i> Formation Demandée</h4>
                 </div>
                 <div class="card-body">
-                    <h3>{{ application.formation.titre }}</h3>
-                    <p class="text-muted mb-3">{{ application.formation.description }}</p>
+                    <h3>
+                        {% if application.formation %}
+                            {{ application.formation.titre }}
+                        {% else %}
+                            <span class="text-warning">Aucune formation sélectionnée</span>
+                        {% endif %}
+                    </h3>
+                    <p class="text-muted mb-3">
+                        {% if application.formation %}
+                            {{ application.formation.description }}
+                        {% endif %}
+                    </p>
+                    {% if application.suggested_formation %}
+                        <div class="alert alert-info">
+                            <strong><i class="fas fa-lightbulb"></i> Formation suggérée par le candidat:</strong>
+                            <span>{{ application.suggested_formation }}</span>
+                        </div>
+                    {% endif %}
                     
                     <div class="row">
                         <div class="col-md-6">
@@ -219,12 +235,14 @@
                             <i class="fas fa-arrow-left"></i> Retour à la liste
                         </a>
                         
-                        <a href="{% url 'formations:admin_formation_detail' application.formation.id %}" 
-                           class="btn btn-outline-primary">
-                            <i class="fas fa-info-circle"></i> Voir la formation
-                        </a>
+                        {% if application.formation %}
+                            <a href="{% url 'formations:admin_formation_detail' application.formation.id %}" 
+                               class="btn btn-outline-primary">
+                                <i class="fas fa-info-circle"></i> Voir la formation
+                            </a>
+                        {% endif %}
 
-                        {% if application.statut == 'acceptee' and not application.formation.formateur %}
+                        {% if application.statut == 'acceptee' and application.formation and not application.formation.formateur %}
                             <a href="{% url 'formations:admin_formation_detail' application.formation.id %}" 
                                class="btn btn-success">
                                 <i class="fas fa-user-plus"></i> Assigner formateur
@@ -249,7 +267,7 @@
                                 </div>
                             </div>
                             <div class="col-6">
-                                <h4 class="text-success">{{ application.formation.applications.filter.statut='acceptee'|length }}</h4>
+                                <h4 class="text-success">{{ accepted_count }}</h4>
                                 <small class="text-muted">Acceptée(s)</small>
                             </div>
                         </div>
@@ -258,13 +276,13 @@
                     <div class="row">
                         <div class="col-6">
                             <div class="border-end">
-                                <h4 class="text-warning">{{ application.formation.applications.filter.statut='en_attente'|length }}</h4>
+                                <h4 class="text-warning">{{ pending_count }}</h4>
                                 <small class="text-muted">En attente</small>
                             </div>
                         </div>
                         <div class="col-6">
-                            <h4 class="text-danger">{{ application.formation.applications.filter.statut='rejetee'|length }}</h4>
-                            <small class="text-muted">Rejetée(s)</small>
+                                    <h4 class="text-danger">{{ rejected_count }}</h4>
+                                    <small class="text-muted">Rejetée(s)</small>
                         </div>
                     </div>
                 </div>

@@ -198,6 +198,52 @@ try:
 except Exception as e:
     print(f"Error creating sample tasks: {e}")
 
+
+# === DASHBOARD FEATURE DATA ===
+from courses.models import ProgressionCours, Quiz, QuizResult, Certification, CertificationProgress, LearningGoal, RessourceCours
+from django.utils import timezone
+
+try:
+    apprenant_user = User.objects.get(email='apprenant@example.com')
+    # Use the first two courses for dashboard data
+    cours1 = Cours.objects.first()
+    cours2 = Cours.objects.last()
+
+    # Create resources for each course
+    res1 = RessourceCours.objects.create(titre='Intro', cours=cours1)
+    res2 = RessourceCours.objects.create(titre='Avancé', cours=cours1)
+    res3 = RessourceCours.objects.create(titre='Déploiement', cours=cours2)
+
+    # Progressions
+    prog1 = ProgressionCours.objects.create(apprenant=apprenant_user, cours=cours1, progression_pourcentage=50, temps_passe_minutes=60)
+    prog1.ressources_completees.set([res1])
+    prog2 = ProgressionCours.objects.create(apprenant=apprenant_user, cours=cours2, progression_pourcentage=33, temps_passe_minutes=40)
+    prog2.ressources_completees.set([res3])
+
+    # Quizzes
+    quiz1 = Quiz.objects.create(titre='Quiz 1', cours=cours1)
+    quiz2 = Quiz.objects.create(titre='Quiz 2', cours=cours2)
+
+    # Quiz Results
+    QuizResult.objects.create(quiz=quiz1, apprenant=apprenant_user, score=8, total=10, passed=True)
+    QuizResult.objects.create(quiz=quiz2, apprenant=apprenant_user, score=4, total=10, passed=False)
+
+    # Certifications
+    cert1 = Certification.objects.create(titre='Certif 1', cours=cours1, description='Certification 1')
+    cert2 = Certification.objects.create(titre='Certif 2', cours=cours2, description='Certification 2')
+
+    # Certification Progress
+    CertificationProgress.objects.create(apprenant=apprenant_user, certification=cert1, completed=True)
+    CertificationProgress.objects.create(apprenant=apprenant_user, certification=cert2, completed=False)
+
+    # Learning Goals
+    LearningGoal.objects.create(apprenant=apprenant_user, objectif_lecons=5, lecons_terminees=3, periode='Hebdomadaire', date_debut=timezone.now().date(), date_fin=timezone.now().date() + timezone.timedelta(days=7), atteint=False)
+    LearningGoal.objects.create(apprenant=apprenant_user, objectif_lecons=10, lecons_terminees=10, periode='Mensuel', date_debut=timezone.now().date().replace(day=1), date_fin=timezone.now().date(), atteint=True)
+
+    print("Dashboard sample data created!")
+except Exception as e:
+    print(f"Error creating dashboard sample data: {e}")
+
 print("\nSample data creation completed!")
 print("\nTest accounts:")
 print("Admin: admin@example.com / admin123")

@@ -362,6 +362,45 @@
 {% endblock %}
 
 {% block content %}
+<!-- Notifications Panel -->
+<div class="content-card" style="background: #f8f9fa; border-left: 6px solid var(--primary-color); margin-bottom:2rem;">
+    <div class="section-header">
+        <h3 class="section-title">
+            <i class="fas fa-bell"></i> Notifications & Alertes
+        </h3>
+    </div>
+    <ul class="list-unstyled" style="max-height: 300px; overflow-y: auto;">
+        {% for notif in notifications %}
+            <li style="padding: 1rem; margin-bottom: 0.5rem; background: white; border-radius: 8px; box-shadow: var(--shadow-light); display: flex; align-items: center;">
+                <span style="font-size:1.5rem; margin-right:1rem;">
+                    {% if notif.type == 'task' %}
+                        <i class="fas fa-tasks text-info"></i>
+                    {% elif notif.type == 'session' %}
+                        <i class="fas fa-calendar-plus text-success"></i>
+                    {% elif notif.type == 'message' %}
+                        <i class="fas fa-envelope text-warning"></i>
+                    {% elif notif.type == 'reclamation' %}
+                        <i class="fas fa-life-ring text-danger"></i>
+                    {% else %}
+                        <i class="fas fa-bell text-secondary"></i>
+                    {% endif %}
+                </span>
+                <div style="flex:1;">
+                    <strong>{{ notif.title }}</strong>
+                    <div style="color:var(--text-secondary); font-size:0.95rem;">{{ notif.message }}</div>
+                    <span style="font-size:0.85rem; color:var(--info-color);">{{ notif.created_at|date:"d/m/Y H:i" }}</span>
+                </div>
+                {% if not notif.is_read %}
+                    <span style="margin-left:1rem; color:var(--danger-color); font-weight:700;">●</span>
+                {% endif %}
+            </li>
+        {% empty %}
+            <li style="padding: 1rem; background: white; border-radius: 8px; text-align:center; color:var(--text-secondary);">
+                Aucune notification pour le moment.
+            </li>
+        {% endfor %}
+    </ul>
+</div>
 <!-- Dashboard Header -->
 <div class="dashboard-header">
     <div class="container">
@@ -392,6 +431,9 @@
             <div class="stat-number" style="color: var(--primary-color);">{{ stats.users_count }}</div>
             <div class="stat-title">Utilisateurs</div>
             <div class="stat-label">{{ stats.formateurs_count }} Formateurs | {{ stats.apprenants_count }} Apprenants</div>
+            <a href="{% url 'users:user_details' %}" class="btn btn-outline-primary mt-3" id="details-users-btn">
+                <i class="fas fa-info-circle"></i> Détails Utilisateurs
+            </a>
         </div>
         
         <div class="stat-card">

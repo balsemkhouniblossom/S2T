@@ -16,6 +16,7 @@ urlpatterns = [
     
     # Formation management (for formateurs and admins)
     path('create/', views.formation_create, name='create'),
+    path('<int:formation_id>/manage-courses/', views.manage_formation_courses, name='manage_formation_courses'),
     
     # My formations
     path('my-formations/', views.my_formations, name='my_formations'),

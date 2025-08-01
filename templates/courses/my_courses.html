@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Mes Cours (Formateur)</h2>
+    {% if user.is_authenticated and user.is_superuser or user.is_authenticated and user.user_type == 'formateur' or user.is_authenticated and user.user_type == 'administrateur' %}
+        <a href="{% url 'courses:create' %}" class="btn btn-success mb-3">Créer un nouveau cours</a>
+    {% endif %}
+    {% if courses %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Titre</th>
+                        <th>Catégorie</th>
+                        <th>Niveau</th>
+                        <th>Prix</th>
+                        <th>Étudiants inscrits</th>
+                        <th>Note Moyenne</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for course in courses %}
+                    <tr>
+                        <td><a href="{% url 'courses:detail' course.id %}">{{ course.titre }}</a></td>
+                        <td>{{ course.categorie }}</td>
+                        <td>{{ course.get_niveau_display }}</td>
+                        <td>{% if course.gratuit %}Gratuit{% else %}{{ course.prix }} €{% endif %}</td>
+                        <td>{{ course.progressioncours_set.count }}</td>
+                        <td>{{ course.commentaires.aggregate_avg_note|default:0|floatformat:1 }}</td>
+                        <td>
+                            <a href="{% url 'courses:detail' course.id %}" class="btn btn-info btn-sm">Voir</a>
+                            {% if user.is_authenticated and user.is_superuser or user.is_authenticated and user.user_type == 'formateur' or user.is_authenticated and user.user_type == 'administrateur' %}
+                                <a href="{% url 'courses:edit' course.id %}" class="btn btn-warning btn-sm">Modifier</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>Vous n'avez créé aucun cours pour le moment.</p>
+    {% endif %}
+</div>
+{% endblock %}

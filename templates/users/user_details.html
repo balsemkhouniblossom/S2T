@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="mb-4"><i class="fas fa-users"></i> Détails des Utilisateurs</h1>
+<style>
+    .user-table-container { overflow-x: auto; }
+    .user-table { min-width: 1400px; font-size: 0.97rem; border-radius: 10px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .user-table th, .user-table td { vertical-align: middle !important; white-space: nowrap; padding: 0.5rem 0.7rem; }
+    .user-table th { position: sticky; top: 0; background: #f8f9fa; z-index: 2; font-weight: 600; border-bottom: 2px solid #dee2e6; }
+    .user-table tbody tr:nth-child(even) { background: #f6f8fa; }
+    .user-table tbody tr:hover { background: #e9f5ff; }
+    .profile-bar { display: inline-block; height: 8px; border-radius: 4px; background: #e0e0e0; width: 60px; margin-right: 6px; vertical-align: middle; }
+    .profile-bar-inner { display: inline-block; height: 8px; border-radius: 4px; background: #007bff; vertical-align: middle; }
+    .expand-btn { cursor: pointer; color: #007bff; }
+    .expand-row { display: none; background: #f9f9f9; }
+    .expand-row.active { display: table-row; }
+    .badge-lock { background: #dc3545; color: #fff; }
+    .badge-2fa { background: #17a2b8; color: #fff; }
+    .badge-gdpr { background: #28a745; color: #fff; }
+    .badge-warning { background: #ffc107; color: #212529; }
+</style>
+<div class="user-table-container">
+<table class="table user-table table-bordered table-hover align-middle">
+    <thead>
+        <tr>
+            <th></th>
+            <th><i class="fas fa-user"></i> Nom</th>
+            <th><i class="fas fa-envelope"></i> Email</th>
+            <th><i class="fas fa-sign-in-alt"></i> Dernière connexion</th>
+            <th><i class="fas fa-calendar-plus"></i> Créé le</th>
+            <th><i class="fas fa-check-circle"></i> Statut</th>
+            <th><i class="fas fa-user-tag"></i> Rôle</th>
+            <th><i class="fas fa-book"></i> Cours inscrits</th>
+            <th><i class="fas fa-graduation-cap"></i> Terminés</th>
+            <th><i class="fas fa-clock"></i> Temps (min)</th>
+            <th><i class="fas fa-building"></i> Organisation</th>
+            <th><i class="fas fa-paper-plane"></i> Messages à</th>
+            <th><i class="fas fa-users"></i> Groupes</th>
+            <th><i class="fas fa-comments"></i> Forum</th>
+            <th><i class="fas fa-fire"></i> Topic actif</th>
+            <th><i class="fas fa-comment-dots"></i> Comm. cours</th>
+            <th><i class="fas fa-euro-sign"></i> Paiements</th>
+            <th><i class="fas fa-bell"></i> Notif.</th>
+            <th><i class="fas fa-exclamation-triangle"></i> Réclam.</th>
+            <th><i class="fas fa-user-check"></i> Profil</th>
+            <th><i class="fas fa-key"></i> MDP changé</th>
+            <th><i class="fas fa-certificate"></i> Certificats</th>
+            <th><i class="fas fa-shield-alt"></i> 2FA</th>
+            <th><i class="fas fa-lock"></i> Verrou</th>
+            <th><i class="fas fa-user-secret"></i> IP/Device</th>
+            <th><i class="fas fa-tags"></i> Tags</th>
+            <th><i class="fas fa-sticky-note"></i> Note</th>
+            <th><i class="fas fa-star"></i> Badges</th>
+            <th><i class="fas fa-user-tie"></i> Mentor</th>
+            <th><i class="fas fa-user-friends"></i> Mentees</th>
+            <th><i class="fas fa-chart-line"></i> Av. Progress</th>
+            <th><i class="fas fa-gavel"></i> Consent</th>
+            <th><i class="fas fa-user-slash"></i> Suppression</th>
+            <th><i class="fas fa-history"></i> Activité</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for user in users %}
+        <tr>
+            <td><span class="expand-btn" onclick="toggleRow('row-{{ user.id }}')"><i class="fas fa-chevron-down"></i></span></td>
+            <td>{{ user.prenom }} {{ user.nom }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.last_login|date:'Y-m-d H:i' }}</td>
+            <td>{{ user.date_joined|date:'Y-m-d' }}</td>
+            <td>{{ user.status }}</td>
+            <td>{{ user.role }}</td>
+            <td>
+                {% for cours in user.courses %}
+                    <span class="badge bg-primary text-light">{{ cours.titre }}</span>{% if not forloop.last %}, {% endif %}
+                {% empty %}<span class="text-muted">Aucun</span>{% endfor %}
+            </td>
+            <td class="text-center">{{ user.completed_courses }}</td>
+            <td class="text-center">{{ user.total_time }}</td>
+            <td>{{ user.organisation|default:'-' }}</td>
+            <td>
+                {% for dest in user.messages_sent %}
+                    <span class="badge bg-info text-dark">{{ dest.prenom }} {{ dest.nom }}</span>{% if not forloop.last %}, {% endif %}
+                {% empty %}<span class="text-muted">Aucun</span>{% endfor %}
+            </td>
+            <td>
+                {% for groupe in user.groups %}
+                    <span class="badge bg-secondary">{{ groupe.nom }}</span>{% if not forloop.last %}, {% endif %}
+                {% empty %}<span class="text-muted">Aucun</span>{% endfor %}
+            </td>
+            <td class="text-center">{{ user.forum_interactions }}</td>
+            <td>{{ user.most_active_topic|default:'-' }}</td>
+            <td class="text-center">{{ user.course_comments }}</td>
+            <td class="text-center">{{ user.payments }}</td>
+            <td class="text-center">{{ user.unread_notifications }}</td>
+            <td class="text-center">{{ user.complaints }}</td>
+            <td class="text-center">
+                <span class="profile-bar">
+                    <span class="profile-bar-inner" style="width:{{ user.profile_completion|floatformat:0 }}%;background:#28a745;"></span>
+                </span>
+                {{ user.profile_completion|floatformat:0 }}%
+            </td>
+            <td>{{ user.last_password_change|date:'Y-m-d H:i' }}</td>
+            <td>
+                {% for cert in user.certificates %}
+                    <span class="badge bg-success">{{ cert }}</span>{% if not forloop.last %}, {% endif %}
+                {% empty %}<span class="text-muted">-</span>{% endfor %}
+            </td>
+            <td>{% if user.two_factor_enabled %}<span class="badge badge-2fa">Activé</span>{% else %}<span class="badge bg-light text-muted">Non</span>{% endif %}</td>
+            <td>{% if user.is_locked %}<span class="badge badge-lock">Verrouillé</span>{% else %}<span class="badge bg-light text-muted">OK</span>{% endif %}</td>
+            <td><span title="IP: {{ user.last_login_ip }}&#10;Device: {{ user.last_login_device }}&#10;Browser: {{ user.last_login_browser }}">{{ user.last_login_ip|default:'-' }}</span></td>
+            <td>{{ user.custom_tags|default:'-' }}</td>
+            <td><span title="{{ user.admin_note|default:'-' }}">📝</span></td>
+            <td>
+                {% for badge in user.badges %}
+                    <span class="badge bg-warning text-dark">{{ badge.name }}</span>{% if not forloop.last %}, {% endif %}
+                {% empty %}<span class="text-muted">-</span>{% endfor %}
+            </td>
+            <td>{% if user.mentor %}{{ user.mentor.prenom }} {{ user.mentor.nom }}{% else %}-{% endif %}</td>
+            <td>
+                {% for mentee in user.mentees %}
+                    <span class="badge bg-info text-dark">{{ mentee.prenom }} {{ mentee.nom }}</span>{% if not forloop.last %}, {% endif %}
+                {% empty %}<span class="text-muted">-</span>{% endfor %}
+            </td>
+            <td class="text-center">{{ user.average_progress|floatformat:0 }}%</td>
+            <td>
+                {% if user.gdpr_consent %}<span class="badge badge-gdpr">GDPR</span>{% endif %}
+                {% if user.marketing_consent %}<span class="badge badge-warning">Mktg</span>{% endif %}
+            </td>
+            <td>{% if user.deletion_requested %}<span class="badge badge-lock">Demandée</span>{% else %}<span class="badge bg-light text-muted">Non</span>{% endif %}</td>
+            <td><span class="expand-btn" onclick="toggleRow('row-{{ user.id }}')"><i class="fas fa-history"></i></span></td>
+        </tr>
+        <tr id="row-{{ user.id }}" class="expand-row">
+            <td colspan="34">
+                <div style="padding:1rem 2rem;">
+                    <strong>Dernières activités :</strong>
+                    <ul>
+                        {% for log in user.activity_logs %}
+                            <li>{{ log.timestamp|date:'Y-m-d H:i' }} - {{ log.action }} {% if log.details %}({{ log.details }}){% endif %}</li>
+                        {% empty %}<li><span class="text-muted">Aucune activité récente</span></li>{% endfor %}
+                    </ul>
+                    <strong>Note admin :</strong> <span>{{ user.admin_note|default:'-' }}</span>
+                </div>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+<script>
+function toggleRow(rowId) {
+    var row = document.getElementById(rowId);
+    if (row) row.classList.toggle('active');
+}
+</script>
+{% endblock %}

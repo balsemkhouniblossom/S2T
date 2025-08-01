@@ -1,30 +1,227 @@
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import redirect, get_object_or_404
-from .models import Utilisateur
-@csrf_exempt
-def update_confirmation(request, user_id):
-    if request.method == 'POST':
-        confirmation = request.POST.get('confirmation')
-        user = get_object_or_404(Utilisateur, pk=user_id)
-        user.confirmation = confirmation
-        user.save()
-    from django.urls import reverse
-    return redirect(reverse('users:dashboard'))
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect, get_object_or_404, render
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Count
-from .models import Utilisateur, Formateur, Apprenant, Administrateur, Notification
+from django.db.models import Count, Q
+from .models import Utilisateur, Formateur, Apprenant, Administrateur, Notification, Reclamation
 from formations.models import Formation
-from courses.models import Cours
-from messaging.models import Message
+from courses.models import Cours, ProgressionCours, CommentaireCours
+from messaging.models import Message, GroupeChat
+from forum.models import ForumQuestion, ForumComment
 from payments.models import Paiement
 from .cv_extraction import extract_cv_info
 from django.views.decorators.http import require_POST
+from courses.quiz_models import Quiz, QuizResult, Certification, CertificationProgress, LearningGoal
+
+
+@login_required
+def user_details_view(request):
+    users = Utilisateur.objects.all()
+    user_data = []
+    for user in users:
+        # Basic info
+        last_login = user.last_login
+        date_joined = user.date_creation if hasattr(user, 'date_creation') else user.date_joined
+        is_active = user.is_active
+        status = user.confirmation if hasattr(user, 'confirmation') else ("Actif" if is_active else "Inactif")
+        # Role/type
+        role = ""
+        try:
+            if hasattr(user, 'apprenant'):
+                role = "Apprenant"
+            elif hasattr(user, 'formateur'):
+                role = "Formateur"
+            elif hasattr(user, 'administrateur'):
+                role = "Administrateur"
+        except Exception:
+            role = "Utilisateur"
+        # Courses enrolled and completed, total time spent
+        courses = []
+        completed_courses = 0
+        total_time = 0
+        organisation = None
+        average_progress = 0
+        mentor = None
+        mentees = []
+        try:
+            apprenant = user.apprenant
+            progressions = ProgressionCours.objects.filter(apprenant=apprenant)
+            courses = [p.cours for p in progressions]
+            completed_courses = progressions.filter(termine=True).count()
+            total_time = sum(p.temps_passe_minutes for p in progressions)
+            organisation = apprenant.organisation.nom if apprenant.organisation else None
+            if progressions.exists():
+                average_progress = sum(p.progression_pourcentage for p in progressions) / progressions.count()
+            # Mentor (if any)
+            from .models import Mentorship
+            mentor_rel = Mentorship.objects.filter(mentee=user, active=True).first()
+            mentor = mentor_rel.mentor if mentor_rel else None
+        except Exception:
+            pass
+        # For trainers: mentees
+        try:
+            from .models import Mentorship
+            mentee_rels = Mentorship.objects.filter(mentor=user, active=True)
+            mentees = [rel.mentee for rel in mentee_rels]
+        except Exception:
+            pass
+        # Messages sent (distinct recipients)
+        messages_sent = Message.objects.filter(expediteur=user).values_list('destinataire', flat=True).distinct()
+        recipients = Utilisateur.objects.filter(id__in=messages_sent)
+        # Groups/roles
+        groups = user.groupes_membre.all()
+        # Forum interactions (questions + comments)
+        forum_questions = ForumQuestion.objects.filter(auteur=user)
+        forum_comments = ForumComment.objects.filter(auteur=user)
+        forum_interactions = forum_questions.count() + forum_comments.count()
+        # Most active forum topic
+        most_active_topic = None
+        if forum_comments.exists():
+            topic_counts = {}
+            for comment in forum_comments:
+                title = comment.question.titre
+                topic_counts[title] = topic_counts.get(title, 0) + 1
+            if topic_counts:
+                most_active_topic = max(topic_counts, key=topic_counts.get)
+        # Course comments
+        course_comments = CommentaireCours.objects.filter(apprenant__utilisateur=user).count()
+        # Payments made
+        payments = Paiement.objects.filter(apprenant__utilisateur=user).count()
+        # Unread notifications
+        unread_notifications = Notification.objects.filter(utilisateur=user, lu=False).count()
+        # Complaints
+        complaints = Reclamation.objects.filter(utilisateur=user).count()
+        # Profile completion (simple: has photo, bio, phone, address)
+        profile_fields = [user.photo_profil, user.telephone, user.adresse, user.date_naissance]
+        profile_completion = int(sum(1 for f in profile_fields if f)) / len(profile_fields) * 100
+        # Last password change
+        last_password_change = user.last_password_change or user.last_login
+        # Certificates (for apprenant or formateur)
+        certificates = []
+        try:
+            if hasattr(user, 'apprenant'):
+                certificates = [c.nom for c in user.apprenant.certification_set.all()]
+            elif hasattr(user, 'formateur'):
+                certificates = [c.nom for c in user.formateur.certifications.all()]
+        except Exception:
+            pass
+        # Activity logs (last 5)
+        activity_logs = list(user.activity_logs.order_by('-timestamp')[:5])
+        # Badges
+        badges = list(user.badges.all())
+        # Admin notes/tags
+        admin_note = user.admin_note
+        custom_tags = user.custom_tags
+        # Account lock/2FA/device info
+        is_locked = user.is_locked
+        failed_login_attempts = user.failed_login_attempts
+        last_login_ip = user.last_login_ip
+        last_login_device = user.last_login_device
+        last_login_browser = user.last_login_browser
+        two_factor_enabled = user.two_factor_enabled
+        # Subscription/plan
+        subscription_plan = user.subscription_plan
+        subscription_renewal = user.subscription_renewal
+        # GDPR/consent
+        gdpr_consent = user.gdpr_consent
+        marketing_consent = user.marketing_consent
+        # Account deletion requests
+        deletion_requested = user.account_deletion_requested
+        # Add all to user_data
+        user_data.append({
+            'id': user.id,
+            'prenom': user.prenom,
+            'nom': user.nom,
+            'email': user.email,
+            'last_login': last_login,
+            'date_joined': date_joined,
+            'status': status,
+            'role': role,
+            'courses': courses,
+            'completed_courses': completed_courses,
+            'total_time': total_time,
+            'organisation': organisation,
+            'average_progress': average_progress,
+            'mentor': mentor,
+            'mentees': mentees,
+            'messages_sent': recipients,
+            'groups': groups,
+            'forum_interactions': forum_interactions,
+            'most_active_topic': most_active_topic,
+            'course_comments': course_comments,
+            'payments': payments,
+            'unread_notifications': unread_notifications,
+            'complaints': complaints,
+            'profile_completion': profile_completion,
+            'last_password_change': last_password_change,
+            'certificates': certificates,
+            'activity_logs': activity_logs,
+            'badges': badges,
+            'admin_note': admin_note,
+            'custom_tags': custom_tags,
+            'is_locked': is_locked,
+            'failed_login_attempts': failed_login_attempts,
+            'last_login_ip': last_login_ip,
+            'last_login_device': last_login_device,
+            'last_login_browser': last_login_browser,
+            'two_factor_enabled': two_factor_enabled,
+            'subscription_plan': subscription_plan,
+            'subscription_renewal': subscription_renewal,
+            'gdpr_consent': gdpr_consent,
+            'marketing_consent': marketing_consent,
+            'deletion_requested': deletion_requested,
+        })
+    return render(request, 'users/user_details.html', {'users': user_data})
 from django.utils import timezone
 from .forms import ReclamationForm
-from .models import Reclamation
+
+
+@login_required
+def user_details_view(request):
+    users = Utilisateur.objects.all()
+    user_data = []
+    for user in users:
+        # Login count (assuming each login updates derniere_connexion, count by number of sessions or logins if tracked)
+        login_count = user.last_login and 1 or 0  # Placeholder, replace with real login tracking if available
+
+        # Courses enrolled (for Apprenant)
+        courses = []
+        try:
+            apprenant = user.apprenant
+            progressions = ProgressionCours.objects.filter(apprenant=apprenant)
+            courses = [p.cours for p in progressions]
+        except Exception:
+            pass
+
+        # Messages sent (distinct recipients)
+        messages_sent = Message.objects.filter(expediteur=user).values_list('destinataire', flat=True).distinct()
+        recipients = Utilisateur.objects.filter(id__in=messages_sent)
+
+        # Groups
+        groups = user.groupes_membre.all()
+
+        # Forum interactions (questions + comments)
+        forum_questions = ForumQuestion.objects.filter(auteur=user).count()
+        forum_comments = ForumComment.objects.filter(auteur=user).count()
+        forum_interactions = forum_questions + forum_comments
+
+        # Course comments
+        course_comments = CommentaireCours.objects.filter(apprenant__utilisateur=user).count()
+
+        user_data.append({
+            'id': user.id,
+            'prenom': user.prenom,
+            'nom': user.nom,
+            'email': user.email,
+            'login_count': login_count,
+            'courses': courses,
+            'messages_sent': recipients,
+            'groups': groups,
+            'forum_interactions': forum_interactions,
+            'course_comments': course_comments,
+        })
+    return render(request, 'users/user_details.html', {'users': user_data})
 
 
 def register_view(request):
@@ -51,7 +248,27 @@ def register_view(request):
             if user_type == 'formateur':
                 Formateur.objects.create(utilisateur=user)
             elif user_type == 'apprenant':
-                Apprenant.objects.create(utilisateur=user)
+                apprenant = Apprenant.objects.create(utilisateur=user)
+                # Extract CV, experience, skills, and languages if available
+                cv = request.FILES.get('cv')
+                competences = request.POST.get('competences', '')
+                experience = request.POST.get('experience', '')
+                langues = request.POST.get('langues', '')
+                motivation = request.POST.get('motivation', 'Je souhaite devenir formateur.')
+                disponibilite = request.POST.get('disponibilite', '')
+                # Create a generic TrainerApplication (not tied to a formation)
+                from formations.models import TrainerApplication
+                TrainerApplication.objects.create(
+                    formation=None,  # Not tied to a specific formation
+                    formateur=None,  # Not a formateur yet
+                    message=f"Candidature automatique lors de l'inscription. CV: {cv}, Compétences: {competences}, Langues: {langues}",
+                    motivation=motivation,
+                    experience_pertinente=experience,
+                    disponibilite=disponibilite,
+                    statut='en_attente',
+                    tarif_propose=None,
+                    commentaire_admin='Classification automatique: Compétences: ' + competences + ', Expérience: ' + experience + ', Langues: ' + langues,
+                )
             elif user_type == 'administrateur':
                 Administrateur.objects.create(utilisateur=user)
             
@@ -153,6 +370,57 @@ def dashboard_view(request):
         context['courses'] = Cours.objects.filter(progressions__apprenant=apprenant)[:5]  # Last 5
         context['total_formations'] = Formation.objects.filter(participants=apprenant).count()
         context['total_courses'] = Cours.objects.filter(progressions__apprenant=apprenant).count()
+
+        # Progressions for all courses
+        progressions = ProgressionCours.objects.filter(apprenant=apprenant).select_related('cours')
+        context['progressions'] = progressions
+
+        # Quiz results
+        quiz_results = QuizResult.objects.filter(apprenant=apprenant).select_related('quiz')
+        context['quiz_results'] = quiz_results
+
+        # Certifications
+        certifications = Certification.objects.filter(cours__in=[p.cours for p in progressions])
+        cert_progress = CertificationProgress.objects.filter(apprenant=apprenant, certification__in=certifications)
+        context['certifications'] = certifications
+        context['cert_progress'] = cert_progress
+
+        # Learning goals (current week/month)
+        from datetime import date
+        today = date.today()
+        goals = LearningGoal.objects.filter(apprenant=apprenant, date_debut__lte=today, date_fin__gte=today)
+        context['learning_goals'] = goals
+
+        # Analytics: total time, average daily engagement
+        total_time = sum(p.temps_passe_minutes for p in progressions)
+        context['total_time_minutes'] = total_time
+        if progressions.exists():
+            first_date = min([p.date_inscription for p in progressions])
+            days_active = max((today - first_date.date()).days, 1)
+            context['avg_daily_minutes'] = int(total_time / days_active)
+        else:
+            context['avg_daily_minutes'] = 0
+
+        # Learning path: levels completed/in progress/locked
+        niveaux = ['debutant', 'intermediaire', 'avance', 'expert']
+        niveau_status = {}
+        for niveau in niveaux:
+            niveau_courses = Cours.objects.filter(niveau=niveau)
+            completed = all(
+                ProgressionCours.objects.filter(apprenant=apprenant, cours=c, termine=True).exists()
+                for c in niveau_courses
+            ) if niveau_courses.exists() else False
+            in_progress = any(
+                ProgressionCours.objects.filter(apprenant=apprenant, cours=c, termine=False).exists()
+                for c in niveau_courses
+            )
+            if completed:
+                niveau_status[niveau] = 'completed'
+            elif in_progress:
+                niveau_status[niveau] = 'in_progress'
+            else:
+                niveau_status[niveau] = 'locked'
+        context['niveau_status'] = niveau_status
 
         # Calculate profile completion progression for apprenant
         user_fields = [user.nom, user.prenom, user.telephone, user.adresse, user.date_naissance, user.photo_profil]

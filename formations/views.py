@@ -1,8 +1,7 @@
-
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q, Count, Avg
 from django.http import JsonResponse
 from django.core.paginator import Paginator
@@ -12,6 +11,7 @@ from .models import Formation, Salle, Planning, Presence, Evaluation, Attestatio
 from payments.models import Organisation
 from .forms import AdminFormationForm, TrainerApplicationForm, TrainerApplicationReviewForm, TaskForm, TaskFilterForm, FormationForm
 from users.models import Formateur, Apprenant, Administrateur
+from courses.models import Cours
 
 # Stub admin evaluations list view
 @staff_member_required
@@ -27,26 +27,35 @@ def admin_attendance_list(request):
 def formations_list(request):
     """List all available formations"""
     formations = Formation.objects.filter(statut='publiee').order_by('-date_creation')
-    
-    # Search functionality
-    query = request.GET.get('search')
-    if query:
+
+    # Search functionality (q, niveau, prix_max)
+    q = request.GET.get('q', '').strip()
+    niveau = request.GET.get('niveau', '').strip()
+    prix_max = request.GET.get('prix_max', '').strip()
+
+    if q:
         formations = formations.filter(
-            Q(titre__icontains=query) | 
-            Q(description__icontains=query) |
-            Q(formateur__utilisateur__nom__icontains=query)
+            Q(titre__icontains=q) |
+            Q(description__icontains=q) |
+            Q(formateur__utilisateur__nom__icontains=q) |
+            Q(formateur__utilisateur__prenom__icontains=q)
         )
-    
-    # Filter by level
-    niveau = request.GET.get('niveau')
     if niveau:
         formations = formations.filter(niveau=niveau)
-    
+    if prix_max:
+        try:
+            prix_max_value = float(prix_max)
+            formations = formations.filter(prix__lte=prix_max_value)
+        except ValueError:
+            pass
+
     context = {
         'formations': formations,
         'niveaux': Formation._meta.get_field('niveau').choices,
-        'query': query,
+        'q': q,
         'selected_niveau': niveau,
+        'prix_max': prix_max,
+        'total_formations': formations.count(),
     }
     return render(request, 'formations/list.html', context)
 
@@ -75,6 +84,7 @@ def formation_detail(request, formation_id):
 
 
 @login_required
+@user_passes_test(lambda u: hasattr(u, 'apprenant'))
 def formation_enroll(request, formation_id):
     """Enroll in a formation"""
     formation = get_object_or_404(Formation, id=formation_id)
@@ -125,6 +135,7 @@ from .forms import FormationForm
 
 @login_required
 def formation_create(request):
+    from django.contrib.auth.decorators import user_passes_test
     """Create a new formation (formateurs only)"""
     try:
         formateur = Formateur.objects.get(utilisateur=request.user)
@@ -135,6 +146,7 @@ def formation_create(request):
     if request.method == 'POST':
         form = FormationForm(request.POST)
         if form.is_valid():
+            # Optionally, admins can select a formateur or assign themselves
             formation = form.save(commit=False)
             formation.formateur = formateur
             formation.save()
@@ -150,7 +162,6 @@ def formation_create(request):
         'niveaux': Formation._meta.get_field('niveau').choices,
     }
     return render(request, 'formations/create.html', context)
-
 
 # ============================================
 # ADMIN VIEWS FOR FORMATION MANAGEMENT
@@ -306,21 +317,34 @@ def admin_formation_edit(request, formation_id):
     formation = get_object_or_404(Formation, id=formation_id)
     
     if request.method == 'POST':
-        form = AdminFormationForm(request.POST, instance=formation)
-        if form.is_valid():
-            formation = form.save()
-            messages.success(request, f'Formation "{formation.titre}" modifiée avec succès!')
-            return redirect('formations:admin_formation_detail', formation_id=formation.id)
+        # Check if the publish button was clicked
+        if 'publier' in request.POST:
+            if formation.statut != 'publiee':
+                formation.statut = 'publiee'
+                formation.save()
+                messages.success(request, f'Formation "{formation.titre}" publiée avec succès!')
+            else:
+                messages.info(request, 'La formation est déjà publiée.')
+            return redirect('formations:admin_formation_edit', formation_id=formation.id)
         else:
-            messages.error(request, 'Veuillez corriger les erreurs dans le formulaire.')
+            form = AdminFormationForm(request.POST, instance=formation)
+            if form.is_valid():
+                formation = form.save()
+                messages.success(request, f'Formation "{formation.titre}" modifiée avec succès!')
+                return redirect('formations:admin_formation_detail', formation_id=formation.id)
+            else:
+                messages.error(request, 'Veuillez corriger les erreurs dans le formulaire.')
     else:
         form = AdminFormationForm(instance=formation)
-    
+
+    # Show the publish button only if not already published
+    show_publish = formation.statut != 'publiee'
     context = {
         'form': form,
         'formation': formation,
         'title': f'Modifier la formation: {formation.titre}',
         'action_url': 'formations:admin_formation_edit',
+        'show_publish': show_publish,
     }
     return render(request, 'formations/admin/form.html', context)
 
@@ -582,12 +606,36 @@ def admin_applications_list(request):
         trainer_applications__isnull=False
     ).distinct()
     
+    stats = {
+        'en_attente': TrainerApplication.objects.filter(statut='en_attente').count(),
+        'acceptees': TrainerApplication.objects.filter(statut='acceptee').count(),
+        'rejetees': TrainerApplication.objects.filter(statut='rejetee').count(),
+        'retirees': TrainerApplication.objects.filter(statut='retiree').count(),
+    }
+    # Prepare a list of applications with extracted names for public applications
+    applications_with_names = []
+    for app in applications:
+        if not app.formateur and app.message:
+            # Extract name from message
+            msg = app.message
+            name = None
+            if msg.startswith('Candidature publique. Nom: '):
+                msg_rest = msg[len('Candidature publique. Nom: '):]
+                name = msg_rest.split(', Email:', 1)[0].strip()
+            app.nom_complet = name or 'Non spécifié'
+        elif app.formateur:
+            app.nom_complet = app.formateur.utilisateur.get_full_name()
+        else:
+            app.nom_complet = 'Non spécifié'
+        applications_with_names.append(app)
+
     context = {
-        'applications': applications,
+        'applications': applications_with_names,
         'formations': formations_with_apps,
         'statuts': TrainerApplication._meta.get_field('statut').choices,
         'selected_statut': statut,
         'selected_formation': formation_id,
+        'stats': stats,
     }
     return render(request, 'formations/admin/applications_list.html', context)
 
@@ -637,9 +685,15 @@ def admin_application_review(request, application_id):
     else:
         form = TrainerApplicationReviewForm(instance=application)
     
+    accepted_count = application.formation.applications.filter(statut='acceptee').count() if application.formation else 0
+    pending_count = application.formation.applications.filter(statut='en_attente').count() if application.formation else 0
+    rejected_count = application.formation.applications.filter(statut='rejetee').count() if application.formation else 0
     context = {
         'application': application,
         'form': form,
+        'accepted_count': accepted_count,
+        'pending_count': pending_count,
+        'rejected_count': rejected_count,
     }
     return render(request, 'formations/admin/application_review.html', context)
 
@@ -992,3 +1046,58 @@ def admin_formation_bulk_status_update(request):
 def admin_sessions_list(request):
     """Stub admin sessions list page."""
     return render(request, 'formations/admin/sessions_list.html')
+
+
+@login_required
+def manage_formation_courses(request, formation_id):
+    formation = get_object_or_404(Formation, id=formation_id)
+    # Only allow the assigned trainer or admin
+    if not (hasattr(request.user, 'formateur') and formation.formateur and formation.formateur.utilisateur == request.user) and not request.user.is_superuser:
+        messages.error(request, "Vous n'avez pas la permission de modifier les cours de cette formation.")
+        return redirect('formations:my_formations')
+    all_courses = Cours.objects.filter(formateur=formation.formateur) if formation.formateur else Cours.objects.none()
+    if request.method == 'POST':
+        selected_ids = request.POST.getlist('cours')
+        formation.cours.set(selected_ids)
+        messages.success(request, "Les cours de la formation ont été mis à jour.")
+        return redirect('formations:my_formations')
+    context = {
+        'formation': formation,
+        'all_courses': all_courses,
+    }
+    return render(request, 'formations/manage_courses.html', context)
+
+
+from django.views.decorators.csrf import csrf_exempt
+from django.core.mail import send_mail
+from .models import TrainerApplication
+
+def public_trainer_application(request):
+    """Public form for anyone to apply as a trainer (no login required)"""
+    if request.method == 'POST':
+        nom = request.POST.get('nom')
+        email = request.POST.get('email')
+        cv = request.FILES.get('cv')
+        competences = request.POST.get('competences', '')
+        experience = request.POST.get('experience', '')
+        langues = request.POST.get('langues', '')
+        motivation = request.POST.get('motivation', '')
+        disponibilite = request.POST.get('disponibilite', '')
+        suggested_formation = request.POST.get('suggested_formation', '')
+        # Save application (no formation, no formateur)
+        TrainerApplication.objects.create(
+            formation=None,
+            formateur=None,
+            message=f"Candidature publique. Nom: {nom}, Email: {email}, CV: {cv}, Compétences: {competences}, Langues: {langues}",
+            motivation=motivation,
+            experience_pertinente=experience,
+            disponibilite=disponibilite,
+            statut='en_attente',
+            tarif_propose=None,
+            commentaire_admin='Classification automatique: Compétences: ' + competences + ', Expérience: ' + experience + ', Langues: ' + langues,
+            suggested_formation=suggested_formation,
+        )
+        # Optionally send notification email to admin
+        # send_mail('Nouvelle candidature formateur', f'Nom: {nom}\nEmail: {email}', 'noreply@example.com', ['admin@example.com'])
+        return render(request, 'formations/public_trainer_application.html', {'success': True})
+    return render(request, 'formations/public_trainer_application.html')

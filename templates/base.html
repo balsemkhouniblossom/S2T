@@ -512,6 +512,9 @@
             <ul class="nav-menu">
                 <li><a href="{% url 'formations:list' %}"><i class="fas fa-graduation-cap"></i> Formations</a></li>
                 <li><a href="{% url 'courses:list' %}"><i class="fas fa-book"></i> Cours</a></li>
+                {% if not user.is_authenticated %}
+                    <li><a href="{% url 'public_trainer_application' %}" class="btn btn-success"><i class="fas fa-user-plus"></i> Devenir Formateur</a></li>
+                {% endif %}
                 {% if user.is_authenticated %}
                     <li><a href="{% url 'messaging:inbox' %}"><i class="fas fa-comments"></i> Messages</a></li>
                     <li><a href="{% url 'formations:task_list' %}"><i class="fas fa-tasks"></i> Mes Tâches</a></li>

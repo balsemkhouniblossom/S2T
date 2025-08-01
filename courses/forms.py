@@ -7,8 +7,8 @@ User = get_user_model()
 class CoursForm(forms.ModelForm):
     class Meta:
         model = Cours
-        fields = ['titre', 'description', 'contenu', 'duree_minutes', 'niveau', 
-                 'prerequis', 'video_url', 'image', 'formateur']
+        fields = ['titre', 'description', 'contenu', 'duree_minutes', 'niveau',
+                  'categorie', 'mots_cles', 'image_couverture', 'prix', 'gratuit', 'formateur']
         widgets = {
             'titre': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -31,17 +31,24 @@ class CoursForm(forms.ModelForm):
             'niveau': forms.Select(attrs={
                 'class': 'form-control'
             }),
-            'prerequis': forms.Textarea(attrs={
+            'categorie': forms.TextInput(attrs={
                 'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Prérequis nécessaires'
+                'placeholder': 'Catégorie'
             }),
-            'video_url': forms.URLInput(attrs={
+            'mots_cles': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'URL de la vidéo (optionnel)'
+                'placeholder': 'Mots-clés'
             }),
-            'image': forms.FileInput(attrs={
+            'image_couverture': forms.FileInput(attrs={
                 'class': 'form-control'
+            }),
+            'prix': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'placeholder': 'Prix (€)'
+            }),
+            'gratuit': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
             }),
             'formateur': forms.Select(attrs={
                 'class': 'form-control'
@@ -60,7 +67,7 @@ class CoursForm(forms.ModelForm):
 class RessourceCoursForm(forms.ModelForm):
     class Meta:
         model = RessourceCours
-        fields = ['titre', 'description', 'fichier', 'url_externe', 'type_ressource']
+        fields = ['titre', 'description', 'fichier', 'lien_externe', 'type_ressource']
         widgets = {
             'titre': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -74,7 +81,7 @@ class RessourceCoursForm(forms.ModelForm):
             'fichier': forms.FileInput(attrs={
                 'class': 'form-control'
             }),
-            'url_externe': forms.URLInput(attrs={
+            'lien_externe': forms.URLInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'URL externe (optionnel)'
             }),

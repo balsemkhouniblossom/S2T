@@ -3,8 +3,49 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q, Avg
 from .models import Cours, RessourceCours, ProgressionCours, CommentaireCours
-from users.models import Formateur, Apprenant
+from users.models import Formateur, Apprenant, Administrateur
 
+from django.contrib.auth.decorators import user_passes_test
+
+def is_admin_or_formateur(user):
+    return user.is_superuser or hasattr(user, 'formateur') or hasattr(user, 'administrateur')
+from .forms import CoursForm
+
+@login_required
+@user_passes_test(is_admin_or_formateur)
+def course_edit(request, course_id):
+    """Edit a course (admins/formateurs only)"""
+    course = get_object_or_404(Cours, id=course_id)
+    # Only allow superuser, admin, or the course's formateur to edit
+    if not (request.user.is_superuser or hasattr(request.user, 'administrateur') or (hasattr(request.user, 'formateur') and course.formateur == request.user.formateur)):
+        messages.error(request, 'Vous ne pouvez modifier que vos propres cours.')
+        return redirect('courses:my_courses')
+    if request.method == 'POST':
+        form = CoursForm(request.POST, request.FILES, instance=course)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Cours modifié avec succès!')
+            return redirect('courses:my_courses')
+    else:
+        form = CoursForm(instance=course)
+    context = {'form': form, 'course': course}
+    return render(request, 'courses/edit.html', context)
+
+@login_required
+@user_passes_test(is_admin_or_formateur)
+def course_delete(request, course_id):
+    """Delete a course (admins/formateurs only)"""
+    course = get_object_or_404(Cours, id=course_id)
+    # Only allow superuser, admin, or the course's formateur to delete
+    if not (request.user.is_superuser or hasattr(request.user, 'administrateur') or (hasattr(request.user, 'formateur') and course.formateur == request.user.formateur)):
+        messages.error(request, 'Vous ne pouvez supprimer que vos propres cours.')
+        return redirect('courses:my_courses')
+    if request.method == 'POST':
+        course.delete()
+        messages.success(request, 'Cours supprimé avec succès!')
+        return redirect('courses:my_courses')
+    context = {'course': course}
+    return render(request, 'courses/delete.html', context)
 
 def courses_list(request):
     """List all published courses"""
@@ -33,6 +74,8 @@ def courses_list(request):
     # Get categories for filter
     categories = courses.values_list('categorie', flat=True).distinct()
     
+    is_admin = hasattr(request.user, 'administrateur') or request.user.is_superuser
+    is_formateur = hasattr(request.user, 'formateur')
     context = {
         'courses': courses,
         'categories': categories,
@@ -40,13 +83,15 @@ def courses_list(request):
         'query': query,
         'selected_categorie': categorie,
         'selected_niveau': niveau,
+        'is_admin': is_admin,
+        'is_formateur': is_formateur,
     }
-    return render(request, 'courses/list.html', context)
+    return render(request, 'courses/course_list.html', context)
 
 
 def course_detail(request, course_id):
     """Course detail view"""
-    course = get_object_or_404(Cours, id=course_id, publie=True)
+    course = get_object_or_404(Cours, id=course_id)
     user_enrolled = False
     user_progress = None
     
@@ -70,6 +115,8 @@ def course_detail(request, course_id):
     # Calculate average rating
     avg_rating = commentaires.aggregate(Avg('note'))['note__avg'] or 0
     
+    is_admin = request.user.is_superuser or hasattr(request.user, 'administrateur')
+    is_formateur = hasattr(request.user, 'formateur')
     context = {
         'course': course,
         'user_enrolled': user_enrolled,
@@ -78,11 +125,14 @@ def course_detail(request, course_id):
         'commentaires': commentaires,
         'avg_rating': round(avg_rating, 1),
         'total_comments': commentaires.count(),
+        'is_admin': is_admin,
+        'is_formateur': is_formateur,
     }
     return render(request, 'courses/detail.html', context)
 
 
 @login_required
+@user_passes_test(lambda u: hasattr(u, 'apprenant'))
 def course_enroll(request, course_id):
     """Enroll in a course"""
     course = get_object_or_404(Cours, id=course_id, publie=True)
@@ -99,7 +149,7 @@ def course_enroll(request, course_id):
     except Apprenant.DoesNotExist:
         messages.error(request, 'Seuls les apprenants peuvent s\'inscrire aux cours.')
     
-    return redirect('course_detail', course_id=course_id)
+    return redirect('courses:detail', course_id=course_id)
 
 
 @login_required
@@ -129,38 +179,32 @@ def my_courses(request):
 
 
 @login_required
+@user_passes_test(is_admin_or_formateur)
 def course_create(request):
-    """Create a new course (formateurs only)"""
-    try:
-        formateur = Formateur.objects.get(utilisateur=request.user)
-    except Formateur.DoesNotExist:
-        messages.error(request, 'Seuls les formateurs peuvent créer des cours.')
-        return redirect('courses_list')
-    
+    """Create a new course (admins/formateurs only)"""
+    formateur = None
+    if hasattr(request.user, 'formateur'):
+        formateur = request.user.formateur
+    elif hasattr(request.user, 'administrateur'):
+        # Optionally, admins can select a formateur or assign themselves
+        pass
+    else:
+        messages.error(request, 'Seuls les formateurs ou administrateurs peuvent créer des cours.')
+        return redirect('courses:my_courses')
+
     if request.method == 'POST':
-        course = Cours.objects.create(
-            titre=request.POST.get('titre'),
-            description=request.POST.get('description'),
-            contenu=request.POST.get('contenu'),
-            formateur=formateur,
-            duree_minutes=request.POST.get('duree_minutes'),
-            niveau=request.POST.get('niveau'),
-            categorie=request.POST.get('categorie'),
-            mots_cles=request.POST.get('mots_cles', ''),
-            prix=request.POST.get('prix', 0),
-            gratuit=request.POST.get('gratuit') == 'on',
-        )
-        
-        if 'image_couverture' in request.FILES:
-            course.image_couverture = request.FILES['image_couverture']
+        form = CoursForm(request.POST, request.FILES)
+        if form.is_valid():
+            course = form.save(commit=False)
+            if formateur:
+                course.formateur = formateur
             course.save()
-        
-        messages.success(request, 'Cours créé avec succès!')
-        return redirect('course_detail', course_id=course.id)
-    
-    context = {
-        'niveaux': Cours._meta.get_field('niveau').choices,
-    }
+            messages.success(request, 'Cours créé avec succès!')
+            return redirect('courses:detail', course_id=course.id)
+    else:
+        form = CoursForm()
+
+    context = {'form': form}
     return render(request, 'courses/create.html', context)
 
 
@@ -174,7 +218,7 @@ def course_watch(request, course_id):
         progress = get_object_or_404(ProgressionCours, cours=course, apprenant=apprenant)
     except Apprenant.DoesNotExist:
         messages.error(request, 'Accès refusé.')
-        return redirect('course_detail', course_id=course_id)
+        return redirect('courses:detail', course_id=course_id)
     
     # Get course resources
     ressources = course.ressources.all().order_by('ordre')

@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Regarder le cours - {{ course.titre }}{% endblock %}
+{% block content %}
+<div class="course-watch-container">
+    <h1>{{ course.titre }}</h1>
+    <div class="course-meta">
+        <span class="badge badge-info">{{ course.get_niveau_display }}</span>
+        <span class="badge badge-secondary">{{ course.categorie }}</span>
+        {% if course.gratuit %}
+            <span class="badge badge-success">Gratuit</span>
+        {% else %}
+            <span class="badge badge-warning">{{ course.prix }} €</span>
+        {% endif %}
+    </div>
+    <p class="course-description">{{ course.description }}</p>
+    <div class="course-progress">
+        <strong>Progression :</strong> {{ progress.progression_pourcentage }}%<br>
+        <strong>Temps passé :</strong> {{ progress.temps_passe_minutes }} minutes
+        {% if progress.termine %}
+            <span class="badge badge-success">Cours terminé !</span>
+        {% endif %}
+    </div>
+    <hr>
+    <h2>Ressources du cours</h2>
+    <ul>
+        {% for ressource in ressources %}
+            <li style="margin-bottom:1em;">
+                <strong>{{ ressource.titre }}</strong> ({{ ressource.get_type_ressource_display }})
+                {% if ressource.type_ressource == 'video' and ressource.fichier %}
+                    <video width="320" controls>
+                        <source src="{{ ressource.fichier.url }}" type="video/mp4">
+                        Votre navigateur ne supporte pas la vidéo.
+                    </video>
+                {% elif ressource.type_ressource == 'document' and ressource.fichier %}
+                    <a href="{{ ressource.fichier.url }}" target="_blank">Télécharger le document</a>
+                {% elif ressource.type_ressource == 'audio' and ressource.fichier %}
+                    <audio controls>
+                        <source src="{{ ressource.fichier.url }}" type="audio/mpeg">
+                        Votre navigateur ne supporte pas l'audio.
+                    </audio>
+                {% elif ressource.type_ressource == 'lien' and ressource.lien_externe %}
+                    <a href="{{ ressource.lien_externe }}" target="_blank">Lien externe</a>
+                {% elif ressource.type_ressource == 'exercice' %}
+                    <span>Exercice à compléter</span>
+                {% elif ressource.type_ressource == 'quiz' %}
+                    <span>Quiz à compléter</span>
+                {% endif %}
+                <p>{{ ressource.description }}</p>
+                {% if ressource in progress.ressources_completees.all %}
+                    <span class="badge badge-success">Complétée</span>
+                {% elif ressource.obligatoire %}
+                    <span class="badge badge-warning">Obligatoire</span>
+                {% endif %}
+            </li>
+        {% empty %}
+            <li>Aucune ressource disponible pour ce cours.</li>
+        {% endfor %}
+    </ul>
+    <hr>
+    <div class="course-enrollment-status">
+        <strong>Votre progression :</strong>
+        <span class="badge badge-info">{{ progress.progression_pourcentage }}%</span>
+        <span class="badge badge-secondary">{{ progress.temps_passe_minutes }} min</span>
+        {% if progress.termine %}
+            <span class="badge badge-success">Cours terminé !</span>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

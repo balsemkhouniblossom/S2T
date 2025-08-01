@@ -25,8 +25,11 @@
             <a href="{% url 'formations:admin_formation_create' %}" class="btn btn-success me-2">
                 <i class="fas fa-plus"></i> Nouvelle Formation
             </a>
-            <a href="{% url 'formations:admin_list' %}" class="btn btn-primary">
+            <a href="{% url 'formations:admin_list' %}" class="btn btn-primary me-2">
                 <i class="fas fa-list"></i> Toutes les Formations
+            </a>
+            <a href="{% url 'formations:admin_applications_list' %}" class="btn btn-warning">
+                <i class="fas fa-user-check"></i> Voir les Candidatures
             </a>
         </div>
     </div>
@@ -236,6 +239,12 @@
                             <a href="{% url 'formations:admin_list' %}" class="btn btn-info w-100 mb-2">
                                 <i class="fas fa-list"></i><br>
                                 Gérer Formations
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'formations:admin_applications_list' %}" class="btn btn-warning w-100 mb-2">
+                                <i class="fas fa-user-check"></i><br>
+                                Candidatures Formateurs
                             </a>
                         </div>
                         <div class="col-md-3">

@@ -2,21 +2,56 @@
 {% block title %}Mes Formations{% endblock %}
 {% block content %}
 <div class="container mt-4">
-    <h1 class="mb-4">Mes Formations</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Mes Formations</h1>
+        <div>
+            <a href="{% url 'formations:create' %}" class="btn btn-success me-2">Nouvelle formation</a>
+                {% if formations and user.is_authenticated and user.is_superuser %}
+                    <a href="{% url 'formations:manage_formation_courses' formations.0.id %}" class="btn btn-warning">Gérer les cours</a>
+                {% elif formations and user.is_authenticated and user.formateur %}
+                    <a href="{% url 'formations:manage_formation_courses' formations.0.id %}" class="btn btn-warning">Gérer les cours</a>
+                {% endif %}
+        </div>
+    </div>
     {% if formations %}
-        <div class="row">
+        <div class="accordion" id="formationsAccordion">
             {% for formation in formations %}
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ formation.titre }}</h5>
-                            <p class="card-text">{{ formation.description|truncatewords:25 }}</p>
-                            <p class="card-text"><strong>Niveau:</strong> {{ formation.get_niveau_display }}</p>
-                            <p class="card-text"><strong>Statut:</strong> {{ formation.get_statut_display }}</p>
-                            <a href="{% url 'formations:detail' formation.id %}" class="btn btn-primary">Voir les détails</a>
-                        </div>
+            <div class="accordion-item mb-3">
+                <h2 class="accordion-header" id="heading{{ formation.id }}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ formation.id }}" aria-expanded="false" aria-controls="collapse{{ formation.id }}">
+                        {{ formation.titre }} ({{ formation.get_niveau_display }})
+                    </button>
+                </h2>
+                <div id="collapse{{ formation.id }}" class="accordion-collapse collapse" aria-labelledby="heading{{ formation.id }}" data-bs-parent="#formationsAccordion">
+                    <div class="accordion-body">
+                        <p><strong>Description:</strong> {{ formation.description }}</p>
+                        <p><strong>Objectifs:</strong> {{ formation.objectifs }}</p>
+                        <p><strong>Durée:</strong> {{ formation.duree_heures }} heures</p>
+                        <p><strong>Formateur:</strong> {{ formation.formateur.utilisateur.prenom }} {{ formation.formateur.utilisateur.nom }}</p>
+                        <h5>Cours inclus :</h5>
+                        {% if formation.cours.all %}
+                        <ul>
+                            {% for cours in formation.cours.all %}
+                            <li>
+                                <strong>{{ cours.titre }}</strong> - {{ cours.get_niveau_display }}<br>
+                                {{ cours.description|truncatewords:15 }}
+                            </li>
+                            {% empty %}
+                            <li>Aucun cours associé à cette formation.</li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p>Aucun cours associé à cette formation.</p>
+                        {% endif %}
+                        <a href="{% url 'formations:detail' formation.id %}" class="btn btn-primary mt-2">Voir les détails</a>
+                            {% if user.is_authenticated and user.is_superuser %}
+                            <a href="{% url 'formations:manage_formation_courses' formation.id %}" class="btn btn-warning mt-2 ms-2">Gérer les cours</a>
+                            {% elif user.is_authenticated and user.formateur and formation.formateur and formation.formateur.utilisateur.id == user.id %}
+                            <a href="{% url 'formations:manage_formation_courses' formation.id %}" class="btn btn-warning mt-2 ms-2">Gérer les cours</a>
+                            {% endif %}
                     </div>
                 </div>
+            </div>
             {% endfor %}
         </div>
     {% else %}

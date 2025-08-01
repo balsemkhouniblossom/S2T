@@ -113,17 +113,16 @@
                                 <tr>
                                     <td>
                                         <div>
-                                            <strong>{{ application.formation.titre }}</strong><br>
-                                            <small class="text-muted">
-                                                {{ application.formation.duree_heures }}h • 
-                                                {{ application.formation.get_niveau_display }}
-                                            </small>
+                                            {% if application.formation %}
+                                                <strong>Formation suggérée</strong>
+                                            {% else %}
+                                                <span class="text-muted">Aucune</span>
+                                            {% endif %}
                                         </div>
                                     </td>
                                     <td>
                                         <div>
-                                            <strong>{{ application.formateur.utilisateur.get_full_name }}</strong><br>
-                                            <small class="text-muted">{{ application.formateur.utilisateur.email }}</small>
+                                            <strong>{{ application.nom_complet }}</strong>
                                         </div>
                                     </td>
                                     <td>
