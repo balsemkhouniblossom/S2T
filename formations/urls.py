@@ -42,6 +42,8 @@ urlpatterns = [
     path('admin/<int:formation_id>/status-update/', views.admin_formation_status_update, name='admin_formation_status_update'),
     path('admin/bulk-status-update/', views.admin_formation_bulk_status_update, name='admin_formation_bulk_status_update'),
     
+    # Admin trainer management
+    path('admin/manage-trainers/', views.admin_manage_trainers, name='admin_manage_trainers'),
     # Admin application management
     path('admin/applications/', views.admin_applications_list, name='admin_applications_list'),
     path('admin/application/<int:application_id>/review/', views.admin_application_review, name='admin_application_review'),

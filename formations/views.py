@@ -1,3 +1,14 @@
+from users.models import Formateur
+
+# ...existing code...
+
+from django.contrib.admin.views.decorators import staff_member_required
+
+@staff_member_required
+def admin_manage_trainers(request):
+    """Admin interface to manage trainers (formateurs)"""
+    formateurs = Formateur.objects.select_related('utilisateur').all().order_by('utilisateur__nom')
+    return render(request, 'formations/admin/manage_trainers.html', {'formateurs': formateurs})
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404, redirect
