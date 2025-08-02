@@ -487,8 +487,13 @@
                                 <div class="conversation-info">
                                     <div class="d-flex justify-content-between align-items-start">
                                         <div class="flex-grow-1">
-                                            <div class="conversation-name">
+                                            <div class="conversation-name d-flex align-items-center">
                                                 {{ conversation.partner.get_full_name }}
+                                                <a href="https://meet.jit.si/conversation-{{ request.user.id }}-{{ conversation.partner.id }}"
+                                                   target="_blank" class="btn btn-outline-success btn-sm ms-2" title="Démarrer une visioconférence"
+                                                   onclick="event.stopPropagation();">
+                                                    <i class="fas fa-video"></i>
+                                                </a>
                                             </div>
                                             <div class="conversation-preview">
                                                 {% if conversation.latest_message %}
