@@ -45,7 +45,7 @@ class CoursForm(forms.ModelForm):
             'prix': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'step': '0.01',
-                'placeholder': 'Prix (€)'
+                'placeholder': 'Prix (TND)'
             }),
             'gratuit': forms.CheckboxInput(attrs={
                 'class': 'form-check-input'
@@ -63,6 +63,22 @@ class CoursForm(forms.ModelForm):
             self.fields['formateur'].queryset = Formateur.objects.all()
         except ImportError:
             pass
+
+    def clean(self):
+        cleaned = super().clean()
+        gratuit = cleaned.get('gratuit')
+        prix = cleaned.get('prix')
+        # If course is free, force price to 0
+        if gratuit:
+            cleaned['prix'] = 0
+        else:
+            # If not free, ensure price is non-negative
+            try:
+                if prix is not None and float(prix) < 0:
+                    self.add_error('prix', 'Le prix ne peut pas être négatif.')
+            except (TypeError, ValueError):
+                pass
+        return cleaned
 
 class RessourceCoursForm(forms.ModelForm):
     class Meta:

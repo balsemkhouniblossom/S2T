@@ -64,9 +64,12 @@
     .mb-3 { margin-bottom: 1rem; }
         
     /* Topbar + Header */
-    .topbar { background: #23285A; border-bottom: 0; font-size: 13px; color: #FFFFFF; }
-    .topbar .container { max-width: 1180px; margin: 0 auto; padding: 6px 20px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-    .topbar .left, .topbar .right { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .topbar { background: #23285A; border-bottom: 0; font-size: 13px; color: #FFFFFF; position: relative; z-index: 1000; }
+    .topbar .container { max-width: 1180px; margin: 0 auto; padding: 6px 20px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; row-gap: 6px; }
+    .topbar .left, .topbar .right { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; min-width: 0; }
+    .topbar .right form { display: inline-flex; flex-wrap: nowrap; flex-shrink: 0; }
+    /* Avoid cramped look when space is tight */
+    .topbar .left span, .topbar .right a, .topbar select { white-space: nowrap; }
     .topbar a { color: #FFFFFF; text-decoration: none; }
     .topbar a:hover { color: #DDE3F5; }
     .topbar i { color: var(--accent); }
@@ -274,6 +277,9 @@
         
     /* Responsive */
         @media (max-width: 768px) {
+            /* Stack topbar content nicely on small screens */
+            .topbar .container { justify-content: center; }
+            .topbar .left, .topbar .right { justify-content: center; gap: 12px; width: 100%; }
             .nav-toggle { display: inline-flex; }
             .nav-container { gap: .75rem; flex-wrap: wrap; }
             .nav-menu { width: 100%; display: none; flex-direction: column; align-items: stretch; gap: 6px; padding: 8px 0; }

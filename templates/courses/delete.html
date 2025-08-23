@@ -1,14 +1,35 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% block content %}
 <div class="container mt-4">
-    <h2>Supprimer le cours</h2>
+    <h2>{% trans "Supprimer le cours" %}</h2>
+
     <div class="alert alert-danger">
-        Êtes-vous sûr de vouloir supprimer le cours <strong>{{ course.titre }}</strong> ? Cette action est irréversible.
+        {% blocktrans with titre=course.titre %}Êtes-vous sûr de vouloir supprimer le cours <strong>{{ titre }}</strong> ? Cette action est irréversible.{% endblocktrans %}
     </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title mb-2">{{ course.titre }}</h5>
+            <p class="card-text text-muted mb-1">
+                <strong>{% trans "Formateur" %}:</strong>
+                {{ course.formateur.utilisateur.get_full_name|default:course.formateur.utilisateur.prenom }}
+            </p>
+            <p class="card-text mb-0">
+                <strong>{% trans "Prix" %}:</strong>
+                {% if course.gratuit %}
+                    <span class="badge bg-success">{% trans "Gratuit" %}</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark">{{ course.prix }} TND</span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
     <form method="post">
         {% csrf_token %}
-        <button type="submit" class="btn btn-danger">Oui, supprimer</button>
-        <a href="{% url 'courses:my_courses' %}" class="btn btn-secondary">Annuler</a>
+        <button type="submit" class="btn btn-danger"><i class="fas fa-trash-alt"></i> {% trans "Oui, supprimer" %}</button>
+    <a href="{% url 'courses:list' %}" class="btn btn-secondary">{% trans "Annuler" %}</a>
     </form>
 </div>
 {% endblock %}

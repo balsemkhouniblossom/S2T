@@ -9,4 +9,25 @@
         <a href="{% url 'courses:my_courses' %}" class="btn btn-secondary">Annuler</a>
     </form>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    var checkbox = document.getElementById('id_gratuit');
+    var prix = document.getElementById('id_prix');
+    function sync(){
+        if(!checkbox || !prix) return;
+        if(checkbox.checked){
+            prix.value = '0.00';
+            prix.setAttribute('readonly','readonly');
+            prix.classList.add('bg-light');
+        } else {
+            prix.removeAttribute('readonly');
+            prix.classList.remove('bg-light');
+        }
+    }
+    if(checkbox){
+        checkbox.addEventListener('change', sync);
+    }
+    sync();
+});
+</script>
 {% endblock %}

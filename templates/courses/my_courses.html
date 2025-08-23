@@ -27,7 +27,7 @@
                         <td><a href="{% url 'courses:detail' course.id %}">{{ course.titre }}</a></td>
                         <td>{{ course.categorie }}</td>
                         <td>{{ course.get_niveau_display }}</td>
-                        <td>{% if course.gratuit %}Gratuit{% else %}{{ course.prix }} €{% endif %}</td>
+                        <td>{% if course.gratuit %}Gratuit{% else %}{{ course.prix }} TND{% endif %}</td>
                         <td>{{ course.progressioncours_set.count }}</td>
                         <td>{{ course.commentaires.aggregate_avg_note|default:0|floatformat:1 }}</td>
                         <td>

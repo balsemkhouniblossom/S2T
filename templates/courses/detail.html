@@ -58,7 +58,7 @@
                             {% if course.gratuit %}
                                 <span class="badge bg-success">Gratuit</span>
                             {% else %}
-                                <span class="badge bg-warning">{{ course.prix }} €</span>
+                                <span class="badge bg-warning">{{ course.prix }} TND</span>
                             {% endif %}
                             <span class="badge bg-info"><i class="fas fa-clock"></i> {{ course.duree_minutes }} min</span>
                         </div>
@@ -74,13 +74,16 @@
                             <a href="{% url 'courses:watch' course.id %}" class="btn btn-success">
                                 <i class="fas fa-play"></i> Commencer / Continuer
                             </a>
-                            {% if is_admin or is_formateur or user.is_superuser or user.user_type == 'formateur' or user.user_type == 'administrateur' %}
+                            {% if can_manage %}
                                 <a href="{% url 'courses:edit' course.id %}" class="btn btn-primary">
                                     <i class="fas fa-edit"></i> Modifier
                                 </a>
-                                <a href="{% url 'courses:delete' course.id %}" class="btn btn-danger">
-                                    <i class="fas fa-trash"></i> Supprimer
-                                </a>
+                                <form method="post" action="{% url 'courses:delete' course.id %}" style="display:inline" onsubmit="return confirm('Confirmer la suppression ?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="fas fa-trash"></i> Supprimer
+                                    </button>
+                                </form>
                             {% endif %}
                         </div>
                     </div>

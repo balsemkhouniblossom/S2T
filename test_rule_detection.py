@@ -133,14 +133,24 @@ def check_rule_matches(rule, content):
     
     # Keyword-based rules
     if rule.rule_type == 'keyword' and rule.keywords:
-        keywords = [k.strip().lower() for k in rule.keywords.split(',')]
+        # Support JSON list or comma-separated string
+        if isinstance(rule.keywords, (list, tuple)):
+            raw_keywords = rule.keywords
+        else:
+            raw_keywords = str(rule.keywords).split(',')
+        keywords = [str(k).strip().lower() for k in raw_keywords if str(k).strip()]
         for keyword in keywords:
             if keyword in content_lower:
                 return True
     
     # Pattern-based rules
     if rule.rule_type == 'pattern' and rule.patterns:
-        patterns = [p.strip() for p in rule.patterns.split(',')]
+        # Support JSON list or comma-separated string
+        if isinstance(rule.patterns, (list, tuple)):
+            raw_patterns = rule.patterns
+        else:
+            raw_patterns = str(rule.patterns).split(',')
+        patterns = [str(p).strip() for p in raw_patterns if str(p).strip()]
         for pattern in patterns:
             try:
                 if re.search(pattern, content, re.IGNORECASE):
@@ -152,14 +162,22 @@ def check_rule_matches(rule, content):
     if rule.rule_type == 'combined':
         # Check keywords
         if rule.keywords:
-            keywords = [k.strip().lower() for k in rule.keywords.split(',')]
+            if isinstance(rule.keywords, (list, tuple)):
+                raw_keywords = rule.keywords
+            else:
+                raw_keywords = str(rule.keywords).split(',')
+            keywords = [str(k).strip().lower() for k in raw_keywords if str(k).strip()]
             for keyword in keywords:
                 if keyword in content_lower:
                     return True
         
         # Check patterns
         if rule.patterns:
-            patterns = [p.strip() for p in rule.patterns.split(',')]
+            if isinstance(rule.patterns, (list, tuple)):
+                raw_patterns = rule.patterns
+            else:
+                raw_patterns = str(rule.patterns).split(',')
+            patterns = [str(p).strip() for p in raw_patterns if str(p).strip()]
             for pattern in patterns:
                 try:
                     if re.search(pattern, content, re.IGNORECASE):
