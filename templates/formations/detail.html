@@ -279,38 +279,48 @@
             </div>
 
             <!-- Instructor Card -->
+            {% if formation.formateur %}
             <div class="card instructor-card mb-4">
                 <div class="card-body">
                     <h5 class="card-title">Formateur</h5>
                     <div class="instructor-info">
                         <div class="d-flex align-items-center mb-3">
-                            {% if formation.formateur.photo %}
-                                <img src="{{ formation.formateur.photo.url }}" 
+                            {% if formation.formateur.utilisateur.photo_profil %}
+                                <img src="{{ formation.formateur.utilisateur.photo_profil.url }}" 
                                      class="rounded-circle me-3" width="60" height="60" 
-                                     alt="{{ formation.formateur.get_full_name }}">
+                                     alt="{{ formation.formateur.utilisateur.prenom }} {{ formation.formateur.utilisateur.nom }}">
                             {% else %}
                                 <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center me-3" 
                                      style="width: 60px; height: 60px;">
-                                    <i class="fas fa-user text-white"></i>
+                                    <span class="text-white fw-bold">
+                                        {{ formation.formateur.utilisateur.prenom|first|upper }}{{ formation.formateur.utilisateur.nom|first|upper }}
+                                    </span>
                                 </div>
                             {% endif %}
                             <div>
-                                <h6 class="mb-1">{{ formation.formateur.get_full_name }}</h6>
-                                <small class="text-muted">{{ formation.formateur.specialite|default:"Formateur" }}</small>
+                                <h6 class="mb-1">{{ formation.formateur.utilisateur.prenom }} {{ formation.formateur.utilisateur.nom }}</h6>
+                                <small class="text-muted">
+                                    {% if formation.formateur.experience %}
+                                        {{ formation.formateur.experience }} ans d'expérience
+                                    {% else %}
+                                        Formateur
+                                    {% endif %}
+                                </small>
                             </div>
                         </div>
-                        {% if formation.formateur.bio %}
-                            <p class="small text-muted">{{ formation.formateur.bio|truncatewords:20 }}</p>
+                        {% if formation.formateur.description %}
+                            <p class="small text-muted">{{ formation.formateur.description|truncatewords:24 }}</p>
                         {% endif %}
                         <div class="instructor-stats">
                             <small class="text-muted">
-                                <i class="fas fa-graduation-cap"></i> 
-                                {{ formation.formateur.formations.count }} formation{{ formation.formateur.formations.count|pluralize }}
+                                <i class="fas fa-graduation-cap"></i>
+                                {{ formation.formateur.formation_set.count }} formation{{ formation.formateur.formation_set.count|pluralize }}
                             </small>
                         </div>
                     </div>
                 </div>
             </div>
+            {% endif %}
 
             <!-- Actions (for admin/formateur) -->
             {% if user.is_authenticated and user == formation.formateur or user.user_type == 'administrateur' %}

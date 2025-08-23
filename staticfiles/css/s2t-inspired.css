@@ -1,0 +1,90 @@
+/* S2T-inspired design system extracted for Django project
+   Scope carefully to avoid collisions with admin or third-party widgets.
+*/
+:root{
+  --color-primary:#6EC1E4; /* brand blue from Elementor kit */
+  --color-secondary:#54595F;
+  --color-text:#333; /* darker for readability */
+  --color-muted:#7A7A7A;
+  --color-accent:#61CE70; /* CTA green */
+  --color-bg:#ffffff;
+  --color-footer-bg:#1f2330; /* dark footer tone */
+  --nav-underline:#008772; /* S2T theme green used for nav hover */
+
+  --radius-sm:8px;
+  --radius-md:12px;
+  --radius-lg:16px;
+
+  --shadow-sm:0 2px 6px rgba(0,0,0,.06);
+  --shadow-md:0 6px 18px rgba(0,0,0,.08);
+}
+
+/* Typography */
+body{
+  color:var(--color-text);
+}
+.h1, h1{font-family:"Roboto", system-ui, -apple-system, Segoe UI, Arial, sans-serif; font-weight:700;}
+.h2, h2{font-family:"Roboto", system-ui, -apple-system, Segoe UI, Arial, sans-serif; font-weight:600;}
+.h3, h3{font-family:"Roboto", system-ui, -apple-system, Segoe UI, Arial, sans-serif; font-weight:600;}
+
+/* Buttons */
+.btn, .button, button, input[type=submit]{
+  display:inline-block;
+  border-radius:9999px;
+  padding:.7rem 1.15rem;
+  border:1px solid transparent;
+  line-height:1.1;
+  transition:all .2s ease-in-out;
+  font-weight:600;
+}
+.btn-primary{background:var(--color-accent);color:#fff;border-color:var(--color-accent);} 
+.btn-primary:hover{background:#008772;border-color:#008772;}
+.btn-secondary{background:#fff;color:var(--color-secondary);border-color:#e5e7eb;}
+.btn-secondary:hover{border-color:#cbd5e1;box-shadow:var(--shadow-sm);} 
+.btn-invert{background:#fff;color:var(--color-accent);border-color:#fff;}
+
+/* Navbar underline hover (S2T-like) */
+.navbar a{position:relative;text-decoration:none;}
+.navbar a:after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:2px;background:transparent;transform:scaleX(0);transform-origin:left;transition:.2s ease;}
+.navbar a:hover:after, .navbar a[aria-current="page"]:after{background:var(--nav-underline);transform:scaleX(1);} 
+
+/* Cards */
+.card{background:#fff;border:1px solid #eef2f6;border-radius:var(--radius-md);box-shadow:var(--shadow-sm);} 
+.card .card-header{border-bottom:1px solid #eef2f6;background:#fafbfc;border-top-left-radius:var(--radius-md);border-top-right-radius:var(--radius-md);} 
+
+/* Forms */
+input[type=text],input[type=password],input[type=email],input[type=number],input[type=url],select,textarea{
+  border:1px solid #e5e7eb;border-radius:10px;padding:.65rem .8rem;outline:none;transition:border-color .2s, box-shadow .2s;
+}
+input:focus, select:focus, textarea:focus{border-color:#008772;box-shadow:0 0 0 3px rgba(0,135,114,.15);} 
+label{font-weight:600;color:var(--color-secondary);} 
+
+/* Footer */
+.site-footer{background:var(--color-footer-bg);color:#cbd5e1;padding:3rem 0;}
+.site-footer a{color:#e5e7eb;opacity:.9;}
+.site-footer a:hover{color:#fff;opacity:1;}
+.site-footer .footer-title{color:#fff;font-weight:700;margin-bottom:.75rem;}
+
+/* Hero banner with overlay variants */
+.banner-hero{position:relative;min-height:56vh;display:flex;align-items:center;justify-content:center;color:#fff;overflow:hidden;}
+.banner-hero .hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;}
+.banner-hero .overlay{position:absolute;inset:0;background:linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.55));}
+.banner-hero.overlay-blue .overlay{background:linear-gradient(180deg, rgba(64,126,201,.5), rgba(22,63,147,.65));}
+.banner-hero.overlay-light .overlay{background:linear-gradient(180deg, rgba(255,255,255,.1), rgba(0,0,0,.25));}
+.banner-hero.no-overlay .overlay{display:none;}
+.banner-hero .container{position:relative;z-index:1;text-align:center;padding:2rem 1rem;}
+.banner-hero .title{font-size:2.25rem;font-weight:800;letter-spacing:.3px;margin-bottom:.75rem;}
+.banner-hero .subtitle{font-size:1.1rem;opacity:.95;margin-bottom:1.25rem;}
+.banner-hero .cta-group .btn{margin:.25rem .4rem;}
+
+/* Lists & helpers */
+.list-unstyled{list-style:none;padding:0;margin:0;}
+.text-muted{color:var(--color-muted)!important;}
+.text-primary{color:var(--color-primary)!important;}
+.bg-primary{background:var(--color-primary)!important;color:#fff!important;}
+.rounded{border-radius:var(--radius-md);} 
+.shadow-sm{box-shadow:var(--shadow-sm);} 
+
+/* Table tweak for dark headers like S2T */
+.table thead th{background:#008772;color:#fff;border-color:#008772;}
+.table tr:nth-child(even){background:#f8fafc;}

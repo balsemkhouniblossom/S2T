@@ -538,18 +538,18 @@
                 <div class="instructor-card">
                     <div class="card-body text-center">
                         <div class="instructor-avatar">
-                            {{ formation.formateur.prenom|first|upper }}{{ formation.formateur.nom|first|upper }}
+                            {{ formation.formateur.utilisateur.prenom|first|upper }}{{ formation.formateur.utilisateur.nom|first|upper }}
                         </div>
-                        <h5 class="card-title">{{ formation.formateur.get_full_name }}</h5>
-                        <p class="card-text text-muted">{{ formation.formateur.bio|default:"Formateur expérimenté" }}</p>
+                        <h5 class="card-title">{{ formation.formateur.utilisateur.prenom }} {{ formation.formateur.utilisateur.nom }}</h5>
+                        <p class="card-text text-muted">{{ formation.formateur.description|default:"Formateur expérimenté" }}</p>
                         <div class="instructor-stats">
                             <div class="row text-center">
                                 <div class="col-4">
-                                    <div class="stat-number">{{ formation.formateur.formations.count }}</div>
+                                    <div class="stat-number">{{ formation.formateur.formation_set.count }}</div>
                                     <div class="stat-label">Formations</div>
                                 </div>
                                 <div class="col-4">
-                                    <div class="stat-number">{{ formation.formateur.apprenants.count }}</div>
+                                    <div class="stat-number">{{ formation.apprenants.count }}</div>
                                     <div class="stat-label">Apprenants</div>
                                 </div>
                                 <div class="col-4">

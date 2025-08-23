@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load i18n static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <h1 class="section-title">{% trans "Flashcard Generator" %}</h1>
+    <p class="muted">{% trans "Paste lesson text, choose how many cards, then generate." %}</p>
+
+    <form method="post" class="card" style="padding:1rem;">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="text"><strong>{% trans "Lesson text" %}</strong></label>
+        <textarea id="text" name="text" rows="6" class="form-control" placeholder="{% trans 'Enter your lesson text here…' %}">{{ text }}</textarea>
+      </div>
+      <div class="form-row" style="display:flex; gap:12px; align-items:center; margin-top:8px;">
+        <div>
+          <label for="num_cards">{% trans "Number of cards" %}</label>
+          <input id="num_cards" name="num_cards" type="number" min="1" max="20" value="{{ num_cards }}" class="form-control" style="width:120px;">
+        </div>
+        <div style="margin-top:22px;">
+          <button type="submit" class="btn btn-primary">{% trans "Generate" %}</button>
+        </div>
+      </div>
+    </form>
+
+    {% if cards %}
+      <div class="grid" style="margin-top:1.5rem;">
+        {% for c in cards %}
+          <div class="card alt">
+            <div class="card-body">
+              <div class="card-title">{{ forloop.counter }}. {{ c.question }}</div>
+              <p class="muted" style="margin-top:6px;">{{ c.answer }}</p>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% elif text %}
+      <div class="alert" style="margin-top:1rem;">
+        {% trans "No cards were generated. Try with more context or fewer cards." %}
+      </div>
+    {% endif %}
+
+    <div class="muted" style="margin-top:1rem; font-size:0.9rem;">
+      <strong>{% trans "Example" %}:</strong>
+      <code>
+        text = "The mitochondria is the powerhouse of the cell. It produces energy in the form of ATP."
+      </code>
+    </div>
+  </div>
+</section>
+{% endblock %}

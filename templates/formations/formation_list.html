@@ -164,9 +164,18 @@
                     </p>
                     
                     <div class="formation-meta mb-3">
+                        {% if formation.formateur %}
                         <small class="text-muted">
-                            <i class="fas fa-user"></i> {{ formation.formateur.get_full_name }}
+                            <i class="fas fa-user"></i>
+                            <a href="{% url 'formations:detail' formation.id %}" class="text-muted" style="text-decoration:none;">
+                                {{ formation.formateur.utilisateur.prenom }} {{ formation.formateur.utilisateur.nom }}
+                            </a>
                         </small><br>
+                        {% else %}
+                        <small class="text-muted">
+                            <i class="fas fa-user"></i> Formateur à définir
+                        </small><br>
+                        {% endif %}
                         <small class="text-muted">
                             <i class="fas fa-clock"></i> {{ formation.duree_heures }}h
                         </small><br>

@@ -459,6 +459,14 @@
                                     <i class="fas fa-calendar"></i>
                                     <span>{{ formation.date_debut|date:"d M" }}</span>
                                 </div>
+                                {% if formation.formateur %}
+                                <div class="meta-item">
+                                    <i class="fas fa-chalkboard-teacher"></i>
+                                    <a href="{% url 'formations:detail' formation.id %}" class="text-muted" style="text-decoration:none;">
+                                        {{ formation.formateur.utilisateur.prenom }} {{ formation.formateur.utilisateur.nom }}
+                                    </a>
+                                </div>
+                                {% endif %}
                             </div>
                             
                             <div class="d-flex justify-content-between align-items-center mb-3">

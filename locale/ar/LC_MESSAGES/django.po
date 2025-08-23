@@ -1,0 +1,222 @@
+# Arabic translations for Training Management System
+msgid ""
+msgstr ""
+"Project-Id-Version: training-management-system\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-08-22 14:33+0100\n"
+"PO-Revision-Date: 2025-08-22 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: Arabic\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
+
+# Base navbar and footer
+#: .\templates\base.html:349
+msgid "Training System"
+msgstr "نظام التدريب"
+
+#: .\templates\base.html:354
+msgid "Formations"
+msgstr "الدورات"
+
+#: .\templates\base.html:355 .\templates\base.html:415
+msgid "Cours"
+msgstr "الدروس"
+
+#: .\templates\base.html:357 .\templates\base.html:416
+msgid "Devenir Formateur"
+msgstr "أصبح مدربًا"
+
+#: .\templates\base.html:360
+msgid "Messages"
+msgstr "الرسائل"
+
+#: .\templates\base.html:361
+msgid "Mes Tâches"
+msgstr "مهامي"
+
+#: .\templates\base.html:363
+msgid "Admin Complet"
+msgstr "إدارة كاملة"
+
+#: .\templates\base.html:364
+msgid "Admin Formations"
+msgstr "إدارة الدورات"
+
+#: .\templates\base.html:365
+msgid "Modération IA"
+msgstr "مراجعة بالذكاء الاصطناعي"
+
+#: .\templates\base.html:367 .\templates\base.html:433
+msgid "Dashboard"
+msgstr "لوحة التحكم"
+
+#: .\templates\base.html:377 .\templates\base.html:434
+msgid "Profil"
+msgstr "الملف الشخصي"
+
+#: .\templates\base.html:378 .\templates\base.html:435
+msgid "Déconnexion"
+msgstr "تسجيل الخروج"
+
+#: .\templates\base.html:380 .\templates\base.html:437
+msgid "Connexion"
+msgstr "تسجيل الدخول"
+
+#: .\templates\base.html:381 .\templates\base.html:438
+msgid "Inscription"
+msgstr "إنشاء حساب"
+
+#: .\templates\base.html:409
+msgid "Adresse"
+msgstr "العنوان"
+
+#: .\templates\base.html:409
+msgid "Email"
+msgstr "البريد الإلكتروني"
+
+#: .\templates\base.html:409
+msgid "Téléphone"
+msgstr "الهاتف"
+
+#: .\templates\base.html:412
+msgid "Liens Utiles"
+msgstr "روابط مفيدة"
+
+#: .\templates\base.html:414
+msgid "Catalogue"
+msgstr "كتالوج"
+
+#: .\templates\base.html:417
+msgid "Open Data"
+msgstr "بيانات مفتوحة"
+
+#: .\templates\base.html:421
+msgid "Services en ligne"
+msgstr "خدمات إلكترونية"
+
+#: .\templates\base.html:423
+msgid "Suivi des demandes"
+msgstr "تتبع الطلبات"
+
+#: .\templates\base.html:424
+msgid "Hébergement"
+msgstr "الاستضافة"
+
+#: .\templates\base.html:425
+msgid "Réservations"
+msgstr "الحجوزات"
+
+#: .\templates\base.html:426
+msgid "Support"
+msgstr "الدعم"
+
+#: .\templates\base.html:430
+msgid "Compte"
+msgstr "الحساب"
+
+#: .\templates\base.html:443
+msgid "Tous droits réservés."
+msgstr "جميع الحقوق محفوظة."
+
+# Home hero and sections
+#: .\templates\home.html:10
+msgid "Plateforme de formation moderne, fiable et professionnelle"
+msgstr "منصة تدريب حديثة وموثوقة واحترافية"
+
+#: .\templates\home.html:11
+msgid ""
+"Découvrez des contenus de qualité, des formateurs experts et une expérience "
+"fluide. Commencez votre parcours avec une interface claire, des actions "
+"nettes et une navigation simple."
+msgstr ""
+"اكتشف محتوى عالي الجودة ومدربين خبراء وتجربة سلسة. ابدأ رحلتك بواجهة واضحة "
+"وإجراءات دقيقة وتنقل بسيط."
+
+#: .\templates\home.html:13
+msgid "Explorer les Formations"
+msgstr "استكشف الدورات"
+
+#: .\templates\home.html:14
+msgid "Commencer Gratuitement"
+msgstr "ابدأ مجانًا"
+
+#: .\templates\home.html:23
+msgid "Pourquoi choisir notre plateforme ?"
+msgstr "لماذا تختار منصتنا؟"
+
+#: .\templates\home.html:24
+msgid ""
+"Une expérience d'apprentissage moderne et personnalisée pour tous les niveaux"
+msgstr "تجربة تعلم حديثة ومخصصة لجميع المستويات"
+
+#: .\templates\home.html:28
+msgid "Formations de Qualité"
+msgstr "دورات عالية الجودة"
+
+#: .\templates\home.html:29
+msgid ""
+"Contenus créés par des experts, actualisés régulièrement pour rester "
+"pertinents."
+msgstr "محتوى من إنشاء خبراء ويتم تحديثه بانتظام ليظل ذا صلة."
+
+#: .\templates\home.html:33
+msgid "Communauté Active"
+msgstr "مجتمع نشط"
+
+#: .\templates\home.html:34
+msgid "Échanges, support et progression en groupe pour rester motivé."
+msgstr "تفاعل ودعم وتقدم جماعي للحفاظ على التحفيز."
+
+#: .\templates\home.html:38
+msgid "Certificats Reconnus"
+msgstr "شهادات معترف بها"
+
+#: .\templates\home.html:39
+msgid "Valorisez vos compétences et votre parcours professionnel."
+msgstr "عزز مهاراتك ومسارك المهني."
+
+#: .\templates\home.html:43
+msgid "Apprentissage Flexible"
+msgstr "تعلم مرن"
+
+#: .\templates\home.html:44
+msgid "À votre rythme, sur tous vos appareils, sans contrainte."
+msgstr "وفق وتيرتك وعلى جميع أجهزتك دون قيود."
+
+#: .\templates\home.html:48
+msgid "Formateurs Experts"
+msgstr "مدربون خبراء"
+
+#: .\templates\home.html:49
+msgid "Des professionnels qualifiés, pédagogues et à l’écoute."
+msgstr "محترفون مؤهلون وذوو نهج تربوي ومصغون."
+
+#: .\templates\home.html:53
+msgid "Multi-Plateforme"
+msgstr "متعدد المنصات"
+
+#: .\templates\home.html:54
+msgid "Accès depuis ordinateur, tablette et smartphone."
+msgstr "وصول من الكمبيوتر واللوحي والهاتف الذكي."
+
+#: .\templates\home.html:86
+msgid "Prêt à commencer votre apprentissage ?"
+msgstr "هل أنت مستعد لبدء التعلم؟"
+
+#: .\templates\home.html:87
+msgid ""
+"Rejoignez des milliers d'apprenants qui ont déjà transformé leur carrière."
+msgstr "انضم إلى الآلاف من المتعلمين الذين غيروا مسارهم المهني بالفعل."
+
+#: .\templates\home.html:89
+msgid "Commencer Maintenant"
+msgstr "ابدأ الآن"
+
+#: .\templates\home.html:90
+msgid "Voir les Formations"
+msgstr "عرض الدورات"

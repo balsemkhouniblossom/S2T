@@ -1,0 +1,221 @@
+# English translations for Training Management System
+msgid ""
+msgstr ""
+"Project-Id-Version: training-management-system\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-08-22 14:33+0100\n"
+"PO-Revision-Date: 2025-08-22 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# Base navbar and footer
+#: .\templates\base.html:349
+msgid "Training System"
+msgstr "Training System"
+
+#: .\templates\base.html:354
+msgid "Formations"
+msgstr "Trainings"
+
+#: .\templates\base.html:355 .\templates\base.html:415
+msgid "Cours"
+msgstr "Courses"
+
+#: .\templates\base.html:357 .\templates\base.html:416
+msgid "Devenir Formateur"
+msgstr "Become a Trainer"
+
+#: .\templates\base.html:360
+msgid "Messages"
+msgstr "Messages"
+
+#: .\templates\base.html:361
+msgid "Mes Tâches"
+msgstr "My Tasks"
+
+#: .\templates\base.html:363
+msgid "Admin Complet"
+msgstr "Full Admin"
+
+#: .\templates\base.html:364
+msgid "Admin Formations"
+msgstr "Trainings Admin"
+
+#: .\templates\base.html:365
+msgid "Modération IA"
+msgstr "AI Moderation"
+
+#: .\templates\base.html:367 .\templates\base.html:433
+msgid "Dashboard"
+msgstr "Dashboard"
+
+#: .\templates\base.html:377 .\templates\base.html:434
+msgid "Profil"
+msgstr "Profile"
+
+#: .\templates\base.html:378 .\templates\base.html:435
+msgid "Déconnexion"
+msgstr "Logout"
+
+#: .\templates\base.html:380 .\templates\base.html:437
+msgid "Connexion"
+msgstr "Login"
+
+#: .\templates\base.html:381 .\templates\base.html:438
+msgid "Inscription"
+msgstr "Sign Up"
+
+#: .\templates\base.html:409
+msgid "Adresse"
+msgstr "Address"
+
+#: .\templates\base.html:409
+msgid "Email"
+msgstr "Email"
+
+#: .\templates\base.html:409
+msgid "Téléphone"
+msgstr "Phone"
+
+#: .\templates\base.html:412
+msgid "Liens Utiles"
+msgstr "Useful Links"
+
+#: .\templates\base.html:414
+msgid "Catalogue"
+msgstr "Catalog"
+
+#: .\templates\base.html:417
+msgid "Open Data"
+msgstr "Open Data"
+
+#: .\templates\base.html:421
+msgid "Services en ligne"
+msgstr "Online Services"
+
+#: .\templates\base.html:423
+msgid "Suivi des demandes"
+msgstr "Request Tracking"
+
+#: .\templates\base.html:424
+msgid "Hébergement"
+msgstr "Hosting"
+
+#: .\templates\base.html:425
+msgid "Réservations"
+msgstr "Bookings"
+
+#: .\templates\base.html:426
+msgid "Support"
+msgstr "Support"
+
+#: .\templates\base.html:430
+msgid "Compte"
+msgstr "Account"
+
+#: .\templates\base.html:443
+msgid "Tous droits réservés."
+msgstr "All rights reserved."
+
+# Home hero and sections
+#: .\templates\home.html:10
+msgid "Plateforme de formation moderne, fiable et professionnelle"
+msgstr "Modern, reliable and professional training platform"
+
+#: .\templates\home.html:11
+msgid ""
+"Découvrez des contenus de qualité, des formateurs experts et une expérience "
+"fluide. Commencez votre parcours avec une interface claire, des actions "
+"nettes et une navigation simple."
+msgstr ""
+"Discover quality content, expert trainers and a smooth experience. Start "
+"your journey with a clear interface, crisp actions and simple navigation."
+
+#: .\templates\home.html:13
+msgid "Explorer les Formations"
+msgstr "Explore Trainings"
+
+#: .\templates\home.html:14
+msgid "Commencer Gratuitement"
+msgstr "Start for Free"
+
+#: .\templates\home.html:23
+msgid "Pourquoi choisir notre plateforme ?"
+msgstr "Why choose our platform?"
+
+#: .\templates\home.html:24
+msgid ""
+"Une expérience d'apprentissage moderne et personnalisée pour tous les niveaux"
+msgstr "A modern, personalized learning experience for all levels"
+
+#: .\templates\home.html:28
+msgid "Formations de Qualité"
+msgstr "Quality Trainings"
+
+#: .\templates\home.html:29
+msgid ""
+"Contenus créés par des experts, actualisés régulièrement pour rester "
+"pertinents."
+msgstr "Content created by experts, regularly updated to stay relevant."
+
+#: .\templates\home.html:33
+msgid "Communauté Active"
+msgstr "Active Community"
+
+#: .\templates\home.html:34
+msgid "Échanges, support et progression en groupe pour rester motivé."
+msgstr "Exchange, support and group progress to stay motivated."
+
+#: .\templates\home.html:38
+msgid "Certificats Reconnus"
+msgstr "Recognized Certificates"
+
+#: .\templates\home.html:39
+msgid "Valorisez vos compétences et votre parcours professionnel."
+msgstr "Showcase your skills and professional journey."
+
+#: .\templates\home.html:43
+msgid "Apprentissage Flexible"
+msgstr "Flexible Learning"
+
+#: .\templates\home.html:44
+msgid "À votre rythme, sur tous vos appareils, sans contrainte."
+msgstr "At your own pace, on all your devices, without constraints."
+
+#: .\templates\home.html:48
+msgid "Formateurs Experts"
+msgstr "Expert Trainers"
+
+#: .\templates\home.html:49
+msgid "Des professionnels qualifiés, pédagogues et à l’écoute."
+msgstr "Qualified professionals, pedagogical and attentive."
+
+#: .\templates\home.html:53
+msgid "Multi-Plateforme"
+msgstr "Multi-Platform"
+
+#: .\templates\home.html:54
+msgid "Accès depuis ordinateur, tablette et smartphone."
+msgstr "Access from computer, tablet and smartphone."
+
+#: .\templates\home.html:86
+msgid "Prêt à commencer votre apprentissage ?"
+msgstr "Ready to start your learning?"
+
+#: .\templates\home.html:87
+msgid ""
+"Rejoignez des milliers d'apprenants qui ont déjà transformé leur carrière."
+msgstr "Join thousands of learners who have already transformed their careers."
+
+#: .\templates\home.html:89
+msgid "Commencer Maintenant"
+msgstr "Start Now"
+
+#: .\templates\home.html:90
+msgid "Voir les Formations"
+msgstr "See Trainings"

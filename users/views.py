@@ -13,6 +13,13 @@ from payments.models import Paiement
 from .cv_extraction import extract_cv_info
 from django.views.decorators.http import require_POST
 from courses.quiz_models import Quiz, QuizResult, Certification, CertificationProgress, LearningGoal
+from django.contrib.auth.views import PasswordResetView
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.urls import reverse
+from django.contrib.auth.views import PasswordResetConfirmView
+from django.contrib.auth.forms import SetPasswordForm
 
 
 @login_required
@@ -685,3 +692,115 @@ def reclamation_detail(request, reclamation_id):
             messages.success(request, 'Réponse envoyée et réclamation résolue.')
             return redirect('users:reclamation_detail', reclamation_id=reclamation.id)
     return render(request, 'users/reclamation_detail.html', {'reclamation': reclamation, 'is_admin': is_admin})
+
+
+class CustomPasswordResetView(PasswordResetView):
+    template_name = 'users/password_reset.html'
+    
+    def form_valid(self, form):
+        email = form.cleaned_data['email']
+        
+        # Try to find user with this email
+        try:
+            user = Utilisateur.objects.get(email=email)
+            
+            # Generate reset token and uid
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            
+            # Build reset link
+            reset_link = self.request.build_absolute_uri(
+                reverse('users:password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
+            )
+            
+            # Store the reset link in session to display it
+            self.request.session['reset_link'] = reset_link
+            self.request.session['reset_email'] = email
+            
+        except Utilisateur.DoesNotExist:
+            # For security, we still show success even if user doesn't exist
+            self.request.session['reset_link'] = None
+            self.request.session['reset_email'] = email
+        
+        return super().form_valid(form)
+
+
+def custom_password_reset_done(request):
+    """Custom password reset done view that shows the reset link"""
+    reset_link = request.session.get('reset_link')
+    reset_email = request.session.get('reset_email')
+    
+    # Clear session data after retrieving
+    if 'reset_link' in request.session:
+        del request.session['reset_link']
+    if 'reset_email' in request.session:
+        del request.session['reset_email']
+    
+    context = {
+        'reset_link': reset_link,
+        'reset_email': reset_email,
+    }
+    
+    return render(request, 'users/password_reset_done.html', context)
+
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    template_name = 'users/password_reset_confirm.html'
+    
+    def dispatch(self, request, *args, **kwargs):
+        print(f"🎯 Password reset confirm view called - Method: {request.method}")
+        print(f"📊 Request data: {request.POST if request.method == 'POST' else 'GET request'}")
+        return super().dispatch(request, *args, **kwargs)
+    
+    def form_valid(self, form):
+        print(f"✅ Form is valid! Password changing...")
+        # Get the new password before it's hashed
+        new_password = form.cleaned_data['new_password1']
+        user_email = self.user.email
+        
+        print(f"👤 User email: {user_email}")
+        print(f"🔑 New password length: {len(new_password)}")
+        
+        # Store the new password and email in session for display
+        self.request.session['new_password'] = new_password
+        self.request.session['reset_user_email'] = user_email
+        self.request.session['password_reset_success'] = True
+        
+        print(f"🚀 Calling parent form_valid...")
+        return super().form_valid(form)
+    
+    def form_invalid(self, form):
+        print(f"❌ Form is INVALID!")
+        print(f"📋 Form errors: {form.errors}")
+        print(f"📊 Form data: {form.data}")
+        return super().form_invalid(form)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        print(f"📄 Context prepared - Valid link: {context.get('validlink')}")
+        print(f"🔗 User: {getattr(self, 'user', None)}")
+        print(f"📝 Form: {context.get('form')}")
+        return context
+
+
+def custom_password_reset_complete(request):
+    """Custom password reset complete view that shows the new password"""
+    new_password = request.session.get('new_password')
+    user_email = request.session.get('reset_user_email')
+    success = request.session.get('password_reset_success', False)
+    
+    # Clear session data after retrieving
+    if 'new_password' in request.session:
+        del request.session['new_password']
+    if 'reset_user_email' in request.session:
+        del request.session['reset_user_email']
+    if 'password_reset_success' in request.session:
+        del request.session['password_reset_success']
+    
+    context = {
+        'new_password': new_password,
+        'user_email': user_email,
+        'success': success,
+    }
+    
+    return render(request, 'users/password_reset_complete.html', context)
