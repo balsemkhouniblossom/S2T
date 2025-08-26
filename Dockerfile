@@ -1,8 +1,10 @@
+# Base image with Python 3.11
 FROM python:3.11-slim
 
+# Set working directory
 WORKDIR /app
 
-# Install system dependencies needed for psycopg2, pycairo, manimpango
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
     libpq-dev \
@@ -13,20 +15,24 @@ RUN apt-get update && apt-get install -y \
     musl-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy project files
+# Copy application code
 COPY . /app/
 
-# Create virtualenv
+# Create virtual environment
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Upgrade pip and install Python dependencies
+# Upgrade pip
 RUN pip install --upgrade pip
+
+# Install Python dependencies
 RUN pip install -r requirements.txt
-RUN pip install azure-ai-openai==1.0.1b1
 
-# Install spacy model
-RUN python -m spacy download en_core_web_sm
+# Collect static files (optional, for production)
+# RUN python manage.py collectstatic --noinput
 
-# Command to run the app
-CMD ["gunicorn", "training_management.wsgi:application", "--bind", "0.0.0.0:8000"]
+# Expose port
+EXPOSE 8000
+
+# Run the application using Gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "training_management.wsgi:application"]
