@@ -14,6 +14,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 RUN pip install azure-ai-openai==1.0.1b1
+RUN apt-get update && apt-get install -y libpq-dev gcc
 
 # Install spacy model separately
 RUN python -m spacy download en_core_web_sm
