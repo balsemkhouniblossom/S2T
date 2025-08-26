@@ -7,6 +7,9 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
+    g++ \
+    libffi-dev \
+    libssl-dev \
     libpq-dev \
     libcairo2-dev \
     libpango1.0-dev \
@@ -14,6 +17,8 @@ RUN apt-get update && apt-get install -y \
     python3-dev \
     musl-dev \
     && rm -rf /var/lib/apt/lists/*
+
+RUN pip install azure-ai-openai==1.0.0b5
 
 # Copy application code
 COPY . /app/
