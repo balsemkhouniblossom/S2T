@@ -13,6 +13,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Install requirements
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
+RUN pip install azure-ai-openai
 
 # Install spacy model separately
 RUN python -m spacy download en_core_web_sm
