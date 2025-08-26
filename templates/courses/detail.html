@@ -71,9 +71,11 @@
                             <strong>Note moyenne :</strong> {{ avg_rating }} / 5 ({{ total_comments }} avis)<br>
                         </div>
                         <div class="course-actions d-flex gap-2">
+                            {% if is_apprenant %}
                             <a href="{% url 'courses:watch' course.id %}" class="btn btn-success">
                                 <i class="fas fa-play"></i> Commencer / Continuer
                             </a>
+                            {% endif %}
                             {% if can_manage %}
                                 <a href="{% url 'courses:edit' course.id %}" class="btn btn-primary">
                                     <i class="fas fa-edit"></i> Modifier

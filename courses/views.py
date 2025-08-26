@@ -52,6 +52,14 @@ def courses_list(request):
     user = request.user
     is_admin = hasattr(user, 'administrateur') or user.is_superuser
     is_formateur = hasattr(user, 'formateur')
+    # Safer apprenant detection than hasattr (avoids descriptor issues)
+    is_apprenant = False
+    if user.is_authenticated:
+        try:
+            Apprenant.objects.get(utilisateur=user)
+            is_apprenant = True
+        except Apprenant.DoesNotExist:
+            is_apprenant = False
 
     if user.is_authenticated and is_admin:
         courses = Cours.objects.all().order_by('-date_creation')
@@ -137,6 +145,7 @@ def courses_list(request):
         'selected_niveau': niveau,
         'is_admin': is_admin,
         'is_formateur': is_formateur,
+    'is_apprenant': is_apprenant,
         'formateurs': formateurs,
         'enrolled_course_ids': enrolled_course_ids,
     'total_courses': total_courses,
@@ -175,6 +184,14 @@ def course_detail(request, course_id):
     
     is_admin = request.user.is_superuser or hasattr(request.user, 'administrateur')
     is_formateur = hasattr(request.user, 'formateur')
+    # Detect learner role to control "Commencer/Continuer" visibility
+    is_apprenant = False
+    if request.user.is_authenticated:
+        try:
+            Apprenant.objects.get(utilisateur=request.user)
+            is_apprenant = True
+        except Apprenant.DoesNotExist:
+            is_apprenant = False
     can_manage = is_admin or (is_formateur and course.formateur == getattr(request.user, 'formateur', None))
     context = {
         'course': course,
@@ -186,6 +203,7 @@ def course_detail(request, course_id):
         'total_comments': commentaires.count(),
         'is_admin': is_admin,
         'is_formateur': is_formateur,
+        'is_apprenant': is_apprenant,
         'can_manage': can_manage,
     }
     return render(request, 'courses/detail.html', context)

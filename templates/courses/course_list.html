@@ -221,7 +221,7 @@
                         <a href="{% url 'courses:detail' course.id %}" class="btn btn-outline-primary btn-sm">
                             Voir détails
                         </a>
-                        {% if user.is_authenticated %}
+                        {% if user.is_authenticated and is_apprenant %}
                             {% if course.id in enrolled_course_ids %}
                                 <a href="{% url 'courses:watch' course.id %}" class="btn btn-success btn-sm">
                                     <i class="fas fa-play"></i> Continuer
