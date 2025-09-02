@@ -26,7 +26,11 @@ SECRET_KEY = '(5d7!2ic%)@+3^j&27cqg&27ue1du9yk4t87ww=_kj#@kz#nk7'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['TrainingManagementSystemS2T.azurewebsites.net']
+ALLOWED_HOSTS = [
+     '127.0.0.1',
+    'localhost',
+    'TrainingManagementSystemS2T.azurewebsites.net',
+   ]
 
 
 # Application definition
